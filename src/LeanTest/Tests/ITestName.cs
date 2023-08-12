@@ -1,11 +1,10 @@
-﻿using LeanTest.Tests.Naming;
+using LeanTest.Tests.Naming;
 
 using System.Linq.Expressions;
 
-namespace LeanTest.Tests
+namespace LeanTest.Tests;
+
+public interface ITestName : ITestNamePart
 {
-    public interface ITestName : ITestNamePart
-    {
-        string GetName(Expression methodExpression);
-    }
+	string GetName(Expression methodExpression);
 }

@@ -1,8 +1,7 @@
-﻿namespace LeanTest
+namespace LeanTest;
+
+public interface ITestSuite
 {
-    public interface ITestSuite
-    {
-        Type ServiceType { get; }
-        TestCollection Tests { get; }
-    }
+	Type ServiceType { get; }
+	TestCollection Tests { get; }
 }

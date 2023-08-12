@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Dependencies.Factories
+namespace LeanTest.Dependencies.Factories;
+
+public interface IDummyFactory
 {
-    public interface IDummyFactory
-    {
-        TService Of<TService>() where TService : notnull;
-    }
+	TService Of<TService>() where TService : notnull;
 }

@@ -2,8 +2,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LeanTest.Extensions
-{
+namespace LeanTest.Extensions;
+
     public static class ServiceExtensions
     {
         public static IServiceCollection AddLeanTestInvoker(this IServiceCollection services)
@@ -16,4 +16,3 @@ namespace LeanTest.Extensions
             return services;
         }
     }
-}

@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Example.Services
+namespace LeanTest.Example.Services;
+
+public interface IExampleService
 {
-    public interface IExampleService
-    {
-        Task<string> DoThing(string thing);
-    }
+	Task<string> DoThing(string thing);
 }

@@ -1,4 +1,4 @@
-﻿using LeanTest.Dependencies.Factories;
+using LeanTest.Dependencies.Factories;
 using LeanTest.Tests;
 using LeanTest.Tests.Naming;
 using LeanTest.Tests.TestBody;
@@ -7,62 +7,63 @@ using Microsoft.Extensions.Logging;
 
 using System.Linq.Expressions;
 
-namespace LeanTest
+namespace LeanTest;
+
+public abstract record TestSuite<TSut> : ITestSuite
 {
-    public abstract record TestSuite<TSut> : ITestSuite
-    {
-        protected TestSuite() { }
+	public Type ServiceType => typeof(TSut);
 
-        public Type ServiceType => typeof(TSut);
 
-        #region Dependencies
-        // TODO, since we have a TestSuite per invocation, we can new these up and share a context for IParameterFactory
-        protected readonly IStubFactory Stub = StubFacotry.Instance;
-        protected readonly ISpyFactory Spy = SpyFactory.Instance;
-        protected readonly IMockFactory Mock = MockFactory.Instance;
-        protected readonly IDummyFactory Dummy = DummyFactory.Instance;
+	#region Dependencies
+	// TODO, since we have a TestSuite per invocation, we can new these up and share a context for IParameterFactory
+	protected readonly IStubFactory Stub = StubFacotry.Instance;
+	protected readonly ISpyFactory Spy = SpyFactory.Instance;
+	protected readonly IMockFactory Mock = MockFactory.Instance;
+	protected readonly IDummyFactory Dummy = DummyFactory.Instance;
 
-        protected readonly IParameterFactory Parameter = ParameterFactory.Instance;
+	protected readonly IParameterFactory Parameter = ParameterFactory.Instance;
 
-        internal protected ILogger<TSut> TestOutputLogger { get; internal set; } = default!;
-        protected ILoggerFactory TestOutputLoggerFactory => Stub.Of<ILoggerFactory>()
-            .Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
-            // TODO Better error message
-            .Setup(factory => factory.CreateLogger(Parameter.Is<string>()), () => throw new NotSupportedException())
-            .Instance;
-        protected ILoggerProvider TestOutputLoggerProvider => Stub.Of<ILoggerProvider>()
-            .Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
-            // TODO Better error message
-            .Setup(factory => factory.CreateLogger(Parameter.Is<string>()), () => throw new NotSupportedException())
-            .Instance;
-        #endregion
+	internal protected ILogger<TSut> TestOutputLogger { get; internal set; } = default!;
+	protected ILoggerFactory TestOutputLoggerFactory => Stub.Of<ILoggerFactory>()
+		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
+		// TODO Better error message
+		.Setup(factory => factory.CreateLogger(Parameter.Is<string>()), () => throw new NotSupportedException())
+		.Instance;
+	protected ILoggerProvider TestOutputLoggerProvider => Stub.Of<ILoggerProvider>()
+		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
+		// TODO Better error message
+		.Setup(factory => factory.CreateLogger(Parameter.Is<string>()), () => throw new NotSupportedException())
+		.Instance;
+	#endregion
 
-        public abstract TestCollection Tests { get; }
-        
 
-        protected ITestScenario Test(
-            Expression<Func<TSut, Delegate>> method, ITestName testName,
-            ITestArangement arrange, ITestAction act, ITestAssertion assert
-        ) {
-            var scenarioName = testName.GetName(method);
-            return new TestScenario(
-                GetType(),
-                ServiceType, scenarioName, 
-                arrange, act, assert
-            );
-        }
+	#region Tests
+	public abstract TestCollection Tests { get; }
 
-        #region Naming
-        protected Given Given(string value) => new(value);
-        #endregion
+	protected ITestScenario Test(
+		Expression<Func<TSut, Delegate>> method, ITestName testName,
+		ITestArangement arrange, ITestAction act, ITestAssertion assert
+	)
+	{
+		var scenarioName = testName.GetName(method);
+		return new TestScenario(
+			GetType(),
+			ServiceType, scenarioName,
+			arrange, act, assert
+		);
+	}
+	#endregion
 
-        #region AAA
-        protected ITestArangement Arrange<TArrange>(TArrange arrange)
-            where TArrange : Delegate => new TestArrangement(arrange);
-        protected ITestAction Act<TAct>(TAct act)
-            where TAct : Delegate => new TestAction(act);
-        protected ITestAssertion Assert<TAssert>(TAssert assert)
-            where TAssert : Delegate => new TestAssertion(assert);
-        #endregion
-    }
+	#region Naming
+	protected Given Given(string value) => new(value);
+	#endregion
+
+	#region AAA
+	protected ITestArangement Arrange<TArrange>(TArrange arrange)
+		where TArrange : Delegate => new TestArrangement(arrange);
+	protected ITestAction Act<TAct>(TAct act)
+		where TAct : Delegate => new TestAction(act);
+	protected ITestAssertion Assert<TAssert>(TAssert assert)
+		where TAssert : Delegate => new TestAssertion(assert);
+	#endregion
 }

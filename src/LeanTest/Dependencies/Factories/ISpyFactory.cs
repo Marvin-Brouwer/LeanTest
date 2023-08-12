@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Dependencies.Factories
+namespace LeanTest.Dependencies.Factories;
+
+public interface ISpyFactory
 {
-    public interface ISpyFactory
-    {
-        ISpy<TService> On<TService>(TService service) where TService : notnull;
-    }
+	ISpy<TService> On<TService>(TService service) where TService : notnull;
 }

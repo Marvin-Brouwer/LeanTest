@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Tests.Naming
+namespace LeanTest.Tests.Naming;
+
+public interface ITestNamePart
 {
-    public interface ITestNamePart
-    {
-        string Name { get; }
-    }
+	string Name { get; }
 }

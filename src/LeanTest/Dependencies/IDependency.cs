@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Dependencies
+namespace LeanTest.Dependencies;
+
+public interface IDependency<out TService>
 {
-    public interface IDependency<out TService>
-    {
-        TService Instance { get; }
-    }
+	TService Instance { get; }
 }

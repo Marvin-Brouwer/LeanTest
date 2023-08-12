@@ -1,27 +1,26 @@
-﻿using System.Collections;
+using System.Collections;
 
 using LeanTest.Tests;
 
-namespace LeanTest
+namespace LeanTest;
+
+public sealed class TestCollection : IReadOnlyCollection<ITestScenario>
 {
-    public sealed class TestCollection : IReadOnlyCollection<ITestScenario>
-    {
-        private readonly ITestScenario[] _scenarios;
-        public TestCollection(params ITestScenario[] scenarios)
-        {
-            _scenarios = scenarios;
-        }
+	private readonly ITestScenario[] _scenarios;
+	public TestCollection(params ITestScenario[] scenarios)
+	{
+		_scenarios = scenarios;
+	}
 
-        public int Count => ((IReadOnlyCollection<ITestScenario>)_scenarios).Count;
+	public int Count => ((IReadOnlyCollection<ITestScenario>)_scenarios).Count;
 
-        public IEnumerator<ITestScenario> GetEnumerator()
-        {
-            return ((IEnumerable<ITestScenario>)_scenarios).GetEnumerator();
-        }
+	public IEnumerator<ITestScenario> GetEnumerator()
+	{
+		return ((IEnumerable<ITestScenario>)_scenarios).GetEnumerator();
+	}
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _scenarios.GetEnumerator();
-        }
-    }
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		return _scenarios.GetEnumerator();
+	}
 }

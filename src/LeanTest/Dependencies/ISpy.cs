@@ -1,6 +1,5 @@
-﻿namespace LeanTest.Dependencies
+namespace LeanTest.Dependencies;
+
+public interface ISpy<TService> : IVerifyableDependency<TService, ISpy<TService>>
 {
-    public interface ISpy<TService> : IVerifyableDependency<TService, ISpy<TService>>
-    {
-    }
 }

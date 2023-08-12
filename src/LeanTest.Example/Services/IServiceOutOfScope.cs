@@ -1,7 +1,5 @@
-﻿namespace LeanTest.Example.Services
-{
+namespace LeanTest.Example.Services;
 
-    public interface IServiceOutOfScope
-    {
-    }
+public interface IServiceOutOfScope
+{
 }

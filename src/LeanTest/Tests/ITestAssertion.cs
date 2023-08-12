@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Tests
+namespace LeanTest.Tests;
+
+public interface ITestAssertion
 {
-    public interface ITestAssertion
-    {
-        Task CallAssert(ITestSuite suite, IDictionary<string, (Type, object?)> parameters, CancellationToken cancellationToken);
-    }
+	Task CallAssert(ITestSuite suite, IDictionary<string, (Type, object?)> parameters, CancellationToken cancellationToken);
 }

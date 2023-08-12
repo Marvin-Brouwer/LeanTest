@@ -1,11 +1,10 @@
-﻿using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dependencies.Wrappers;
 
-namespace LeanTest.Dependencies.Factories
+namespace LeanTest.Dependencies.Factories;
+
+internal readonly record struct SpyFactory : ISpyFactory
 {
-    internal readonly record struct SpyFactory : ISpyFactory
-    {
-        internal static readonly ISpyFactory Instance = new SpyFactory();
+	internal static readonly ISpyFactory Instance = new SpyFactory();
 
-        ISpy<TService> ISpyFactory.On<TService>(TService service) => new Spy<TService>(service);
-    }
+	ISpy<TService> ISpyFactory.On<TService>(TService service) => new Spy<TService>(service);
 }

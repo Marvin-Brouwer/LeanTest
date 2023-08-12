@@ -1,10 +1,9 @@
-﻿using System.Reflection;
+using System.Reflection;
 
-namespace LeanTest.Tests
+namespace LeanTest.Tests;
+
+public interface ITestAction
 {
-    public interface ITestAction
-    {
-        ParameterInfo[] GetParameters();
-        Task CallAct(ITestSuite suite, IDictionary<string, (Type, object?)> parameters, CancellationToken cancellationToken);
-    }
+	ParameterInfo[] GetParameters();
+	Task CallAct(ITestSuite suite, IDictionary<string, (Type, object?)> parameters, CancellationToken cancellationToken);
 }

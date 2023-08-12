@@ -1,7 +1,6 @@
-﻿namespace LeanTest.Dependencies.Factories
+namespace LeanTest.Dependencies.Factories;
+
+public interface IMockFactory
 {
-    public interface IMockFactory
-    {
-        IMock<TService> Of<TService>() where TService : notnull;
-    }
+	IMock<TService> Of<TService>() where TService : notnull;
 }

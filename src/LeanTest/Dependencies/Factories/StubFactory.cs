@@ -1,11 +1,10 @@
-﻿using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dependencies.Wrappers;
 
-namespace LeanTest.Dependencies.Factories
+namespace LeanTest.Dependencies.Factories;
+
+internal readonly record struct StubFacotry : IStubFactory
 {
-    internal readonly record struct StubFacotry : IStubFactory
-    {
-        internal static readonly IStubFactory Instance = new StubFacotry();
+	internal static readonly IStubFactory Instance = new StubFacotry();
 
-        IStub<TService> IStubFactory.Of<TService>() => new Stub<TService>();
-    }
+	IStub<TService> IStubFactory.Of<TService>() => new Stub<TService>();
 }
