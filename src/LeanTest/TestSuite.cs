@@ -22,6 +22,7 @@ public abstract record TestSuite<TSut> : ITestSuite
 	protected readonly IDummyFactory Dummy = DummyFactory.Instance;
 
 	protected readonly IParameterFactory Parameter = ParameterFactory.Instance;
+	protected readonly ITimesFactory Times = TimesFactory.Instance;
 
 	internal protected ILogger<TSut> TestOutputLogger { get; internal set; } = default!;
 	protected ILoggerFactory TestOutputLoggerFactory => Stub.Of<ILoggerFactory>()

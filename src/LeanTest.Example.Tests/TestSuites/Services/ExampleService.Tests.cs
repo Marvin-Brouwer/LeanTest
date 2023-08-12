@@ -39,13 +39,17 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 
                 return (sut, input, expected);
             }),
-            Act(async (ExampleService sut, string input) => (
-
+            Act(async (ExampleService sut, string input) =>
+			(
                 await sut.DoThing(input)
             )),
             Assert((string result, string expected) =>
             {
                 result.Should().Be(expected);
+
+				_someSpy
+					.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+					.VerifyNoOtherCalls();
             })
         )
     );

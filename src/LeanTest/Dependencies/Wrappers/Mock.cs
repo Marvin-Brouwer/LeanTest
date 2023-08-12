@@ -1,3 +1,6 @@
+using LeanTest.Dependencies.Definitions;
+using LeanTest.Dependencies.Factories;
+
 using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Wrappers;
@@ -34,17 +37,53 @@ internal class Mock<TService> : IMock<TService>
 		return this;
 	}
 
-	public IMock<TService> Verify(Expression<Func<TService>> member, int times)
+	public IMock<TService> Verify(Expression<Func<TService>> member, ITimesConstraint times)
 	{
 		_spy.Verify(member, times);
 		return this;
 	}
 
-	public IMock<TService> Verify(Expression<Func<TService, Task>> member, int times)
+	public IMock<TService> Verify<TValue>(Expression<Func<TService, TValue>> member, ITimesConstraint times)
 	{
 		_spy.Verify(member, times);
 		return this;
 	}
+
+	public IMock<TService> Verify(Expression<Func<TService, Task>> member, ITimesConstraint times)
+	{
+		_spy.Verify(member, times);
+		return this;
+	}
+
+	public IMock<TService> Verify<TValue>(Expression<Func<TService, Task<TValue>>> member, ITimesConstraint times)
+	{
+		_spy.Verify(member, times);
+		return this;
+	}
+
+	public IMock<TService> VerifyOnce(Expression<Func<TService>> member) =>
+		Verify(member, TimesFactory.Instance.Once);
+
+	public IMock<TService> VerifyOnce<TValue>(Expression<Func<TService, TValue>> member) =>
+		Verify(member, TimesFactory.Instance.Once);
+
+	public IMock<TService> VerifyOnce(Expression<Func<TService, Task>> member) =>
+		Verify(member, TimesFactory.Instance.Once);
+
+	public IMock<TService> VerifyOnce<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
+		Verify(member, TimesFactory.Instance.Once);
+
+	public IMock<TService> VerifyNever(Expression<Func<TService>> member) =>
+		Verify(member, TimesFactory.Instance.Never);
+
+	public IMock<TService> VerifyNever<TValue>(Expression<Func<TService, TValue>> member) =>
+		Verify(member, TimesFactory.Instance.Never);
+
+	public IMock<TService> VerifyNever(Expression<Func<TService, Task>> member) =>
+		Verify(member, TimesFactory.Instance.Never);
+
+	public IMock<TService> VerifyNever<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
+		Verify(member, TimesFactory.Instance.Never);
 
 	public void VerifyNoOtherCalls()
 	{
