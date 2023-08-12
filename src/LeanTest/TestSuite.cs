@@ -26,13 +26,21 @@ public abstract record TestSuite<TSut> : ITestSuite
 	internal protected ILogger<TSut> TestOutputLogger { get; internal set; } = default!;
 	protected ILoggerFactory TestOutputLoggerFactory => Stub.Of<ILoggerFactory>()
 		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
-		// TODO Better error message
-		.Setup(factory => factory.CreateLogger(Parameter.Is<string>()), () => throw new NotSupportedException())
+		.Setup(
+			factory => factory.CreateLogger(Parameter.Is<string>()),
+			() => throw new NotSupportedException($"The {nameof(TestOutputLoggerFactory)} " +
+				$"only supports {nameof(ILoggerFactory.CreateLogger)} with a categoryName of \"{typeof(TSut).Name}\"."
+			)
+		)
 		.Instance;
 	protected ILoggerProvider TestOutputLoggerProvider => Stub.Of<ILoggerProvider>()
 		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
-		// TODO Better error message
-		.Setup(factory => factory.CreateLogger(Parameter.Is<string>()), () => throw new NotSupportedException())
+		.Setup(
+			provider => provider.CreateLogger(Parameter.Is<string>()),
+			() => throw new NotSupportedException($"The {nameof(TestOutputLoggerProvider)} " +
+				$"only supports {nameof(ILoggerProvider.CreateLogger)} with a categoryName of \"{typeof(TSut).Name}\"."
+			)
+		)
 		.Instance;
 	#endregion
 
