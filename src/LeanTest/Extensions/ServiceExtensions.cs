@@ -1,6 +1,7 @@
-﻿using LeanTest.TestRunner;
+using LeanTest.TestRunner;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace LeanTest.Extensions;
 
@@ -8,10 +9,8 @@ namespace LeanTest.Extensions;
     {
         public static IServiceCollection AddLeanTestInvoker(this IServiceCollection services)
         {
-            // TODO check if inserted
-
-            services.AddSingleton<TestFactory>();
-            services.AddSingleton<TestInvoker>();
+            services.TryAddSingleton<TestFactory>();
+            services.TryAddSingleton<TestInvoker>();
 
             return services;
         }
