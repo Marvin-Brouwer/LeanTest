@@ -1,4 +1,4 @@
-namespace LeanTest.Example.Services;
+namespace ExampleProject.Services;
 
 public interface IServiceOutOfScope
 {

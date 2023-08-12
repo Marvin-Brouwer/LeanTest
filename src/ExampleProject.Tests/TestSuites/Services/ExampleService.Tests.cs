@@ -1,14 +1,17 @@
-using FluentAssertions;
-
-using LeanTest.Dependencies;
-using LeanTest.Example.Services;
-
-namespace LeanTest.Example.Tests.TestSuites.Services;
-
 // TODO figure out if this can be forced with an attribute or an analyzer
 #pragma warning disable RCS1032 // Remove redundant parentheses.
 #pragma warning disable IDE0055 // Remove redundant parentheses.
 #pragma warning disable RCS1021 // Convert lambda expression body to expression body.
+
+using ExampleProject.Services;
+
+using FluentAssertions;
+
+using LeanTest;
+using LeanTest.Dependencies;
+
+namespace ExampleProject.Tests.TestSuites.Services;
+
 public sealed record ExampleServiceTests : TestSuite<ExampleService>
 {
     private readonly IStub<ISomeThing> _someStub;
@@ -40,9 +43,9 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
                 return (sut, input, expected);
             }),
             Act(async (ExampleService sut, string input) =>
-			(
+			
                 await sut.DoThing(input)
-            )),
+            ),
             Assert((string result, string expected) =>
             {
                 result.Should().Be(expected);

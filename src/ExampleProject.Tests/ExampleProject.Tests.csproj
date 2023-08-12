@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LeanTest.Example\LeanTest.Example.csproj" />
+    <ProjectReference Include="..\ExampleProject\ExampleProject.csproj" />
     <ProjectReference Include="..\LeanTest\LeanTest.csproj" />
   </ItemGroup>
 

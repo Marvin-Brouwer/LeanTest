@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace LeanTest.Example.Services;
+namespace ExampleProject.Services;
 
 public class ExampleService : IExampleService
 {
