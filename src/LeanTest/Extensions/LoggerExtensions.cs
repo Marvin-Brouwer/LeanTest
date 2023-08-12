@@ -1,11 +1,8 @@
+using LeanTest.Exceptions;
+
 using Microsoft.Extensions.Logging;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeanTest.Extensions;
 
@@ -15,20 +12,23 @@ internal static class LoggerExtensions
 
 	private static MethodInfo GetCreateLoggerMethod()
 	{
-		var methods = typeof(Microsoft.Extensions.Logging.LoggerFactoryExtensions)
+		var methods = typeof(LoggerFactoryExtensions)
 			.GetMethods(BindingFlags.Public | BindingFlags.Static)!;
 
 		foreach (var method in methods)
 		{
 			if (!method.Name
-				.Equals(nameof(Microsoft.Extensions.Logging.LoggerFactoryExtensions.CreateLogger),
+				.Equals(nameof(LoggerFactoryExtensions.CreateLogger),
 				StringComparison.Ordinal)
 			) continue;
 
 			if (method.IsGenericMethod) return method;
 		}
 
-		throw new NotImplementedException("Unreachable code");
+		throw new UnreachableCodeException
+		{
+			Why = "The LoggerFactoryExtensions.CreateLogger method is known to exist"
+		};
 	}
 
 	public static object CreateGenericLoggerForType(this ILoggerFactory loggerFactory, Type type)

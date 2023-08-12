@@ -1,9 +1,9 @@
 using LeanTest.Extensions;
-using LeanTest.Indexing;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
 
+using System.Diagnostics;
 using System.Reflection;
 
 namespace LeanTest.TestRunner;
@@ -32,7 +32,7 @@ internal class TestFactory
 
 	private IEnumerable<ITestScenario> InitializeScenariosForAssembly(Assembly assembly, CancellationToken cancellationToken)
 	{
-		var suiteTypes = SuiteIndexer.IndexTestSuites(assembly, cancellationToken);
+		var suiteTypes = IndexTestSuites(assembly, cancellationToken);
 		var suites = InitializeSuites(suiteTypes, cancellationToken);
 		if (cancellationToken.IsCancellationRequested) yield break;
 
@@ -45,6 +45,17 @@ internal class TestFactory
 				if (cancellationToken.IsCancellationRequested) yield break;
 				yield return test;
 			}
+		}
+	}
+
+	internal static IEnumerable<Type> IndexTestSuites(Assembly assembly, CancellationToken cancellationToken)
+	{
+		foreach (var assemblyScannedType in assembly.GetExportedTypes())
+		{
+			if (cancellationToken.IsCancellationRequested) yield break;
+			if (!assemblyScannedType.IsAssignableTo(typeof(ITestSuite))) continue;
+
+			yield return assemblyScannedType;
 		}
 	}
 
@@ -63,8 +74,9 @@ internal class TestFactory
 	private ITestSuite InitializeSuite(Type suiteType)
 	{
 		var instance = Activator.CreateInstance(suiteType) as ITestSuite;
-		if (instance is null) throw new NotSupportedException("Impossible code reached");
-
+		Debug.Assert(instance is not null,
+			$"Types passed to {nameof(InitializeSuite)} are known to be {nameof(ITestSuite)}");
+		
 		return instance
 			.InjectLogger(_loggerFactory);
 	}
