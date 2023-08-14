@@ -16,7 +16,7 @@ public abstract record TestSuite<TSut> : ITestSuite
 
 	#region Dependencies
 	// TODO, since we have a TestSuite per invocation, we can new these up and share a context for IParameterFactory
-	protected readonly IStubFactory Stub = StubFacotry.Instance;
+	protected readonly IStubFactory Stub = StubFactory.Instance;
 	protected readonly ISpyFactory Spy = SpyFactory.Instance;
 	protected readonly IMockFactory Mock = MockFactory.Instance;
 	protected readonly IDummyFactory Dummy = DummyFactory.Instance;

@@ -10,6 +10,8 @@ using FluentAssertions;
 using LeanTest;
 using LeanTest.Dependencies;
 
+using System;
+
 namespace ExampleProject.Tests.TestSuites.Services;
 
 public sealed record ExampleServiceTests : TestSuite<ExampleService>
@@ -22,6 +24,14 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
     public ExampleServiceTests()
     {
         _someStub = Stub.Of<ISomeThing>();
+		try
+		{
+			_someStub.Instance.DoOtherThing();
+		}
+		catch (Exception ex)
+		{
+			// TODO should throw notimplemented exception (or custom) with clear message
+		}
         _someSpy = Spy.On<ISomeThing>(new SomeThing());
         _someMock = Mock.Of<ISomeThing>();
 

@@ -68,15 +68,21 @@ internal class TestFactory
 		}
 	}
 
-
-
-
 	private ITestSuite InitializeSuite(Type suiteType)
 	{
-		var instance = Activator.CreateInstance(suiteType) as ITestSuite;
+		ITestSuite instance = default!;
+		try
+		{
+			instance = (ITestSuite)Activator.CreateInstance(suiteType)!;
+		}
+		catch (Exception ex)
+		{
+			// TODO handle constructor exceptions
+		}
+
 		Debug.Assert(instance is not null,
 			$"Types passed to {nameof(InitializeSuite)} are known to be {nameof(ITestSuite)}");
-		
+
 		return instance
 			.InjectLogger(_loggerFactory);
 	}
