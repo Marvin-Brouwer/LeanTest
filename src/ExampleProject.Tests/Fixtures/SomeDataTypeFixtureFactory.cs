@@ -3,12 +3,6 @@ using ExampleProject.Models;
 using LeanTest.Dependencies;
 using LeanTest.Dependencies.Factories;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace ExampleProject.Tests.Fixtures;
 
 internal static class SomeDataTypeFixtureFactory

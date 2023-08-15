@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Wrappers;
 
-// TODO MockProxy
 internal class Mock<TService> : IMock<TService>
 {
 	private readonly ISpy<TService> _spy;

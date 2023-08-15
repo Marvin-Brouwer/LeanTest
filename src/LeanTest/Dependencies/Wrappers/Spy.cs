@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Wrappers;
 
-// TODO SpyProxy
 internal class Spy<TService> : ISpy<TService>
 {
 	public TService Instance { get; }

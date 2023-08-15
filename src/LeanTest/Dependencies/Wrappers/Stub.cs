@@ -3,7 +3,6 @@ using System.Reflection;
 
 namespace LeanTest.Dependencies.Wrappers;
 
-// TODO MockProxy
 internal class Stub<TService> : IStub<TService>
 {
 	private readonly IDictionary<MethodInfo, object?> _configuredMethods;

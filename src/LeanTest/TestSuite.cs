@@ -1,4 +1,5 @@
 using LeanTest.Dependencies.Factories;
+using LeanTest.Dynamic.ReflectionEmitting;
 using LeanTest.Tests;
 using LeanTest.Tests.Naming;
 using LeanTest.Tests.TestBody;
@@ -13,10 +14,15 @@ public abstract record TestSuite<TSut> : ITestSuite
 {
 	public Type ServiceType => typeof(TSut);
 
+	protected TestSuite()
+	{
+		var moduleBuilder = ServiceType.GenerateRuntimeModuleAssembly();
+		Stub = new StubFactory(moduleBuilder);
+	}
+
 
 	#region Dependencies
-	// TODO, since we have a TestSuite per invocation, we can new these up and share a context for IParameterFactory
-	protected readonly IStubFactory Stub = StubFactory.Instance;
+	protected readonly IStubFactory Stub;
 	protected readonly ISpyFactory Spy = SpyFactory.Instance;
 	protected readonly IMockFactory Mock = MockFactory.Instance;
 	protected readonly IFixtureFactory Fixture = FixtureFactory.Instance;
