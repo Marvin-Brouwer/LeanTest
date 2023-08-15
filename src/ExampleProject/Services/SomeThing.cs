@@ -11,4 +11,9 @@ public class SomeThing : ISomeThing
 	{
 		throw new NotImplementedException();
 	}
+
+	public bool TestManyParam(string a, bool b, int c, DateTime d, byte e)
+	{
+		throw new NotImplementedException();
+	}
 }

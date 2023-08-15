@@ -26,7 +26,8 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 
     public ExampleServiceTests()
     {
-        _someStub = Stub.Of<ISomeThing>();
+        _someStub = Stub
+			.Of<ISomeThing>();
 		try
 		{
 			_someStub.Instance.DoOtherThing();
@@ -35,14 +36,33 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		{
 			// TODO should throw notimplemented exception (or custom) with clear message
 		}
-        _someSpy = Spy.On<ISomeThing>(new SomeThing());
-        _someMock = Mock.Of<ISomeThing>();
+		try
+		{
+			_someStub.Instance.DoThing("Thing");
+		}
+		catch (Exception ex)
+		{
+			// TODO should throw notimplemented exception (or custom) with clear message
+		}
+		try
+		{
+			_someStub.Instance.TestManyParam("a", true, 8, DateTime.Now, 0);
+		}
+		catch (Exception ex)
+		{
+			// TODO should throw notimplemented exception (or custom) with clear message
+		}
+		_someSpy = Spy
+			.On<ISomeThing>(new SomeThing());
+        _someMock = Mock
+			.Of<ISomeThing>();
 
 		_someFixture = Fixture
 			.ForSomeDataType()
 			.WithRealName();
 
-		_outOfScopeDummy = Dummy.Of<IServiceOutOfScope>();
+		_outOfScopeDummy = Dummy
+			.Of<IServiceOutOfScope>();
     }
 
     public override TestCollection Tests => new(

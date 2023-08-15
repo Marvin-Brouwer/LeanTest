@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using LeanTest.Dependencies.Invocation;
+using System.Runtime.Intrinsics.Arm;
 
 namespace LeanTest.Dependencies.Factories;
 
@@ -78,6 +79,7 @@ internal readonly record struct StubFactory : IStubFactory
 	private void GenerateMethod(TypeBuilder typeBuilder, MethodInfo method, FieldBuilder configuredMethodsField)
 	{
 		var parameters = method.GetParameters();
+		var hasParameters = parameters.Length > 0;
 		var isVoid = method.ReturnType == typeof(void);
 
 		var attibutes = MethodAttributes.Public
@@ -99,6 +101,45 @@ internal readonly record struct StubFactory : IStubFactory
 		methodIL.Emit(OpCodes.Ldfld, configuredMethodsField);
 		methodIL.Emit(OpCodes.Call, typeof(MethodBase).GetMethod(nameof(MethodBase.GetCurrentMethod))!);
 
+		if (hasParameters)
+		{
+			// Create new array of object
+			methodIL.Emit(OpCodes.Ldc_I4, parameters.Length);
+			methodIL.Emit(OpCodes.Newarr, typeof(object));
+			methodIL.Emit(OpCodes.Dup);
+
+			// Add parameters
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				var parameter = parameters[i]!;
+				var shouldBox = parameter.ParameterType.IsValueType;
+				var parameterNumber = i + 1;
+
+				methodIL.Emit(OpCodes.Ldc_I4, i);
+				// TODO check if ldarg s name works
+				if (parameterNumber < 4) methodIL.Emit(OpCodes.Ldarg, parameterNumber);
+				else methodIL.Emit(OpCodes.Ldarg_S, parameterNumber);
+
+				if (shouldBox)
+					methodIL.Emit(OpCodes.Box, parameter.ParameterType);
+
+				methodIL.Emit(OpCodes.Stelem_Ref);
+
+				if (i < parameters.Length - 1)
+					methodIL.Emit(OpCodes.Dup);
+			}
+		}
+		else
+		{
+			// TODO cache
+			var arrayEmpty = typeof(Array)
+				.GetMethod(nameof(Array.Empty))!
+				.GetGenericMethodDefinition()!
+				.MakeGenericMethod(new[] { typeof(object) })!;
+			methodIL.Emit(OpCodes.Call, arrayEmpty);
+		}
+
+		// Making a type generic of TReturn is easier than boxing if nexessary
 		// TODO remove linq
 		// TODO cache base
 		var invokeMethod = typeof(InvocationMarshall)
@@ -109,8 +150,9 @@ internal readonly record struct StubFactory : IStubFactory
 		if (!isVoid)
 			invokeMethod = invokeMethod!
 				.GetGenericMethodDefinition()!
-				.MakeGenericMethod(new[] { method.ReturnType} )!;
+				.MakeGenericMethod(new[] { method.ReturnType })!;
 		methodIL.Emit(OpCodes.Call, invokeMethod);
+
 		if (isVoid)
 			methodIL.Emit(OpCodes.Nop);
 		methodIL.Emit(OpCodes.Ret);

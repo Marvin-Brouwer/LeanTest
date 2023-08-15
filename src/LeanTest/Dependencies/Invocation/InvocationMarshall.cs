@@ -13,7 +13,8 @@ public static class InvocationMarshall
 {
 	public static TReturn InvokeStub<TReturn>(
 		IDictionary<MethodInfo, Action<object?>> configuredMethods,
-		MethodBase methodInfo)
+		MethodBase methodInfo,
+		object?[] parameters)
 	{
 
 		throw new NotSupportedException();
@@ -21,7 +22,8 @@ public static class InvocationMarshall
 
 	public static void InvokeStub(
 		IDictionary<MethodInfo, Action<object?>> configuredMethods,
-		MethodBase methodInfo)
+		MethodBase methodInfo,
+		object?[] parameters)
 	{
 
 		throw new NotSupportedException();
@@ -29,7 +31,8 @@ public static class InvocationMarshall
 
 	public static void InvokeSpy(
 		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo)
+		MethodBase methodInfo,
+		object?[] parameters)
 	{
 
 		throw new NotSupportedException();
@@ -38,7 +41,8 @@ public static class InvocationMarshall
 
 	public static void InvokeSpy<TReturn>(
 		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo)
+		MethodBase methodInfo,
+		object?[] parameters)
 	{
 
 		throw new NotSupportedException();
@@ -47,31 +51,33 @@ public static class InvocationMarshall
 	public static TReturn InvokeMock<TReturn>(
 		IDictionary<MethodInfo, Action<object?>> configuredMethods,
 		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo)
+		MethodBase methodInfo,
+		object?[] parameters)
 	{
 
 		try
 		{
-			return InvokeStub<TReturn>(configuredMethods, methodInfo);
+			return InvokeStub<TReturn>(configuredMethods, methodInfo, parameters);
 		}
 		finally
 		{
-			InvokeSpy<TReturn>(calledMethods, methodInfo);
+			InvokeSpy<TReturn>(calledMethods, methodInfo, parameters);
 		}
 	}
 	public static void InvokeMock(
 		IDictionary<MethodInfo, Action<object?>> configuredMethods,
 		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo)
+		MethodBase methodInfo,
+		object?[] parameters)
 	{
 
 		try
 		{
-			InvokeStub(configuredMethods, methodInfo);
+			InvokeStub(configuredMethods, methodInfo, parameters);
 		}
 		finally
 		{
-			InvokeSpy(calledMethods, methodInfo);
+			InvokeSpy(calledMethods, methodInfo, parameters);
 		}
 	}
 }

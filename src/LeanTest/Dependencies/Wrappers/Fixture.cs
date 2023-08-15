@@ -4,7 +4,7 @@ internal readonly record struct Fixture<TClass> : IFixture<TClass>
 	where TClass : notnull
 {
 	private readonly Func<TClass> _initialValueFunction;
-	private List<Func<TClass, TClass>> _mutations;
+	private readonly List<Func<TClass, TClass>> _mutations;
 
 	public Fixture(Func<TClass> initialValue)
 	{
