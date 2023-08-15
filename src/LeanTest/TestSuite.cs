@@ -19,6 +19,7 @@ public abstract record TestSuite<TSut> : ITestSuite
 	protected readonly IStubFactory Stub = StubFactory.Instance;
 	protected readonly ISpyFactory Spy = SpyFactory.Instance;
 	protected readonly IMockFactory Mock = MockFactory.Instance;
+	protected readonly IFixtureFactory Fixture = FixtureFactory.Instance;
 	protected readonly IDummyFactory Dummy = DummyFactory.Instance;
 
 	protected readonly IParameterFactory Parameter = ParameterFactory.Instance;

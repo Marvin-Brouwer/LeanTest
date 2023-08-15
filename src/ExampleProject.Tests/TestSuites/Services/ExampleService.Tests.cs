@@ -3,7 +3,9 @@
 #pragma warning disable IDE0055 // Remove redundant parentheses.
 #pragma warning disable RCS1021 // Convert lambda expression body to expression body.
 
+using ExampleProject.Models;
 using ExampleProject.Services;
+using ExampleProject.Tests.Fixtures;
 
 using FluentAssertions;
 
@@ -19,7 +21,8 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
     private readonly IStub<ISomeThing> _someStub;
     private readonly ISpy<ISomeThing> _someSpy;
     private readonly IMock<ISomeThing> _someMock;
-    private readonly IServiceOutOfScope _outOfScopeDummy;
+	private readonly IFixture<SomeDataType> _someFixture;
+	private readonly IServiceOutOfScope _outOfScopeDummy;
 
     public ExampleServiceTests()
     {
@@ -35,7 +38,11 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
         _someSpy = Spy.On<ISomeThing>(new SomeThing());
         _someMock = Mock.Of<ISomeThing>();
 
-        _outOfScopeDummy = Dummy.Of<IServiceOutOfScope>();
+		_someFixture = Fixture
+			.ForSomeDataType()
+			.WithRealName();
+
+		_outOfScopeDummy = Dummy.Of<IServiceOutOfScope>();
     }
 
     public override TestCollection Tests => new(
