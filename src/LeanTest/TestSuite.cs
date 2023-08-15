@@ -1,5 +1,7 @@
 using LeanTest.Dependencies.Factories;
+using LeanTest.Dependencies.Providers;
 using LeanTest.Dynamic.ReflectionEmitting;
+using LeanTest.TestRunner;
 using LeanTest.Tests;
 using LeanTest.Tests.Naming;
 using LeanTest.Tests.TestBody;
@@ -16,6 +18,9 @@ public abstract record TestSuite<TSut> : ITestSuite
 
 	protected TestSuite()
 	{
+		TestOutputLogger = TestFactory.TestInserts.TestLoggerFactory.CreateLogger<TSut>();
+		CancellationToken = TestFactory.TestInserts.TestCancellationToken;
+
 		var moduleBuilder = ServiceType.GenerateRuntimeModuleAssembly();
 		Stub = new StubFactory(moduleBuilder);
 	}
@@ -29,9 +34,10 @@ public abstract record TestSuite<TSut> : ITestSuite
 	protected readonly IDummyFactory Dummy = DummyFactory.Instance;
 
 	protected readonly IParameterFactory Parameter = ParameterFactory.Instance;
-	protected readonly ITimesFactory Times = TimesFactory.Instance;
+	protected readonly ITimesContstraintProvider Times = TimesContstraintProvider.Instance;
 
-	internal protected ILogger<TSut> TestOutputLogger { get; internal set; } = default!;
+	internal protected readonly ICancellationTokenProvider CancellationToken;
+	internal protected readonly ILogger<TSut> TestOutputLogger;
 	protected ILoggerFactory TestOutputLoggerFactory => Stub.Of<ILoggerFactory>()
 		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
 		.Setup(

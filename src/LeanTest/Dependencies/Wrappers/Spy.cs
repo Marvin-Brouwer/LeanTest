@@ -1,5 +1,5 @@
 using LeanTest.Dependencies.Definitions;
-using LeanTest.Dependencies.Factories;
+using LeanTest.Dependencies.Providers;
 
 using System.Linq.Expressions;
 
@@ -34,28 +34,28 @@ internal class Spy<TService> : ISpy<TService>
 	}
 
 	public ISpy<TService> VerifyOnce(Expression<Func<TService>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public ISpy<TService> VerifyOnce<TValue>(Expression<Func<TService, TValue>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public ISpy<TService> VerifyOnce(Expression<Func<TService, Task>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public ISpy<TService> VerifyOnce<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public ISpy<TService> VerifyNever(Expression<Func<TService>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public ISpy<TService> VerifyNever<TValue>(Expression<Func<TService, TValue>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public ISpy<TService> VerifyNever(Expression<Func<TService, Task>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public ISpy<TService> VerifyNever<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public void VerifyNoOtherCalls()
 	{

@@ -1,3 +1,4 @@
+using LeanTest.Dependencies.Providers;
 using LeanTest.Extensions;
 using LeanTest.Tests;
 
@@ -5,12 +6,22 @@ using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 
 namespace LeanTest.TestRunner;
+
+internal record struct TestInserts
+{
+	internal ICancellationTokenProvider TestCancellationToken;
+	internal ILoggerFactory TestLoggerFactory;
+}
 
 internal class TestFactory
 {
 	private readonly ILoggerFactory _loggerFactory;
+
+	[ThreadStatic]
+	internal static TestInserts TestInserts;
 
 	public TestFactory(ILoggerFactory loggerFactory)
 	{
@@ -19,6 +30,9 @@ internal class TestFactory
 
 	public IEnumerable<ITestScenario> InitializeScenarios(Assembly assembly, CancellationToken cancellationToken)
 	{
+		TestInserts.TestLoggerFactory = _loggerFactory;
+		TestInserts.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
+
 		if (cancellationToken.IsCancellationRequested) yield break;
 		var assemblySenarios = InitializeScenariosForAssembly(assembly, cancellationToken);
 		if (cancellationToken.IsCancellationRequested) yield break;
@@ -83,8 +97,7 @@ internal class TestFactory
 		Debug.Assert(instance is not null,
 			$"Types passed to {nameof(InitializeSuite)} are known to be {nameof(ITestSuite)}");
 
-		return instance
-			.InjectLogger(_loggerFactory);
+		return instance;
 	}
 }
 

@@ -12,6 +12,8 @@ using FluentAssertions;
 using LeanTest;
 using LeanTest.Dependencies;
 
+using Microsoft.Extensions.Logging;
+
 using System;
 
 namespace ExampleProject.Tests.TestSuites.Services;
@@ -26,6 +28,7 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 
     public ExampleServiceTests()
     {
+		TestOutputLogger.LogInformation("Succesfully instantiated base of {type}", typeof(ExampleServiceTests));
         _someStub = Stub
 			.Of<ISomeThing>();
 		try

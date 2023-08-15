@@ -1,10 +1,10 @@
 using LeanTest.Dependencies.Definitions;
 
-namespace LeanTest.Dependencies.Factories;
+namespace LeanTest.Dependencies.Providers;
 
-internal readonly record struct TimesFactory : ITimesFactory
+internal readonly record struct TimesContstraintProvider : ITimesContstraintProvider
 {
-	internal static readonly ITimesFactory Instance = new TimesFactory();
+	internal static readonly ITimesContstraintProvider Instance = new TimesContstraintProvider();
 
 	public ITimesConstraint Once => throw new NotImplementedException();
 

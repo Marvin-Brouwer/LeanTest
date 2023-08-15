@@ -1,5 +1,5 @@
 using LeanTest.Dependencies.Definitions;
-using LeanTest.Dependencies.Factories;
+using LeanTest.Dependencies.Providers;
 
 using System.Linq.Expressions;
 
@@ -61,28 +61,28 @@ internal class Mock<TService> : IMock<TService>
 	}
 
 	public IMock<TService> VerifyOnce(Expression<Func<TService>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public IMock<TService> VerifyOnce<TValue>(Expression<Func<TService, TValue>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public IMock<TService> VerifyOnce(Expression<Func<TService, Task>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public IMock<TService> VerifyOnce<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
-		Verify(member, TimesFactory.Instance.Once);
+		Verify(member, TimesContstraintProvider.Instance.Once);
 
 	public IMock<TService> VerifyNever(Expression<Func<TService>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public IMock<TService> VerifyNever<TValue>(Expression<Func<TService, TValue>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public IMock<TService> VerifyNever(Expression<Func<TService, Task>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public IMock<TService> VerifyNever<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
-		Verify(member, TimesFactory.Instance.Never);
+		Verify(member, TimesContstraintProvider.Instance.Never);
 
 	public void VerifyNoOtherCalls()
 	{

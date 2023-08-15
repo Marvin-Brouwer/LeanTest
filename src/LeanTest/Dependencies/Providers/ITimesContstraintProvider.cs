@@ -1,9 +1,9 @@
 using LeanTest.Dependencies.Definitions;
 
-namespace LeanTest.Dependencies.Factories;
+namespace LeanTest.Dependencies.Providers;
 
 // TODO steal more from Moq
-public interface ITimesFactory
+public interface ITimesContstraintProvider
 {
 	ITimesConstraint Once { get; }
 	ITimesConstraint Never { get; }
