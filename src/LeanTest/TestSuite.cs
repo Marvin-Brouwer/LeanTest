@@ -18,8 +18,8 @@ public abstract record TestSuite<TSut> : ITestSuite
 
 	protected TestSuite()
 	{
-		TestOutputLogger = TestFactory.TestInserts.TestLoggerFactory.CreateLogger<TSut>();
-		CancellationToken = TestFactory.TestInserts.TestCancellationToken;
+		TestOutputLogger = TestContext.Current.TestLoggerFactory.CreateLogger<TSut>();
+		CancellationToken = TestContext.Current.TestCancellationToken;
 
 		var moduleBuilder = ServiceType.GenerateRuntimeModuleAssembly();
 		Stub = new StubFactory(moduleBuilder);
