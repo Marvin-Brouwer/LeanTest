@@ -58,11 +58,43 @@ public abstract record TestSuite<TSut> : ITestSuite
 		.Instance;
 	#endregion
 
-
+	// TODO ask the public which is better
 	#region Tests
 	public abstract TestCollection Tests { get; }
 
-	protected ITestScenario Test(
+	protected ITestScenario TestClassic(
+		Expression<Func<TSut, Delegate>> method, ITestName testName,
+		Action test
+	)
+	{
+		var scenarioName = testName.GetName(method);
+		return new TestScenario(
+			GetType(),
+			ServiceType, scenarioName,
+			// TODO these are just here for the example
+			Arrange(() => (object?)null),
+			Act(() => (object?)null),
+			Assert(test)
+		);
+	}
+
+	protected ITestScenario TestClassic(
+		Expression<Func<TSut, Delegate>> method, ITestName testName,
+		Func<Task> test
+	)
+	{
+		var scenarioName = testName.GetName(method);
+		return new TestScenario(
+			GetType(),
+			ServiceType, scenarioName,
+			// TODO these are just here for the example
+			Arrange(() => (object?)null),
+			Act(() => (object?)null),
+			Assert(test)
+		);
+	}
+
+	protected ITestScenario TestTripleA(
 		Expression<Func<TSut, Delegate>> method, ITestName testName,
 		ITestArangement arrange, ITestAction act, ITestAssertion assert
 	)

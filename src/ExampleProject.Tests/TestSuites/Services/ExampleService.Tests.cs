@@ -69,7 +69,30 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
     }
 
     public override TestCollection Tests => new(
-        Test(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"),
+
+		TestClassic(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"), async () =>
+		{
+			// Arrange
+			_someStub
+				.Setup(x => x.DoThing(Parameter.Is<string>()), () => true)
+				.Setup(x => x.DoOtherThing(), () => true);
+
+			var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
+			var input = "SomeString";
+			var expected = "SomeString";
+
+			// Act
+			var result = await sut.DoThing(input);
+
+			// Assert
+			result.Should().Be(expected);
+
+			_someSpy
+				.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+				.VerifyNoOtherCalls();
+		}),
+
+		TestTripleA(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"),
             Arrange(() =>
             {
                 _someStub
