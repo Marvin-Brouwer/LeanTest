@@ -2,8 +2,8 @@ namespace LeanTest.Tests;
 
 internal class TestScenario : ITestScenario
 {
-	private readonly ITestArangement _arrange;
-	private readonly ITestAction _act;
+	private readonly ITestArangement? _arrange;
+	private readonly ITestAction? _act;
 	private readonly ITestAssertion _assert;
 
 	private readonly Type _suiteType;
@@ -11,7 +11,7 @@ internal class TestScenario : ITestScenario
 	public Type ServiceType { get; }
 	internal string Name { get; }
 
-	public TestScenario(Type suiteType, Type serviceType, string scenarioName, ITestArangement arrange, ITestAction act, ITestAssertion assert)
+	public TestScenario(Type suiteType, Type serviceType, string scenarioName, ITestArangement? arrange, ITestAction? act, ITestAssertion assert)
 	{
 		ServiceType = serviceType;
 		Name = scenarioName;
@@ -25,7 +25,7 @@ internal class TestScenario : ITestScenario
 
 	public async Task Run(CancellationToken cancellationToken)
 	{
-		IDictionary<string, (Type, object?)> parameters;
+		IDictionary<string, (Type, object?)> parameters = new Dictionary<string, (Type, object?)>();
 		ITestSuite suite;
 
 		try
@@ -41,7 +41,8 @@ internal class TestScenario : ITestScenario
 
 		try
 		{
-			parameters = await _arrange.CallArrange(suite, _act.GetParameters(), cancellationToken);
+			if (_arrange is not null)
+				parameters = await _arrange.CallArrange(suite, _act?.GetParameters(), cancellationToken);
 		}
 		catch (Exception ex)
 		{
@@ -50,7 +51,8 @@ internal class TestScenario : ITestScenario
 		}
 		try
 		{
-			await _act.CallAct(suite, parameters, cancellationToken);
+			if (_act is not null)
+				await _act.CallAct(suite, parameters, cancellationToken);
 		}
 		catch (Exception ex)
 		{
@@ -59,7 +61,8 @@ internal class TestScenario : ITestScenario
 		}
 		try
 		{
-			await _assert.CallAssert(suite, parameters, cancellationToken);
+			if (_assert is not null)
+				await _assert.CallAssert(suite, parameters, cancellationToken);
 		}
 		catch (Exception ex)
 		{

@@ -1,14 +1,12 @@
 using System.Reflection;
 
-using LeanTest.Extensions;
-
 namespace LeanTest.Tests.TestBody;
 
-internal sealed record TestArrangement(Delegate Arrange) : ITestArangement
+internal sealed record TestArrangement(Delegate Arrange) : TestDelegate(Arrange), ITestArangement
 {
 	async Task<IDictionary<string, (Type, object?)>> ITestArangement.CallArrange(
 		ITestSuite suite,
-		ParameterInfo[] actParameters,
+		ParameterInfo[]? actParameters,
 		CancellationToken cancellationToken
 	) {
 		// TODO:
@@ -19,7 +17,7 @@ internal sealed record TestArrangement(Delegate Arrange) : ITestArangement
 
 		//return dictionary;
 
-		var result = await Arrange.ExecuteAsync(suite, cancellationToken);
+		var result = await ExecuteAsync(suite, cancellationToken);
 		throw new NotImplementedException();
 	}
 }

@@ -26,13 +26,13 @@ internal class TestHost<TAssembly> : IHostedService
 		var testScenarios = _serviceProvider
 			.GetRequiredService<TestFactory>()
 			.InitializeScenarios(assembly, runnerCancellationToken);
-		await _serviceProvider
-			.GetRequiredService<TestInvoker>()
-			.RunTests(testScenarios, runnerCancellationToken);
+
+		await TestRunner.RunTests(testScenarios, runnerCancellationToken);
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		// Unecessary to stop tasks due to CancellationToken everywhere
+		return Task.CompletedTask;
 	}
 }

@@ -6,7 +6,7 @@ public interface ITestArangement
 {
 	Task<IDictionary<string, (Type, object?)>> CallArrange(
 		ITestSuite suite,
-		ParameterInfo[] actParameters,
+		ParameterInfo[]? actParameters,
 		CancellationToken cancellationToken
 	);
 }

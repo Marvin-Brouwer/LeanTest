@@ -1,8 +1,6 @@
 # TODO
 
-- Discover TestSuites
-- Flatten Suites and tests into list of TestScenarios
-- Randomize list of TestScenarios
+- Finish Spy and Mock setup
 - Execute list of TestScenarios using configured multithreading
 - Connect to Test SDK
 - Report test results

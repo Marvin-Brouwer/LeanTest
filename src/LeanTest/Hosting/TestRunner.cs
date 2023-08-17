@@ -4,9 +4,9 @@ using System.Security.Cryptography;
 
 namespace LeanTest.Hosting;
 
-internal class TestInvoker
+internal static class TestRunner
 {
-	public async Task RunTests(IEnumerable<ITestScenario> scenarios, CancellationToken cancellationToken)
+	public static async Task RunTests(IEnumerable<ITestScenario> scenarios, CancellationToken cancellationToken)
 	{
 		var testTasks = InvokeTests(Shuffle(scenarios, cancellationToken), cancellationToken);
 		await Task.WhenAll(testTasks);

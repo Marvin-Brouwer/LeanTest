@@ -70,8 +70,8 @@ public abstract record TestSuite<TSut> : ITestSuite
 			GetType(),
 			ServiceType, scenarioName,
 			// TODO these are just here for the example
-			Arrange(() => (object?)null),
-			Act(() => (object?)null),
+			null,
+			null,
 			Assert(test)
 		);
 	}
@@ -86,8 +86,8 @@ public abstract record TestSuite<TSut> : ITestSuite
 			GetType(),
 			ServiceType, scenarioName,
 			// TODO these are just here for the example
-			Arrange(() => (object?)null),
-			Act(() => (object?)null),
+			null,
+			null,
 			Assert(test)
 		);
 	}

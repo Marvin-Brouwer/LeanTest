@@ -1,10 +1,8 @@
 using System.Reflection;
 
-using LeanTest.Extensions;
-
 namespace LeanTest.Tests.TestBody;
 
-internal sealed record TestAction(Delegate Act) : ITestAction
+internal sealed record TestAction(Delegate Act) : TestDelegate(Act), ITestAction
 {
 	public ParameterInfo[] GetParameters()
 	{
@@ -16,7 +14,7 @@ internal sealed record TestAction(Delegate Act) : ITestAction
 		IDictionary<string, (Type, object?)> parameters,
 		CancellationToken cancellationToken
 	) {
-		var result = await Act.ExecuteAsync(suite, parameters, cancellationToken);
+		var result = await ExecuteAsync(suite, parameters, cancellationToken);
 		parameters.Add("result", (Act.GetMethodInfo().ReturnType, result));
 	}
 }

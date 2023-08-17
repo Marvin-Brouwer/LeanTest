@@ -10,7 +10,6 @@ public static class HostExensions
 	public static IServiceCollection AddLeanTestInvoker(this IServiceCollection services)
 	{
 		services.TryAddSingleton<TestFactory>();
-		services.TryAddSingleton<TestInvoker>();
 
 		return services;
 	}
