@@ -29,11 +29,36 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
     public ExampleServiceTests()
     {
 		TestOutputLogger.LogInformation("Succesfully instantiated base of {type}", typeof(ExampleServiceTests));
-        _someStub = Stub
-			.Of<ISomeThing>();
+
+		_someStub = Stub.Of<ISomeThing>();
+		_someStub
+			.Setup(s => s.DoThing("test"))
+			.Returns((string _) => true);
+		_someStub
+			.Setup(s => s.DoThing("test2"))
+			.Returns((string _) => false);
+		_someStub
+			.Setup(s => s.DoString("FOO"))
+			.Returns((string _) => "Bar");
+		_someStub
+			.Setup(s => s.DoString(Parameter.Is<string>()))
+			.Returns((string a) => a);
+		_someStub
+			.Setup(s => s.DoOtherThing())
+			.Returns(() => true);
+		_someStub
+			.Setup(s => s.SomeAction(false))
+			.Executes();
+		_someStub
+			.Setup(s => s.SomeAction(true))
+			.Executes(() => TestOutputLogger.LogInformation("SomeAction was true"));
+
 		try
 		{
 			_someStub.Instance.DoOtherThing();
+			
+			var one = _someStub.Instance.DoString("one");
+			var bar = _someStub.Instance.DoString("FOO");
 		}
 		catch (Exception ex)
 		{
@@ -41,6 +66,7 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		}
 		try
 		{
+			_someStub.Instance.DoThing("test2");
 			_someStub.Instance.DoThing("Thing");
 		}
 		catch (Exception ex)
@@ -74,8 +100,11 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		{
 			// Arrange
 			_someStub
-				.Setup(x => x.DoThing(Parameter.Is<string>()), () => true)
-				.Setup(x => x.DoOtherThing(), () => true);
+				.Setup(x => x.DoThing(Parameter.Is<string>()))
+				.Returns((string _) => true);
+			_someStub
+				.Setup(x => x.DoOtherThing())
+				.Returns(() => true);
 
 			var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
 			var input = "SomeString";
@@ -95,9 +124,12 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		TestTripleA(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"),
             Arrange(() =>
             {
-                _someStub
-                    .Setup(x => x.DoThing(Parameter.Is<string>()), () => true)
-                    .Setup(x => x.DoOtherThing(), () => true);
+				_someStub
+					.Setup(x => x.DoThing(Parameter.Is<string>()))
+					.Returns((string _) => true);
+				_someStub
+					.Setup(x => x.DoOtherThing())
+					.Returns(() => true);
 
                 var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
                 var input = "SomeString";

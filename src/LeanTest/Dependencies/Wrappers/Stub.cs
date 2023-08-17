@@ -1,36 +1,23 @@
+using LeanTest.Dynamic.Invocation;
+
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace LeanTest.Dependencies.Wrappers;
 
 internal class Stub<TService> : IStub<TService>
 {
-	private readonly IDictionary<MethodInfo, object?> _configuredMethods;
+	private readonly ConfiguredMethodSet _configuredMethods;
 
-	public Stub(IDictionary<MethodInfo, object?> configuredMethods)
+	public Stub(ConfiguredMethodSet configuredMethods)
 	{
 		_configuredMethods = configuredMethods;
 	}
 
 	public TService Instance { get; internal init; } = default!;
 
-	public IStub<TService> Setup<TReturn>(Expression<Func<TService, TReturn>> member, Func<TReturn> returnValue)
-	{
-		throw new NotImplementedException();
-	}
+	public IMemberSetup<IStub<TService>> Setup(Expression<Action<TService>> member) =>
+		new MemberSetup<IStub<TService>>(this, member, _configuredMethods);
 
-	public IStub<TService> Setup<TReturn>(Expression<Func<TService, Task<TReturn>>> member, Func<TReturn> returnValue)
-	{
-		throw new NotImplementedException();
-	}
-
-	public IStub<TService> Setup(Expression<Func<TService>> member)
-	{
-		throw new NotImplementedException();
-	}
-
-	public IStub<TService> Setup(Expression<Func<TService, Task>> member)
-	{
-		throw new NotImplementedException();
-	}
+	public IMemberSetup<IStub<TService>, TReturn> Setup<TReturn>(Expression<Func<TService, TReturn>> member) =>
+		new MemberSetup<IStub<TService>, TReturn>(this, member, _configuredMethods);
 }

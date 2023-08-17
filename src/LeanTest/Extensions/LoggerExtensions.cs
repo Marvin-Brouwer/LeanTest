@@ -1,4 +1,3 @@
-using LeanTest.Dependencies.Providers;
 using LeanTest.Exceptions;
 
 using Microsoft.Extensions.Logging;

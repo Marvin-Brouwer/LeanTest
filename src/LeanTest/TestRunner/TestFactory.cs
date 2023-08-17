@@ -1,12 +1,10 @@
 using LeanTest.Dependencies.Providers;
-using LeanTest.Extensions;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
 
 using System.Diagnostics;
 using System.Reflection;
-using System.Threading;
 
 namespace LeanTest.TestRunner;
 

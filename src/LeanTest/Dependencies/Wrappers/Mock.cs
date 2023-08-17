@@ -1,5 +1,6 @@
 using LeanTest.Dependencies.Definitions;
 using LeanTest.Dependencies.Providers;
+using LeanTest.Dynamic.Invocation;
 
 using System.Linq.Expressions;
 
@@ -8,33 +9,21 @@ namespace LeanTest.Dependencies.Wrappers;
 internal class Mock<TService> : IMock<TService>
 {
 	private readonly ISpy<TService> _spy;
-	private readonly IStub<TService> _stub;
+	private readonly ConfiguredMethodSet _configuredMethods;
 
-	public TService Instance { get; }
-
-	public IMock<TService> Setup(Expression<Func<TService>> member)
+	internal Mock(ConfiguredMethodSet configuredMethods, ISpy<TService> spy)
 	{
-		_stub.Setup(member);
-		return this;
+		_configuredMethods = configuredMethods;
+		_spy = spy;
 	}
 
-	public IMock<TService> Setup(Expression<Func<TService, Task>> member)
-	{
-		_stub.Setup(member);
-		return this;
-	}
+	public TService Instance { get; } = default!;
 
-	public IMock<TService> Setup<TReturn>(Expression<Func<TService, TReturn>> member, Func<TReturn> returnValue)
-	{
-		_stub.Setup(member, returnValue);
-		return this;
-	}
+	public IMemberSetup<IMock<TService>> Setup(Expression<Action<TService>> member) =>
+		new MemberSetup<IMock<TService>>(this, member, _configuredMethods);
 
-	public IMock<TService> Setup<TReturn>(Expression<Func<TService, Task<TReturn>>> member, Func<TReturn> returnValue)
-	{
-		_stub.Setup(member, returnValue);
-		return this;
-	}
+	public IMemberSetup<IMock<TService>, TReturn> Setup<TReturn>(Expression<Func<TService, TReturn>> member) =>
+		new MemberSetup<IMock<TService>, TReturn>(this, member, _configuredMethods);
 
 	public IMock<TService> Verify(Expression<Func<TService>> member, ITimesConstraint times)
 	{
@@ -84,8 +73,6 @@ internal class Mock<TService> : IMock<TService>
 	public IMock<TService> VerifyNever<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(member, TimesContstraintProvider.Instance.Never);
 
-	public void VerifyNoOtherCalls()
-	{
+	public void VerifyNoOtherCalls() =>
 		_spy.VerifyNoOtherCalls();
-	}
 }

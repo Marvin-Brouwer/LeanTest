@@ -39,22 +39,20 @@ public abstract record TestSuite<TSut> : ITestSuite
 	internal protected readonly ICancellationTokenProvider CancellationToken;
 	internal protected readonly ILogger<TSut> TestOutputLogger;
 	protected ILoggerFactory TestOutputLoggerFactory => Stub.Of<ILoggerFactory>()
-		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
-		.Setup(
-			factory => factory.CreateLogger(Parameter.Is<string>()),
-			() => throw new NotSupportedException($"The {nameof(TestOutputLoggerFactory)} " +
-				$"only supports {nameof(ILoggerFactory.CreateLogger)} with a categoryName of \"{typeof(TSut).Name}\"."
-			)
-		)
+		.Setup(factory => factory.CreateLogger(typeof(TSut).Name))
+		.Returns(() => TestOutputLogger)
+		.Setup(factory => factory.CreateLogger(Parameter.Is<string>()))
+		.Returns(() => throw new NotSupportedException($"The {nameof(TestOutputLoggerFactory)} " +
+			$"only supports {nameof(ILoggerFactory.CreateLogger)} with a categoryName of \"{typeof(TSut).Name}\"."
+		))
 		.Instance;
+
 	protected ILoggerProvider TestOutputLoggerProvider => Stub.Of<ILoggerProvider>()
-		.Setup(factory => factory.CreateLogger(typeof(TSut).Name), () => TestOutputLogger)
-		.Setup(
-			provider => provider.CreateLogger(Parameter.Is<string>()),
-			() => throw new NotSupportedException($"The {nameof(TestOutputLoggerProvider)} " +
-				$"only supports {nameof(ILoggerProvider.CreateLogger)} with a categoryName of \"{typeof(TSut).Name}\"."
-			)
-		)
+		.Setup(factory => factory.CreateLogger(typeof(TSut).Name)).Returns(() => TestOutputLogger)
+		.Setup(provider => provider.CreateLogger(Parameter.Is<string>()))
+		.Returns(() => throw new NotSupportedException($"The {nameof(TestOutputLoggerProvider)} " +
+			$"only supports {nameof(ILoggerProvider.CreateLogger)} with a categoryName of \"{typeof(TSut).Name}\"."
+		))
 		.Instance;
 	#endregion
 

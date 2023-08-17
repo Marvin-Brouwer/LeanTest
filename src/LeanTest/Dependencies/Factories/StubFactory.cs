@@ -1,7 +1,7 @@
 using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dynamic.Invocation;
 using LeanTest.Dynamic.ReflectionEmitting;
 
-using System.Reflection;
 using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
@@ -19,7 +19,7 @@ internal readonly record struct StubFactory : IStubFactory
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
-		var configuredMethods = new Dictionary<MethodInfo, object?>();
+		var configuredMethods = new ConfiguredMethodSet();
 		var instance = GenerateStubClass<TService>(configuredMethods);
 
 		return new Stub<TService>(configuredMethods)
@@ -28,7 +28,7 @@ internal readonly record struct StubFactory : IStubFactory
 		};
 	}
 
-	private TService GenerateStubClass<TService>(IDictionary<MethodInfo, object?> configuredMethods)
+	private TService GenerateStubClass<TService>(ConfiguredMethodSet configuredMethods)
 		where TService : class
 	{
 		var serviceType = typeof(TService);
@@ -36,7 +36,7 @@ internal readonly record struct StubFactory : IStubFactory
 			.GenerateRuntimeType(serviceType, nameof(Stub<TService>));
 
 		var configuredMethodsField = typeBuilder
-			.GeneratePrivateField(nameof(configuredMethods), typeof(IDictionary<MethodInfo, object?>));
+			.GeneratePrivateField(nameof(configuredMethods), typeof(ConfiguredMethodSet));
 
 		typeBuilder
 			.GenerateConstructor(configuredMethodsField);

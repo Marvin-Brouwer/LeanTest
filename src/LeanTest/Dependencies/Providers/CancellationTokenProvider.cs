@@ -1,5 +1,3 @@
-using LeanTest.Dependencies.Definitions;
-
 namespace LeanTest.Dependencies.Providers;
 
 internal readonly record struct CancellationTokenProvider : ICancellationTokenProvider
