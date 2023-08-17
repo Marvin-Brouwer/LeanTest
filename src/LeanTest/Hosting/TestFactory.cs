@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace LeanTest.TestRunner;
+namespace LeanTest.Hosting;
 
 internal class TestFactory
 {

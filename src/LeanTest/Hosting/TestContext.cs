@@ -2,7 +2,7 @@ using LeanTest.Dependencies.Providers;
 
 using Microsoft.Extensions.Logging;
 
-namespace LeanTest.TestRunner;
+namespace LeanTest.Hosting;
 
 /// <summary>
 /// We need a way to access test contextual instances. <br />

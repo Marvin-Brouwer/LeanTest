@@ -2,7 +2,7 @@ using LeanTest.Tests;
 
 using System.Security.Cryptography;
 
-namespace LeanTest.TestRunner;
+namespace LeanTest.Hosting;
 
 internal class TestInvoker
 {

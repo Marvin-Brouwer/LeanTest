@@ -30,7 +30,8 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
     {
 		TestOutputLogger.LogInformation("Succesfully instantiated base of {type}", typeof(ExampleServiceTests));
 
-		_someStub = Stub.Of<ISomeThing>();
+		_someStub = Stub
+			.Of<ISomeThing>();
 		_someStub
 			.Setup(s => s.DoThing("test"))
 			.Returns((string _) => true);

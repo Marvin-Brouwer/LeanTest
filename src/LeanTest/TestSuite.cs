@@ -1,7 +1,7 @@
 using LeanTest.Dependencies.Factories;
 using LeanTest.Dependencies.Providers;
 using LeanTest.Dynamic.ReflectionEmitting;
-using LeanTest.TestRunner;
+using LeanTest.Hosting;
 using LeanTest.Tests;
 using LeanTest.Tests.Naming;
 using LeanTest.Tests.TestBody;
