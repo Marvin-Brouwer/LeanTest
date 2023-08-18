@@ -1,8 +1,8 @@
-using LeanTest.Dynamic.Invocation;
+using LeanTest.Dependencies;
+using LeanTest.Dependencies.Configuration;
 
 using System.Linq.Expressions;
 
-namespace LeanTest.Dependencies.Wrappers;
 
 internal class Stub<TService> : IStub<TService>
 {

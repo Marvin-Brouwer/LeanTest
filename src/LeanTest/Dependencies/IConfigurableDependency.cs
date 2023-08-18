@@ -1,3 +1,5 @@
+using LeanTest.Dependencies.Configuration;
+
 using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies;

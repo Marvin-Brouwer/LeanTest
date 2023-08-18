@@ -15,14 +15,28 @@ internal readonly record struct ReflectionReferenceConstants
 		.MakeGenericMethod(new[] { typeof(object) })!;
 
 	// TODO remove linq
-	internal static readonly MethodInfo InvokeStubGeneric = typeof(InvocationMarshall)
+	internal static readonly MethodInfo InvokeGenericNoParameters = typeof(IInvocationMarshall)
 		.GetMethods()
-		.First(method => method.Name == nameof(InvocationMarshall.InvokeStub)
+		.First(method => method.Name == nameof(IInvocationMarshall.RequestInvoke)
 			&& method.IsGenericMethod
+			&& method.GetParameters().Length == 1
 		)!;
-	internal static readonly MethodInfo InvokeStubVoid = typeof(InvocationMarshall)
+	internal static readonly MethodInfo InvokeGenericWithParameters = typeof(IInvocationMarshall)
 		.GetMethods()
-		.First(method => method.Name == nameof(InvocationMarshall.InvokeStub)
+		.First(method => method.Name == nameof(IInvocationMarshall.RequestInvoke)
+			&& method.IsGenericMethod
+			&& method.GetParameters().Length > 1
+		)!;
+	internal static readonly MethodInfo InvokeVoidNoParameters = typeof(IInvocationMarshall)
+		.GetMethods()
+		.First(method => method.Name == nameof(IInvocationMarshall.RequestInvoke)
 			&& !method.IsGenericMethod
+			&& method.GetParameters().Length == 1
+		)!;
+	internal static readonly MethodInfo InvokeVoidWithParameters = typeof(IInvocationMarshall)
+		.GetMethods()
+		.First(method => method.Name == nameof(IInvocationMarshall.RequestInvoke)
+			&& !method.IsGenericMethod
+			&& method.GetParameters().Length > 1
 		)!;
 }

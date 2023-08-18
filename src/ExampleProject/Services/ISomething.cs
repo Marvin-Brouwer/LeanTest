@@ -2,6 +2,7 @@ namespace ExampleProject.Services;
 
 public interface ISomeThing
 {
+	void DoNothing();
 	void SomeAction(bool input);
 	bool DoOtherThing();
 	bool DoThing(string value);

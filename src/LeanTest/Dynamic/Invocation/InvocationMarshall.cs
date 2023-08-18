@@ -1,83 +1,40 @@
+using LeanTest.Dependencies.Configuration;
+
 using System.Reflection;
 
 namespace LeanTest.Dynamic.Invocation;
 
 // TODO NotSupportedException => Custom exception
-public static class InvocationMarshall
+
+internal sealed class InvocationMarshall : IInvocationMarshall
 {
-	public static TReturn InvokeStub<TReturn>(
-		ConfiguredMethodSet configuredMethods,
+	private readonly ConfiguredMethodSet _configuredMethods;
+
+	internal InvocationMarshall(ConfiguredMethodSet configuredMethods)
+	{
+		_configuredMethods = configuredMethods;
+	}
+
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, Array.Empty<object>());
+	public TReturn RequestInvoke<TReturn>(
 		MethodBase methodInfo,
 		object?[] parameters)
 	{
-		if (!configuredMethods.TryFind<TReturn>(methodInfo, parameters, out var returnDelegate))
+		if (!_configuredMethods.TryFind<TReturn>(methodInfo, parameters, out var configuredMethod))
 			throw new NotSupportedException();
 
-		return returnDelegate()!;
+		return (TReturn)configuredMethod.Invoke(parameters)!;
 	}
 
-	public static void InvokeStub(
-		ConfiguredMethodSet configuredMethods,
+	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, Array.Empty<object>());
+	public void RequestInvoke(
 		MethodBase methodInfo,
 		object?[] parameters)
 	{
 
-		if (!configuredMethods.TryFind(methodInfo, parameters, out var returnDelegate))
+		if (!_configuredMethods.TryFind(methodInfo, parameters, out var configuredMethod))
 			throw new NotSupportedException();
 
-		returnDelegate.DynamicInvoke(parameters);
-	}
-
-	public static void InvokeSpy(
-		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo,
-		object?[] parameters)
-	{
-
-		throw new NotSupportedException();
-	}
-
-
-	public static void InvokeSpy<TReturn>(
-		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo,
-		object?[] parameters)
-	{
-
-		throw new NotSupportedException();
-	}
-
-	public static TReturn InvokeMock<TReturn>(
-		ConfiguredMethodSet configuredMethods,
-		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo,
-		object?[] parameters)
-	{
-
-		try
-		{
-			return InvokeStub<TReturn>(configuredMethods, methodInfo, parameters);
-		}
-		finally
-		{
-			InvokeSpy<TReturn>(calledMethods, methodInfo, parameters);
-		}
-	}
-
-	public static void InvokeMock(
-		ConfiguredMethodSet configuredMethods,
-		IDictionary<MethodInfo, IInvocationRecord> calledMethods,
-		MethodBase methodInfo,
-		object?[] parameters)
-	{
-
-		try
-		{
-			InvokeStub(configuredMethods, methodInfo, parameters);
-		}
-		finally
-		{
-			InvokeSpy(calledMethods, methodInfo, parameters);
-		}
+		_ = configuredMethod.Invoke(parameters)!;
 	}
 }

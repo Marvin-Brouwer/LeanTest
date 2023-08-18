@@ -1,6 +1,6 @@
+using LeanTest.Dependencies.Configuration;
 using LeanTest.Dependencies.Definitions;
 using LeanTest.Dependencies.Providers;
-using LeanTest.Dynamic.Invocation;
 
 using System.Linq.Expressions;
 

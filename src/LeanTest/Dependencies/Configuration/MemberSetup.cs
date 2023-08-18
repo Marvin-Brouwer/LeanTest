@@ -1,20 +1,16 @@
-using LeanTest.Dynamic.Invocation;
-
 using System.Linq.Expressions;
 
-namespace LeanTest.Dependencies.Wrappers;
+namespace LeanTest.Dependencies.Configuration;
 
 internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 	where TDependency : IDependency
 {
 	protected readonly TDependency Dependency;
-	protected readonly ConfiguredMethod Method;
+	protected readonly LambdaExpression Method;
 	protected readonly ConfiguredMethodSet ConfiguredMethods;
 
-	internal MemberSetup(TDependency dependency, LambdaExpression method, ConfiguredMethodSet configuredMethods)
-		: this(dependency, ConfiguredMethod.FromExpression(method, null), configuredMethods) { }
 
-	internal MemberSetup(TDependency dependency, ConfiguredMethod method, ConfiguredMethodSet configuredMethods)
+	internal MemberSetup(TDependency dependency, LambdaExpression method, ConfiguredMethodSet configuredMethods)
 	{
 		Dependency = dependency;
 		Method = method;
@@ -23,12 +19,12 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 
 	public TDependency Executes(Action callBack)
 	{
-		ConfiguredMethods.Add(Method with { ReturnDelegate = callBack });
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
 		return Dependency;
 	}
 	public TDependency Executes()
 	{
-		ConfiguredMethods.Add(Method);
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method));
 		return Dependency;
 	}
 }
@@ -36,16 +32,21 @@ internal class MemberSetup<TDependency, TReturn> : MemberSetup<TDependency>, IMe
 	where TDependency : IDependency
 {
 	internal MemberSetup(TDependency dependency, LambdaExpression method, ConfiguredMethodSet configuredMethods)
-		: base(dependency, ConfiguredMethod.FromExpression(method, typeof(TReturn)), configuredMethods) { }
+		: base(dependency, method, configuredMethods) { }
 
+	public TDependency Returns(TReturn value)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForValue(Method, value));
+		return Dependency;
+	}
 	public TDependency Returns(Func<TReturn> callBack)
 	{
-		ConfiguredMethods.Add(Method with { ReturnDelegate = callBack });
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
 		return Dependency;
 	}
 	public TDependency Returns<T1>(Func<T1, TReturn> callBack)
 	{
-		ConfiguredMethods.Add(Method with { ReturnDelegate = callBack });
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
 		return Dependency;
 	}
 }

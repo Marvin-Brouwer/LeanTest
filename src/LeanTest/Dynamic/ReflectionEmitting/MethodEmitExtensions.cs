@@ -8,8 +8,6 @@ internal static class MethodEmitExtensions
 	internal static void GenerateDynamicImplementationMethods(
 		this TypeBuilder typeBuilder,
 		Type serviceType,
-		MethodInfo invokeMethodGeneric,
-		MethodInfo invokeMethodVoid,
 		// TODO FieldBuilder[] fields 
 		FieldBuilder configuredMethodsField)
 	{
@@ -20,8 +18,6 @@ internal static class MethodEmitExtensions
 			GenerateDynamicImplementationMethod(
 				typeBuilder,
 				interfaceMethod,
-				invokeMethodGeneric,
-				invokeMethodVoid,
 				configuredMethodsField
 			);
 		}
@@ -30,10 +26,8 @@ internal static class MethodEmitExtensions
 	private static void GenerateDynamicImplementationMethod(
 		TypeBuilder typeBuilder,
 		MethodInfo method,
-		MethodInfo invokeMethodGeneric,
-		MethodInfo invokeMethodVoid,
 		// TODO FieldBuilder[] fields 
-		FieldBuilder configuredMethodsField)
+		FieldBuilder invocationMarshallField)
 	{
 		var parameters = method.GetParameters();
 		var hasParameters = parameters.Length > 0;
@@ -55,8 +49,9 @@ internal static class MethodEmitExtensions
 
 		// TODO Explain why reflection emit
 		methodIL.Emit(OpCodes.Ldarg_0);
-		methodIL.Emit(OpCodes.Ldfld, configuredMethodsField);
+		methodIL.Emit(OpCodes.Ldfld, invocationMarshallField);
 		methodIL.Emit(OpCodes.Call, ReflectionReferenceConstants.GetCurrentMethod);
+
 
 		if (hasParameters)
 		{
@@ -73,8 +68,7 @@ internal static class MethodEmitExtensions
 				var parameterNumber = i + 1;
 
 				methodIL.Emit(OpCodes.Ldc_I4, i);
-				if (parameterNumber < 4) methodIL.Emit(OpCodes.Ldarg, parameterNumber);
-				else methodIL.Emit(OpCodes.Ldarg_S, parameterNumber);
+				methodIL.Emit(OpCodes.Ldarg, parameterNumber);
 
 				if (shouldBox)
 					methodIL.Emit(OpCodes.Box, parameter.ParameterType);
@@ -85,23 +79,24 @@ internal static class MethodEmitExtensions
 					methodIL.Emit(OpCodes.Dup);
 			}
 		}
-		else
-		{
-			methodIL.Emit(OpCodes.Call, ReflectionReferenceConstants.ObjectArrayEmpty);
-		}
 
 		// Making a type generic of TReturn is easier than boxing if necessary
 		if (isVoid)
 		{
-			methodIL.Emit(OpCodes.Call, invokeMethodVoid);
+			methodIL.Emit(OpCodes.Call, hasParameters
+				? ReflectionReferenceConstants.InvokeVoidWithParameters
+				: ReflectionReferenceConstants.InvokeVoidNoParameters);
 			methodIL.Emit(OpCodes.Nop);
 		}
 		else
 		{
-			var invokeMethod = invokeMethodGeneric!
-				.GetGenericMethodDefinition()!
-				.MakeGenericMethod(new[] { method.ReturnType })!;
-			methodIL.Emit(OpCodes.Call, invokeMethod);
+			var invokeMethod = hasParameters
+				? ReflectionReferenceConstants.InvokeGenericWithParameters
+				: ReflectionReferenceConstants.InvokeGenericNoParameters!;
+			invokeMethod = invokeMethod
+					.GetGenericMethodDefinition()!
+					.MakeGenericMethod(new[] { method.ReturnType })!;
+			methodIL.Emit(OpCodes.Callvirt, invokeMethod);
 		}
 
 		methodIL.Emit(OpCodes.Ret);

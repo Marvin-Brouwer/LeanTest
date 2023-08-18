@@ -1,7 +1,8 @@
-using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dependencies.Configuration;
 using LeanTest.Dynamic.Invocation;
 using LeanTest.Dynamic.ReflectionEmitting;
 
+using System.Reflection;
 using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
@@ -20,7 +21,8 @@ internal readonly record struct StubFactory : IStubFactory
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
 		var configuredMethods = new ConfiguredMethodSet();
-		var instance = GenerateStubClass<TService>(configuredMethods);
+		var invocationMarshall = new InvocationMarshall(configuredMethods);
+		var instance = GenerateStubClass<TService>(invocationMarshall);
 
 		return new Stub<TService>(configuredMethods)
 		{
@@ -28,36 +30,34 @@ internal readonly record struct StubFactory : IStubFactory
 		};
 	}
 
-	private TService GenerateStubClass<TService>(ConfiguredMethodSet configuredMethods)
+	private TService GenerateStubClass<TService>(IInvocationMarshall invocationMarshall)
 		where TService : class
 	{
 		var serviceType = typeof(TService);
 		var typeBuilder = _moduleBuilder
 			.GenerateRuntimeType(serviceType, nameof(Stub<TService>));
 
-		var configuredMethodsField = typeBuilder
-			.GeneratePrivateField(nameof(configuredMethods), typeof(ConfiguredMethodSet));
+		var invocationMarshallField = typeBuilder
+			.GeneratePrivateField(nameof(invocationMarshall), typeof(IInvocationMarshall));
 
 		typeBuilder
-			.GenerateConstructor(configuredMethodsField);
+			.GenerateConstructor(invocationMarshallField);
 		
 		typeBuilder
 			.GenerateDynamicImplementationMethods(
 				serviceType,
-				ReflectionReferenceConstants.InvokeStubGeneric,
-				ReflectionReferenceConstants.InvokeStubVoid,
-				configuredMethodsField
+				invocationMarshallField
 			);
 
-		// TODO props, fields, etc
+		// TODO properties
 
 		#region TODO this is just for dev
 		var generator = new Lokad.ILPack.AssemblyGenerator();
 		var bytes = generator.GenerateAssemblyBytes(typeBuilder.CreateType()!.Assembly);
-		generator.GenerateAssembly(typeBuilder.CreateType()!.Assembly, "D:\\GEN\\Gen.dll");
+		generator.GenerateAssembly(typeBuilder.CreateType()!.Assembly, Assembly.GetExecutingAssembly().GetLoadedModules().Select(m => m.Assembly), "D:\\GEN\\Gen.dll");
 		#endregion
 
 		return typeBuilder
-			.Instantiate<TService>(configuredMethods);
+			.Instantiate<TService>(invocationMarshall);
 	}
 }

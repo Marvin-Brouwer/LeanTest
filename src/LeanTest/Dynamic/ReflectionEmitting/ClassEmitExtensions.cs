@@ -49,7 +49,6 @@ internal static class ClassEmitExtensions
 			FieldBuilder? field = fields[i];
 
 			ctorIL.Emit(OpCodes.Ldarg_0);
-			// TODO either support Ldarg_s or throw
 			ctorIL.Emit(OpCodes.Ldarg, i + 1);
 			ctorIL.Emit(OpCodes.Stfld, field);
 		}

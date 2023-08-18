@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
-namespace LeanTest.Dynamic.Invocation;
+namespace LeanTest.Dependencies.Configuration;
 
 public sealed class ConfiguredMethodSet
 {
@@ -12,49 +12,23 @@ public sealed class ConfiguredMethodSet
 		_configuredMethods.Add(configuredMethod);
 	}
 
-	internal bool TryFind(MethodBase methodInfo, object?[] parameters, [NotNullWhen(true)] out Action? returnAction)
+	internal bool TryFind(MethodBase methodInfo, object?[] parameters, [NotNullWhen(true)] out ConfiguredMethod? method)
 	{
-		if (!TryFind(methodInfo, parameters, typeof(void), out var returnDelegate))
-		{
-			returnAction = null;
-			return false;
-		}
-
-		returnAction =  parameters.Length == 0
-			? () => returnDelegate.DynamicInvoke(null)
-			: () => returnDelegate.DynamicInvoke(parameters);
-
-		return true;
+		return TryFind(methodInfo, parameters, typeof(void), out method);
 	}
 
-	internal bool TryFind<TReturn>(MethodBase methodInfo, object?[] parameters, [NotNullWhen(true)] out Func<TReturn>? returnFunction)
+	internal bool TryFind<TReturn>(MethodBase methodInfo, object?[] parameters, [NotNullWhen(true)] out ConfiguredMethod? method)
 	{
-		if (!TryFind(methodInfo, parameters, typeof(TReturn), out var returnDelegate))
-		{
-			returnFunction = null;
-			return false;
-		}
-
-		returnFunction = parameters.Length == 0
-			? () => (TReturn)returnDelegate.DynamicInvoke(null)!
-			: () => (TReturn)returnDelegate.DynamicInvoke(parameters)!;
-		return true;
+		return TryFind(methodInfo, parameters, typeof(TReturn), out method);
 	}
 
-	internal bool TryFind(MethodBase methodInfo, object?[] parameters, Type returnType, [NotNullWhen(true)] out Delegate? returnDelegate)
+	internal bool TryFind(MethodBase methodInfo, object?[] parameters, Type returnType, [NotNullWhen(true)] out ConfiguredMethod? configuredMethod)
 	{
-		var configuredMethod = _configuredMethods
+		configuredMethod = _configuredMethods
 			.FirstOrDefault(configuredMethod => MethodBodyMatches(methodInfo, parameters, returnType, configuredMethod)
 		);
 
-		if (configuredMethod == default)
-		{
-			returnDelegate = null;
-			return false;
-		}
-
-		returnDelegate = configuredMethod.ReturnDelegate!;
-		return true;
+		return configuredMethod is not null;
 	}
 
 	private static bool MethodBodyMatches(MethodBase methodInfo, object?[] parameters, Type returnType, ConfiguredMethod configuredMethod)

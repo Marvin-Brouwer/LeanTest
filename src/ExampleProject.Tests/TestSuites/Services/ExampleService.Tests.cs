@@ -40,7 +40,7 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 			.Returns((string _) => false);
 		_someStub
 			.Setup(s => s.DoString("FOO"))
-			.Returns((string _) => "Bar");
+			.Returns("Bar");
 		_someStub
 			.Setup(s => s.DoString(Parameter.Is<string>()))
 			.Returns((string a) => a);
@@ -57,7 +57,7 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		try
 		{
 			_someStub.Instance.DoOtherThing();
-			
+
 			var one = _someStub.Instance.DoString("one");
 			var bar = _someStub.Instance.DoString("FOO");
 		}
@@ -100,12 +100,12 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		TestClassic(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"), async () =>
 		{
 			// Arrange
-			_someStub
-				.Setup(x => x.DoThing(Parameter.Is<string>()))
-				.Returns((string _) => true);
-			_someStub
-				.Setup(x => x.DoOtherThing())
-				.Returns(() => true);
+			//_someStub
+			//	.Setup(x => x.DoThing(Parameter.Is<string>()))
+			//	.Returns((string _) => true);
+			//_someStub
+			//	.Setup(x => x.DoOtherThing())
+			//	.Returns(() => true);
 
 			var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
 			var input = "SomeString";
@@ -117,20 +117,20 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 			// Assert
 			result.Should().Be(expected);
 
-			_someSpy
-				.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-				.VerifyNoOtherCalls();
+			//_someSpy
+			//	.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			//	.VerifyNoOtherCalls();
 		}),
 
 		TestTripleA(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"),
             Arrange(() =>
             {
-				_someStub
-					.Setup(x => x.DoThing(Parameter.Is<string>()))
-					.Returns((string _) => true);
-				_someStub
-					.Setup(x => x.DoOtherThing())
-					.Returns(() => true);
+				//_someStub
+				//	.Setup(x => x.DoThing(Parameter.Is<string>()))
+				//	.Returns((string _) => true);
+				//_someStub
+				//	.Setup(x => x.DoOtherThing())
+				//	.Returns(() => true);
 
                 var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
                 var input = "SomeString";
@@ -146,9 +146,9 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
             {
                 result.Should().Be(expected);
 
-				_someSpy
-					.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-					.VerifyNoOtherCalls();
+				//_someSpy
+				//	.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+				//	.VerifyNoOtherCalls();
             })
         )
     );

@@ -27,4 +27,9 @@ public class SomeThing : ISomeThing
 	{
 		throw new NotImplementedException();
 	}
+
+	public void DoNothing()
+	{
+		throw new NotImplementedException();
+	}
 }
