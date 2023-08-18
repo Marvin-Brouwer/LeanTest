@@ -11,10 +11,8 @@ internal static class MethodEmitExtensions
 		// TODO FieldBuilder[] fields 
 		FieldBuilder configuredMethodsField)
 	{
-		var methods = serviceType.GetMethods();
-		for (int i = 0; i < methods.Length; i++)
+		foreach (var interfaceMethod in serviceType.GetMethods())
 		{
-			var interfaceMethod = methods[i];
 			GenerateDynamicImplementationMethod(
 				typeBuilder,
 				interfaceMethod,
@@ -44,6 +42,12 @@ internal static class MethodEmitExtensions
 			// TODO remove linq
 			parameters.Select(param => param.ParameterType).ToArray()
 		);
+		if (method.IsGenericMethod)
+		{
+			// TODO remove linq
+			var genericArgumentNames = method.GetGenericMethodDefinition().GetGenericArguments().Select(arg => arg.Name).ToArray();
+			methodBuilder.DefineGenericParameters(genericArgumentNames);
+		}
 
 		var methodIL = methodBuilder.GetILGenerator();
 
