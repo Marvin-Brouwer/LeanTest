@@ -8,15 +8,14 @@ internal static class MethodEmitExtensions
 	internal static void GenerateDynamicImplementationMethods(
 		this TypeBuilder typeBuilder,
 		Type serviceType,
-		// TODO FieldBuilder[] fields 
-		FieldBuilder configuredMethodsField)
+		FieldBuilder interceptorField)
 	{
 		foreach (var interfaceMethod in serviceType.GetMethods())
 		{
 			GenerateDynamicImplementationMethod(
 				typeBuilder,
 				interfaceMethod,
-				configuredMethodsField
+				interceptorField
 			);
 		}
 	}
@@ -24,8 +23,7 @@ internal static class MethodEmitExtensions
 	private static void GenerateDynamicImplementationMethod(
 		TypeBuilder typeBuilder,
 		MethodInfo method,
-		// TODO FieldBuilder[] fields 
-		FieldBuilder invocationMarshallField)
+		FieldBuilder interceptorField)
 	{
 		var parameters = method.GetParameters();
 		var hasParameters = parameters.Length > 0;
@@ -53,7 +51,7 @@ internal static class MethodEmitExtensions
 
 		// TODO Explain why reflection emit
 		methodIL.Emit(OpCodes.Ldarg_0);
-		methodIL.Emit(OpCodes.Ldfld, invocationMarshallField);
+		methodIL.Emit(OpCodes.Ldfld, interceptorField);
 		methodIL.Emit(OpCodes.Call, ReflectionReferenceConstants.GetCurrentMethod);
 
 

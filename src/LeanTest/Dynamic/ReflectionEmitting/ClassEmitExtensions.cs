@@ -1,6 +1,7 @@
 using System.Reflection.Emit;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
+using LeanTest.Dynamic.Invocation;
 
 namespace LeanTest.Dynamic.ReflectionEmitting;
 
@@ -18,30 +19,29 @@ internal static class ClassEmitExtensions
 		);
 	}
 
-	internal static void GenerateConstructor(this TypeBuilder typeBuilder, params FieldBuilder[] fields)
+	internal static void GenerateConstructor(this TypeBuilder typeBuilder, FieldBuilder interceptorField)
 	{
 		// #1: Figure out why IL output breaks for constructor when adding parameters
 #if DEBUG
 		typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
-		_ = fields;
+		_ = interceptorField;
 #else
 		var baseConstructor = typeBuilder.DefineDefaultConstructor(MethodAttributes.Private);
-		GenerateConstructorOverload(typeBuilder, baseConstructor, fields);
+		GenerateConstructorOverload(typeBuilder, baseConstructor, interceptorField);
 #endif
 	}
 
 	private static void GenerateConstructorOverload(
 		TypeBuilder typeBuilder,
 		ConstructorBuilder baseConstructor,
-		FieldBuilder[] fields)
+		FieldBuilder interceptorField)
 	{
 		var wrapperCtor = typeBuilder.DefineConstructor(
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName |
 			MethodAttributes.Final,
 			CallingConventions.Standard,
 			// #1: Figure out why IL output breaks for constructor when adding parameters
-			// TODO remove linq
-			parameterTypes: fields.Select(field => field.FieldType).ToArray()
+			parameterTypes: new[] { typeof (IInvokeInterceptor) } 
 		);
 
 		var ctorIL = wrapperCtor.GetILGenerator();
@@ -50,20 +50,17 @@ internal static class ClassEmitExtensions
 		ctorIL.Emit(OpCodes.Ldarg_0);
 		ctorIL.Emit(OpCodes.Call, baseConstructor);
 		ctorIL.Emit(OpCodes.Nop);
-		// Load parameters into fields
+		// Load interceptor into interceptorField
 		ctorIL.Emit(OpCodes.Nop);
-		for (int i = 0; i < fields.Length; i++)
-		{
-			var field = fields[i];
-			wrapperCtor.DefineParameter(i + 1, ParameterAttributes.In, field.Name.TrimStart('_'));
-
-			ctorIL.Emit(OpCodes.Ldarg_0);
-			ctorIL.Emit(OpCodes.Ldarg, i + 1);
-			ctorIL.Emit(OpCodes.Stfld, field);
-		}
+		// TODO, is this necessary?
+		wrapperCtor.DefineParameter(1, ParameterAttributes.In, interceptorField.Name.TrimStart('_'));
+		ctorIL.Emit(OpCodes.Ldarg_0);
+		ctorIL.Emit(OpCodes.Ldarg, 1);
+		ctorIL.Emit(OpCodes.Stfld, interceptorField);
 		// End constructor
 		ctorIL.Emit(OpCodes.Ret);
 	}
+
 	internal static FieldBuilder GeneratePrivateField(this TypeBuilder typeBuilder, string fieldName, Type fieldType) =>
 		typeBuilder.DefineField($"_{fieldName}", fieldType, FieldAttributes.Private | FieldAttributes.InitOnly);
 }
