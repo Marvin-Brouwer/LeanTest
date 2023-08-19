@@ -59,6 +59,7 @@ internal static class MethodEmitExtensions
 
 		if (hasParameters)
 		{
+			// TODO Figure out why adding paramters breaks IL output
 			// Create new array of object
 			methodIL.Emit(OpCodes.Ldc_I4, parameters.Length);
 			methodIL.Emit(OpCodes.Newarr, typeof(object));

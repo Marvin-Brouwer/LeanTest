@@ -2,7 +2,6 @@ using LeanTest.Dependencies.Configuration;
 using LeanTest.Dynamic.Invocation;
 using LeanTest.Dynamic.ReflectionEmitting;
 
-using System.Reflection;
 using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
@@ -51,13 +50,7 @@ internal readonly record struct StubFactory : IStubFactory
 
 		// TODO properties
 
-		#region TODO this is just for dev
-		var generator = new Lokad.ILPack.AssemblyGenerator();
-		var bytes = generator.GenerateAssemblyBytes(typeBuilder.CreateType()!.Assembly);
-		generator.GenerateAssembly(typeBuilder.CreateType()!.Assembly, Assembly.GetExecutingAssembly().GetLoadedModules().Select(m => m.Assembly), "D:\\GEN\\Gen.dll");
-		#endregion
-
 		return typeBuilder
-			.Instantiate<TService>(invocationMarshall);
+			.Instantiate<TService>((Object)invocationMarshall);
 	}
 }

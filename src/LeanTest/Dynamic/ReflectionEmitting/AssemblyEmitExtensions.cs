@@ -52,7 +52,34 @@ internal static class AssemblyEmitExtensions
 		where TService : class
 	{
 		var generatedType = typeBuilder.CreateType()!;
+
+#if WRITE_RUNTIME_DLL
+		var runtimeAssembly = Assembly.GetEntryAssembly()!;
+		var runtimeBinFolder = new FileInfo(runtimeAssembly.Location).Directory!;
+		_ = runtimeAssembly;
+
+
+		var generator = new Lokad.ILPack.AssemblyGenerator();
+		// Validate assembly
+		_ = generator.GenerateAssemblyBytes(generatedType.Assembly);
+		// Write assembly
+		var simplifiedAssemblyName = generatedType.Assembly!.GetName()!.Name!.Split('_')[0];
+		generator.GenerateAssembly(
+			generatedType.Assembly,
+			Assembly.GetExecutingAssembly().GetLoadedModules().Select(m => m.Assembly),
+			System.IO.Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + ".dll")
+		);
+#endif
+
+#if DEBUG
+		// TODO figure out why adding parameters make the IL output break and replace debug code
+		var wrappedInstance = Activator.CreateInstance(generatedType)!;
+		var runtimeFields = generatedType.GetRuntimeFields().ToArray();
+		for (var i =0; i < constructorParameters.Length; i++)
+			runtimeFields[i].SetValue(wrappedInstance, constructorParameters[i]);
+#else
 		var wrappedInstance = Activator.CreateInstance(generatedType, constructorParameters)!;
+#endif
 		return (TService)wrappedInstance;
 	}
 }

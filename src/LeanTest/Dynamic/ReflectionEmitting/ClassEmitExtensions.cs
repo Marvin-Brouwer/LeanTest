@@ -11,7 +11,7 @@ internal static class ClassEmitExtensions
 	{
 		// TODO see if namespace is necessary
 		var newTypeName = $"{moduleBuilder.Assembly.GetName().Name}.Runtime{dependencyType}<{serviceType.Name}>";
-		var newTypeAttribute = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.Sealed;
+		var newTypeAttribute = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.Sealed;
 		return moduleBuilder
 			.DefineType(newTypeName, newTypeAttribute,
 			!serviceType.IsInterface ? serviceType : null,
@@ -21,9 +21,13 @@ internal static class ClassEmitExtensions
 
 	internal static void GenerateConstructor(this TypeBuilder typeBuilder, params FieldBuilder[] fields)
 	{
-		// TODO private base constructor?
-		var baseConstructor = typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
+		// TODO figure out why adding parameters make the IL output break and replace debug code
+#if DEBUG
+		typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
+#else
+		var baseConstructor = typeBuilder.DefineDefaultConstructor(MethodAttributes.Private);
 		GenerateConstructorOverload(typeBuilder, baseConstructor, fields);
+#endif
 	}
 
 	private static void GenerateConstructorOverload(
@@ -32,26 +36,32 @@ internal static class ClassEmitExtensions
 		FieldBuilder[] fields)
 	{
 		var wrapperCtor = typeBuilder.DefineConstructor(
-			MethodAttributes.Public,
+			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName |
+			MethodAttributes.Final,
 			CallingConventions.Standard,
+			// TODO figure out why adding parameters make the IL output break and replace debug code
 			// TODO remove linq
 			parameterTypes: fields.Select(field => field.FieldType).ToArray()
 		);
 
 		var ctorIL = wrapperCtor.GetILGenerator();
 
+		// Call base
 		ctorIL.Emit(OpCodes.Ldarg_0);
 		ctorIL.Emit(OpCodes.Call, baseConstructor);
 		ctorIL.Emit(OpCodes.Nop);
+		// Load parameters into fields
 		ctorIL.Emit(OpCodes.Nop);
 		for (int i = 0; i < fields.Length; i++)
 		{
-			FieldBuilder? field = fields[i];
+			var field = fields[i];
+			wrapperCtor.DefineParameter(i + 1, ParameterAttributes.In, field.Name.TrimStart('_'));
 
 			ctorIL.Emit(OpCodes.Ldarg_0);
 			ctorIL.Emit(OpCodes.Ldarg, i + 1);
 			ctorIL.Emit(OpCodes.Stfld, field);
 		}
+		// End constructor
 		ctorIL.Emit(OpCodes.Ret);
 	}
 	internal static FieldBuilder GeneratePrivateField(this TypeBuilder typeBuilder, string fieldName, Type fieldType) =>
