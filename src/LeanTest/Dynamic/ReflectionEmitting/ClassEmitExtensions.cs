@@ -21,9 +21,10 @@ internal static class ClassEmitExtensions
 
 	internal static void GenerateConstructor(this TypeBuilder typeBuilder, params FieldBuilder[] fields)
 	{
-		// TODO figure out why adding parameters make the IL output break and replace debug code
+		// #1: Figure out why IL output breaks for constructor when adding parameters
 #if DEBUG
 		typeBuilder.DefineDefaultConstructor(MethodAttributes.Public);
+		_ = fields;
 #else
 		var baseConstructor = typeBuilder.DefineDefaultConstructor(MethodAttributes.Private);
 		GenerateConstructorOverload(typeBuilder, baseConstructor, fields);
@@ -39,7 +40,7 @@ internal static class ClassEmitExtensions
 			MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName |
 			MethodAttributes.Final,
 			CallingConventions.Standard,
-			// TODO figure out why adding parameters make the IL output break and replace debug code
+			// #1: Figure out why IL output breaks for constructor when adding parameters
 			// TODO remove linq
 			parameterTypes: fields.Select(field => field.FieldType).ToArray()
 		);

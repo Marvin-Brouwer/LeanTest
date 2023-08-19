@@ -72,7 +72,7 @@ internal static class AssemblyEmitExtensions
 #endif
 
 #if DEBUG
-		// TODO figure out why adding parameters make the IL output break and replace debug code
+		// #1: Figure out why IL output breaks for constructor when adding parameters
 		var wrappedInstance = Activator.CreateInstance(generatedType)!;
 		var runtimeFields = generatedType.GetRuntimeFields().ToArray();
 		for (var i =0; i < constructorParameters.Length; i++)
