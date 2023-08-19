@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace LeanTest.Dynamic.Invocation;
 
-public interface IInvocationMarshall
+public interface IInvokeInterceptor
 {
 	TReturn RequestInvoke<TReturn>(MethodBase methodInfo);
 	TReturn RequestInvoke<TReturn>(MethodBase methodInfo, object?[] parameters);

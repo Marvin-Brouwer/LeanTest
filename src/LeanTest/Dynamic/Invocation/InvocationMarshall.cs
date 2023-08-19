@@ -6,7 +6,7 @@ namespace LeanTest.Dynamic.Invocation;
 
 // TODO NotSupportedException => Custom exception
 
-internal sealed class InvocationMarshall : IInvocationMarshall
+internal sealed class InvocationMarshall : IInvokeInterceptor
 {
 	private readonly ConfiguredMethodSet _configuredMethods;
 

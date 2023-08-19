@@ -1,4 +1,5 @@
 using LeanTest.Dependencies.Configuration;
+using LeanTest.Dependencies.Wrappers;
 using LeanTest.Dynamic.Invocation;
 using LeanTest.Dynamic.ReflectionEmitting;
 
@@ -23,13 +24,10 @@ internal readonly record struct StubFactory : IStubFactory
 		var invocationMarshall = new InvocationMarshall(configuredMethods);
 		var instance = GenerateStubClass<TService>(invocationMarshall);
 
-		return new Stub<TService>(configuredMethods)
-		{
-			Instance = instance
-		};
+		return new Stub<TService>(configuredMethods, instance);
 	}
 
-	private TService GenerateStubClass<TService>(IInvocationMarshall invocationMarshall)
+	private TService GenerateStubClass<TService>(IInvokeInterceptor invocationMarshall)
 		where TService : class
 	{
 		var serviceType = typeof(TService);
@@ -37,7 +35,7 @@ internal readonly record struct StubFactory : IStubFactory
 			.GenerateRuntimeType(serviceType, nameof(Stub<TService>));
 
 		var invocationMarshallField = typeBuilder
-			.GeneratePrivateField(nameof(invocationMarshall), typeof(IInvocationMarshall));
+			.GeneratePrivateField(nameof(invocationMarshall), typeof(IInvokeInterceptor));
 
 		typeBuilder
 			.GenerateConstructor(invocationMarshallField);

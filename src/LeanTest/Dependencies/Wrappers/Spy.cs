@@ -1,5 +1,6 @@
 using LeanTest.Dependencies.Definitions;
 using LeanTest.Dependencies.Providers;
+using LeanTest.Dynamic.Invocation;
 
 using System.Linq.Expressions;
 
@@ -7,10 +8,14 @@ namespace LeanTest.Dependencies.Wrappers;
 
 internal class Spy<TService> : ISpy<TService>
 {
+	private readonly InvocationRecordList _invocationRecordList;
+
 	public TService Instance { get; }
 
-	public Spy(TService service)
+	public Spy(InvocationRecordList invocationRecordList, TService service)
 	{
+		_invocationRecordList = invocationRecordList;
+		Instance = service;
 	}
 
 	public ISpy<TService> Verify(Expression<Func<TService>> member, ITimesConstraint times)

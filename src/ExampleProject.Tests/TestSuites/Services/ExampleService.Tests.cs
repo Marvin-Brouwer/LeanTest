@@ -54,6 +54,10 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 			.Setup(s => s.SomeAction(true))
 			.Executes(() => TestOutputLogger.LogInformation("SomeAction was true"));
 
+
+		_someSpy = Spy
+			.On<ISomeThing>(new SomeThing());
+
 		try
 		{
 			_someStub.Instance.DoOtherThing();

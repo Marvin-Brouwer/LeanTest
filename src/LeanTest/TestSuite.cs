@@ -23,12 +23,13 @@ public abstract record TestSuite<TSut> : ITestSuite
 
 		var moduleBuilder = ServiceType.GenerateRuntimeModuleAssembly();
 		Stub = new StubFactory(moduleBuilder);
+		Spy = new SpyFactory(moduleBuilder);
 	}
 
 
 	#region Dependencies
 	protected readonly IStubFactory Stub;
-	protected readonly ISpyFactory Spy = SpyFactory.Instance;
+	protected readonly ISpyFactory Spy;
 	protected readonly IMockFactory Mock = MockFactory.Instance;
 	protected readonly IFixtureFactory Fixture = FixtureFactory.Instance;
 	protected readonly IDummyFactory Dummy = DummyFactory.Instance;

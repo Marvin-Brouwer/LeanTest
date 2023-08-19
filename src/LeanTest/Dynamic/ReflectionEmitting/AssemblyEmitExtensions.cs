@@ -12,9 +12,9 @@ internal static class AssemblyEmitExtensions
 	public static ModuleBuilder GenerateRuntimeModuleAssembly(this Type serviceType)
 	{
 		// TODO package release date
-		// TODO ref stackoverflow
 
 		// This doesn't need to be completely random, this just needs to be random engouh to prevent namespace classes.
+		// Based on: https://stackoverflow.com/a/41723783/2319865
 		var ticks = new DateTime(2016, 1, 1).Ticks;
 		var timeId = DateTime.Now.Ticks - ticks;
 		var assemblyName = $"{serviceType.Assembly.GetName().Name}.RuntimeGenerated_{timeId:x}";

@@ -9,7 +9,6 @@ internal static class ClassEmitExtensions
 
 	internal static TypeBuilder GenerateRuntimeType(this ModuleBuilder moduleBuilder, Type serviceType, string dependencyType)
 	{
-		// TODO see if namespace is necessary
 		var newTypeName = $"{moduleBuilder.Assembly.GetName().Name}.Runtime{dependencyType}<{serviceType.Name}>";
 		var newTypeAttribute = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.Sealed;
 		return moduleBuilder
