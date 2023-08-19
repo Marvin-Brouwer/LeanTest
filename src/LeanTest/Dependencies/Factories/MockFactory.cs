@@ -8,9 +8,6 @@ namespace LeanTest.Dependencies.Factories;
 
 internal sealed class MockFactory : DependencyFactory, IMockFactory
 {
-	protected override string FieldName => "recordingInvocationMarshall";
-	protected override string DependencyName => nameof(Mock<object>);
-
 	public MockFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
 
 	IMock<TService> IMockFactory.Of<TService>()

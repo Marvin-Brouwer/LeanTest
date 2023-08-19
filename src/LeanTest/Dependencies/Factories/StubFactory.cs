@@ -8,9 +8,6 @@ namespace LeanTest.Dependencies.Factories;
 
 internal sealed class StubFactory : DependencyFactory, IStubFactory
 {
-	protected override string FieldName => "invocationMarshall";
-	protected override string DependencyName => nameof(Stub<object>);
-
 	public StubFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
 
 	IStub<TService> IStubFactory.Of<TService>()

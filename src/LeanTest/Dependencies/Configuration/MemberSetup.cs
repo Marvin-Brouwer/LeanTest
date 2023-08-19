@@ -27,6 +27,12 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method));
 		return Dependency;
 	}
+
+	public TDependency Executes<T1>(Action<T1> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
+		return Dependency;
+	}
 }
 internal class MemberSetup<TDependency, TReturn> : MemberSetup<TDependency>, IMemberSetup<TDependency, TReturn>
 	where TDependency : IDependency
@@ -34,9 +40,9 @@ internal class MemberSetup<TDependency, TReturn> : MemberSetup<TDependency>, IMe
 	internal MemberSetup(TDependency dependency, LambdaExpression method, ConfiguredMethodSet configuredMethods)
 		: base(dependency, method, configuredMethods) { }
 
-	public TDependency Returns(TReturn value)
+	public TDependency Returns(TReturn returnValue)
 	{
-		ConfiguredMethods.Add(ConfiguredMethod.ForValue(Method, value));
+		ConfiguredMethods.Add(ConfiguredMethod.ForValue(Method, returnValue));
 		return Dependency;
 	}
 	public TDependency Returns(Func<TReturn> callBack)

@@ -9,5 +9,10 @@ public class ExampleService : IExampleService
 	{
 	}
 
+	public Task DoAsync()
+	{
+		throw new NotImplementedException();
+	}
+
 	public async Task<string> DoThing(string thing) => await Task.FromResult(thing);
 }

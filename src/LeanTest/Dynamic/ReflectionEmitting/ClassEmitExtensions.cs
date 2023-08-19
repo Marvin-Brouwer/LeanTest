@@ -8,9 +8,9 @@ namespace LeanTest.Dynamic.ReflectionEmitting;
 internal static class ClassEmitExtensions
 {
 
-	internal static TypeBuilder GenerateRuntimeType(this ModuleBuilder moduleBuilder, Type serviceType, string dependencyType)
+	internal static TypeBuilder GenerateRuntimeType(this ModuleBuilder moduleBuilder, Type serviceType)
 	{
-		var newTypeName = $"{moduleBuilder.Assembly.GetName().Name}.Runtime{dependencyType}<{serviceType.Name}>";
+		var newTypeName = $"{moduleBuilder.Assembly.GetName().Name}.Runtime{serviceType.Name.CleanClassName()}";
 		var newTypeAttribute = TypeAttributes.Class | TypeAttributes.Public | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit | TypeAttributes.Sealed;
 		return moduleBuilder
 			.DefineType(newTypeName, newTypeAttribute,

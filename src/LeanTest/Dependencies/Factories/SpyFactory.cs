@@ -7,9 +7,6 @@ namespace LeanTest.Dependencies.Factories;
 
 internal sealed class SpyFactory : DependencyFactory, ISpyFactory
 {
-	protected override string FieldName => "invocationRecorder";
-	protected override string DependencyName => nameof(Spy<object>);
-
 	public SpyFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
 
 	ISpy<TService> ISpyFactory.On<TService>(TService service)

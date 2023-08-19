@@ -17,7 +17,7 @@ internal static class AssemblyEmitExtensions
 		// Based on: https://stackoverflow.com/a/41723783/2319865
 		var ticks = new DateTime(2016, 1, 1).Ticks;
 		var timeId = DateTime.Now.Ticks - ticks;
-		var assemblyName = $"{serviceType.Assembly.GetName().Name}.RuntimeGenerated_{timeId:x}";
+		var assemblyName = $"{serviceType.Assembly.GetName().Name}.RuntimeGenerated<>{timeId:x}";
 
 		var originalAssembly = serviceType.Assembly;
 		var originalAssemblyName = originalAssembly.GetName();
@@ -32,15 +32,7 @@ internal static class AssemblyEmitExtensions
 			Version = originalAssemblyName.Version,
 			VersionCompatibility = System.Configuration.Assemblies.AssemblyVersionCompatibility.SameMachine
 		};
-
-		const string BaseFix = "Base";
-		const int BaseFixLength = 4;
-
-		var cleanServiceName = serviceType.Name.TrimStart('I');
-		if (serviceType.Name.StartsWith(BaseFix, StringComparison.Ordinal))
-			cleanServiceName = cleanServiceName.Substring(BaseFixLength);
-		else if (serviceType.Name.EndsWith(BaseFix, StringComparison.Ordinal))
-			cleanServiceName = cleanServiceName.Substring(0, cleanServiceName.Length - BaseFixLength);
+		string cleanServiceName = serviceType.Name.CleanClassName();
 
 		return AssemblyBuilder
 			// TODO see if Run is sufficient
@@ -48,7 +40,21 @@ internal static class AssemblyEmitExtensions
 			.DefineDynamicModule($"{assemblyName}.{cleanServiceName}Module");
 	}
 
-	public static Type GenerateType(this TypeBuilder typeBuilder, string serviceTypeKey, Dictionary<string, Type> generatedTypes)
+	internal static string CleanClassName(this string serviceTypeName)
+	{
+		const string BaseFix = "Base";
+		const int BaseFixLength = 4;
+
+		var cleanServiceName = serviceTypeName.TrimStart('I');
+		if (serviceTypeName.StartsWith(BaseFix, StringComparison.Ordinal))
+			cleanServiceName = cleanServiceName.Substring(BaseFixLength);
+		else if (serviceTypeName.EndsWith(BaseFix, StringComparison.Ordinal))
+			cleanServiceName = cleanServiceName.Substring(0, cleanServiceName.Length - BaseFixLength);
+
+		return cleanServiceName;
+	}
+
+	public static Type GenerateType(this TypeBuilder typeBuilder, Type serviceType, Dictionary<Type, Type> generatedTypes)
 	{
 		var generatedType = typeBuilder.CreateType()!;
 
@@ -62,14 +68,14 @@ internal static class AssemblyEmitExtensions
 		// Validate assembly
 		_ = generator.GenerateAssemblyBytes(generatedType.Assembly);
 		// Write assembly
-		var simplifiedAssemblyName = generatedType.Assembly!.GetName()!.Name!.Split('_')[0];
+		var simplifiedAssemblyName = generatedType.Assembly!.GetName()!.Name!.Split('<')[0];
 		generator.GenerateAssembly(
 			generatedType.Assembly,
 			Assembly.GetExecutingAssembly().GetLoadedModules().Select(m => m.Assembly),
 			System.IO.Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + ".dll")
 		);
 #endif
-		generatedTypes.Add(serviceTypeKey, generatedType);
+		generatedTypes.Add(serviceType, generatedType);
 		return generatedType;
 	}
 

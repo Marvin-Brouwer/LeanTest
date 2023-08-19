@@ -7,11 +7,15 @@ using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((application, configuration) =>
+	{
+		// TODO configure threading
+		if (!application.HostingEnvironment.IsDevelopment())
+		{
+			// TODO configure app stop after test run (for pipelines)
+		}
+	})
+    .ConfigureHostConfiguration((configuration) =>
     {
-    })
-    .ConfigureHostConfiguration((config) =>
-    {
-
     })
     .ConfigureServices((services) =>
     {

@@ -6,9 +6,6 @@ namespace LeanTest.Dependencies.Factories;
 
 internal sealed class DummyFactory : DependencyFactory, IDummyFactory
 {
-	protected override string FieldName => "dummyInterceptor";
-	protected override string DependencyName => "Dummy";
-
 	public DummyFactory(ModuleBuilder moduleBuilder) :base(moduleBuilder) { }
 
 	TService IDummyFactory.Of<TService>()

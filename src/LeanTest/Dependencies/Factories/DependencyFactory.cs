@@ -7,11 +7,11 @@ namespace LeanTest.Dependencies.Factories;
 
 internal abstract class DependencyFactory
 {
-	private readonly ModuleBuilder _moduleBuilder;
-	private static readonly Dictionary<string, Type> GeneratedTypes = new();
+	private const string InterceptorFieldName = "interceptor";
 
-	protected abstract string FieldName { get; }
-	protected abstract string DependencyName { get; }
+	private readonly ModuleBuilder _moduleBuilder;
+	private static readonly Dictionary<Type, Type> GeneratedTypes = new();
+
 
 	protected DependencyFactory(ModuleBuilder moduleBuilder)
 	{
@@ -22,18 +22,17 @@ internal abstract class DependencyFactory
 		where TService : class
 	{
 		var serviceType = typeof(TService);
-		var serviceTypeKey = $"{serviceType.FullName}_{DependencyName}";
-		if (GeneratedTypes.TryGetValue(serviceTypeKey, out var type))
+		if (GeneratedTypes.TryGetValue(serviceType, out var type))
 		{
 			return type
 				.InitializeType<TService>(interceptor);
 		}
 
 		var typeBuilder = _moduleBuilder
-			.GenerateRuntimeType(serviceType, DependencyName);
+			.GenerateRuntimeType(serviceType);
 
 		var interceptorField = typeBuilder
-			.GeneratePrivateField(FieldName, typeof(IInvokeInterceptor));
+			.GeneratePrivateField(InterceptorFieldName, typeof(IInvokeInterceptor));
 
 		typeBuilder
 			.GenerateConstructor(interceptorField);
@@ -44,7 +43,7 @@ internal abstract class DependencyFactory
 		// TODO properties
 
 		return typeBuilder
-			.GenerateType(serviceTypeKey, GeneratedTypes)
+			.GenerateType(serviceType, GeneratedTypes)
 			.InitializeType<TService>(interceptor);
 	}
 }

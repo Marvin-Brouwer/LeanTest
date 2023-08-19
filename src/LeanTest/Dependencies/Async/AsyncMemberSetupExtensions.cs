@@ -1,3 +1,5 @@
+#pragma warning disable RCS1047 // Allow Async postfix, because overloading doesn't work otherwise
+
 using LeanTest.Dependencies.Configuration;
 
 namespace LeanTest.Dependencies.Async;
@@ -83,3 +85,5 @@ public static class AsyncMemberSetupExtensions
 		return memberSetup;
 	}
 }
+
+#pragma warning restore RCS1047 // Allow Async postfix, because overloading doesn't work otherwise
