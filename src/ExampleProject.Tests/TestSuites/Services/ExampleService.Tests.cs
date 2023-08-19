@@ -105,7 +105,7 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 
     public override TestCollection Tests => new(
 
-		TestClassic(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"), async () =>
+		TestClassic(For(sut => sut.DoThing).Given("Some thing").When("Condition_for_something    else").Then("Result"), async () =>
 		{
 			// Arrange
 			//_someStub
@@ -130,7 +130,7 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 			//	.VerifyNoOtherCalls();
 		}),
 
-		TestTripleA(sut => sut.DoThing, Given("Something").When("Condition").Then("Result"),
+		TestTripleA(For(sut => sut.DoThing).Given("Something").When("Condition").Then("Result"),
             Arrange(() =>
             {
 				//_someStub

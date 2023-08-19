@@ -64,11 +64,11 @@ public abstract record TestSuite<TSut> : ITestSuite
 	public abstract TestCollection Tests { get; }
 
 	protected ITestScenario TestClassic(
-		Expression<Func<TSut, Delegate>> method, ITestName testName,
+		ITestName testName,
 		Action test
 	)
 	{
-		var scenarioName = testName.GetName(method);
+		var scenarioName = testName.GetNormalizedName();
 		return new TestScenario(
 			GetType(),
 			ServiceType, scenarioName,
@@ -80,11 +80,10 @@ public abstract record TestSuite<TSut> : ITestSuite
 	}
 
 	protected ITestScenario TestClassic(
-		Expression<Func<TSut, Delegate>> method, ITestName testName,
-		Func<Task> test
+		ITestName testName, Func<Task> test
 	)
 	{
-		var scenarioName = testName.GetName(method);
+		var scenarioName = testName.GetNormalizedName();
 		return new TestScenario(
 			GetType(),
 			ServiceType, scenarioName,
@@ -96,11 +95,10 @@ public abstract record TestSuite<TSut> : ITestSuite
 	}
 
 	protected ITestScenario TestTripleA(
-		Expression<Func<TSut, Delegate>> method, ITestName testName,
-		ITestArangement arrange, ITestAction act, ITestAssertion assert
+		ITestName testName, ITestArangement arrange, ITestAction act, ITestAssertion assert
 	)
 	{
-		var scenarioName = testName.GetName(method);
+		var scenarioName = testName.GetNormalizedName();
 		return new TestScenario(
 			GetType(),
 			ServiceType, scenarioName,
@@ -110,7 +108,8 @@ public abstract record TestSuite<TSut> : ITestSuite
 	#endregion
 
 	#region Naming
-	protected Given Given(string value) => new(value);
+	protected Given Given(string value) => new(null, value);
+	protected For For(Expression<Func<TSut, Delegate>> methodExpression) => new(methodExpression);
 	#endregion
 
 	#region AAA

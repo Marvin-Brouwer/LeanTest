@@ -19,7 +19,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 
     public override TestCollection Tests => new(
 
-		TestClassic(sut => sut.VoidNoParameters, Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
+		TestClassic(For(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
 		{
 			// Arrange
 			_someStub
@@ -34,7 +34,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			// Assert
 			result.Should().NotThrow();
 		}),
-		TestClassic(sut => sut.VoidNoParameters, Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
+		TestClassic(For(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
 		{
 			// Arrange
 			_someStub
@@ -49,7 +49,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			// Assert
 			result.Should().ThrowExactly<NotSupportedException>();
 		}),
-		TestClassic(sut => sut.VoidNoParameters, Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
+		TestClassic(For(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
 		{
 			// Arrange
 			_someStub
@@ -65,7 +65,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			result.Should().ThrowExactly<Exception>();
 		}),
 
-		TestClassic(sut => sut.VoidWithParameters, Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
+		TestClassic(For(sut => sut.VoidWithParameters).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
 		{
 			// Arrange
 			_someStub
@@ -80,7 +80,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			// Assert
 			result.Should().NotThrow();
 		}),
-		TestClassic(sut => sut.VoidWithParameters, Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
+		TestClassic(For(sut => sut.VoidWithParameters).Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
 		{
 			// Arrange
 			_someStub
@@ -95,7 +95,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			// Assert
 			result.Should().ThrowExactly<NotSupportedException>();
 		}),
-		TestClassic(sut => sut.VoidNoParameters, Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
+		TestClassic(For(sut => sut.VoidWithParameters).Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
 		{
 			// Arrange
 			_someStub
@@ -111,7 +111,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			result.Should().ThrowExactly<Exception>();
 		}),
 
-		TestClassic(sut => sut.VoidWithGenericParameters<int>, Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
+		TestClassic(For(sut => sut.VoidWithGenericParameters<int>).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
 		{
 			// Arrange
 			_someStub
@@ -126,7 +126,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			// Assert
 			result.Should().NotThrow();
 		}),
-		TestClassic(sut => sut.VoidWithGenericParameters<int>, Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
+		TestClassic(For(sut => sut.VoidWithGenericParameters<int>).Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
 		{
 			// Arrange
 			_someStub
@@ -141,7 +141,7 @@ public sealed record StubTests : TestSuite<IExampleService>
 			// Assert
 			result.Should().ThrowExactly<NotSupportedException>();
 		}),
-		TestClassic(sut => sut.VoidWithGenericParameters<int>, Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
+		TestClassic(For(sut => sut.VoidWithGenericParameters<int>).Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
 		{
 			// Arrange
 			_someStub
