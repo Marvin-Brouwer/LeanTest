@@ -48,8 +48,7 @@ internal static class AssemblyEmitExtensions
 			.DefineDynamicModule($"{assemblyName}.{cleanServiceName}Module");
 	}
 
-	public static TService Instantiate<TService>(this TypeBuilder typeBuilder, params object[] constructorParameters)
-		where TService : class
+	public static Type GenerateType(this TypeBuilder typeBuilder, string serviceTypeKey, Dictionary<string, Type> generatedTypes)
 	{
 		var generatedType = typeBuilder.CreateType()!;
 
@@ -70,7 +69,8 @@ internal static class AssemblyEmitExtensions
 			System.IO.Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + ".dll")
 		);
 #endif
-		return generatedType.InitializeType<TService>(constructorParameters);
+		generatedTypes.Add(serviceTypeKey, generatedType);
+		return generatedType;
 	}
 
 	public static TService InitializeType<TService>(this Type generatedType, params object[] constructorParameters)

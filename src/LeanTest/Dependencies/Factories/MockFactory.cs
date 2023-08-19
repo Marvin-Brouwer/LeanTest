@@ -1,21 +1,17 @@
 using LeanTest.Dependencies.Configuration;
 using LeanTest.Dependencies.Wrappers;
 using LeanTest.Dynamic.Invocation;
-using LeanTest.Dynamic.ReflectionEmitting;
 
 using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-internal readonly record struct MockFactory : IMockFactory
+internal sealed class MockFactory : DependencyFactory, IMockFactory
 {
-	private readonly ModuleBuilder _moduleBuilder;
-	private static readonly Dictionary<Type, Type> GeneratedTypes = new();
+	protected override string FieldName => "recordingInvocationMarshall";
+	protected override string DependencyName => nameof(Mock<object>);
 
-	public MockFactory(ModuleBuilder moduleBuilder)
-	{
-		_moduleBuilder = moduleBuilder;
-	}
+	public MockFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
 
 	IMock<TService> IMockFactory.Of<TService>()
 		where TService : class
@@ -24,40 +20,9 @@ internal readonly record struct MockFactory : IMockFactory
 		var configuredMethods = new ConfiguredMethodSet();
 		var invocationRecordList = new InvocationRecordList();
 		var recordingInvocationMarshall = new RecordingInvocationMarshall(configuredMethods, invocationRecordList);
-		var instance = GenerateMockClass<TService>(recordingInvocationMarshall);
+		var instance = GenerateClass<TService>(recordingInvocationMarshall);
 
 		return new Mock<TService>(configuredMethods, invocationRecordList, instance);
-	}
-
-	private TService GenerateMockClass<TService>(IInvokeInterceptor recordingInvocationMarshall)
-		where TService : class
-	{
-		var serviceType = typeof(TService);
-		if (GeneratedTypes.TryGetValue(serviceType, out var type))
-		{
-			return serviceType
-				.InitializeType<TService>(recordingInvocationMarshall);
-		}
-
-		var typeBuilder = _moduleBuilder
-			.GenerateRuntimeType(serviceType, nameof(Mock<TService>));
-
-		var invocationMarshallField = typeBuilder
-			.GeneratePrivateField(nameof(recordingInvocationMarshall), typeof(IInvokeInterceptor));
-
-		typeBuilder
-			.GenerateConstructor(invocationMarshallField);
-
-		typeBuilder
-			.GenerateDynamicImplementationMethods(
-				serviceType,
-				invocationMarshallField
-			);
-
-		// TODO properties
-
-		return typeBuilder
-			.Instantiate<TService>(recordingInvocationMarshall);
 	}
 }
 
