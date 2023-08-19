@@ -11,6 +11,7 @@ using FluentAssertions;
 
 using LeanTest;
 using LeanTest.Dependencies;
+using LeanTest.Dependencies.Async;
 
 using Microsoft.Extensions.Logging;
 
@@ -25,8 +26,9 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
     private readonly IMock<ISomeThing> _someMock;
 	private readonly IFixture<SomeDataType> _someFixture;
 	private readonly IServiceOutOfScope _outOfScopeDummy;
+	private readonly IMock<IExampleService> _asyncExampleMock;
 
-    public ExampleServiceTests()
+	public ExampleServiceTests()
     {
 		TestOutputLogger.LogInformation("Succesfully instantiated base of {type}", typeof(ExampleServiceTests));
 
@@ -53,7 +55,6 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		_someStub
 			.Setup(s => s.SomeAction(true))
 			.Executes(() => TestOutputLogger.LogInformation("SomeAction was true"));
-
 
 		_someSpy = Spy
 			.On<ISomeThing>(new SomeThing());
@@ -101,7 +102,17 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 
 		_outOfScopeDummy = Dummy
 			.Of<IServiceOutOfScope>();
-    }
+
+		_asyncExampleMock = Mock
+			.Of<IExampleService>();
+
+		_asyncExampleMock
+			.Setup(sut => sut.DoThing(Parameter.Is<string>()))
+			.ReturnsAsync((string _) => "Test");
+		_asyncExampleMock
+			.Setup(sut => sut.DoAsync())
+			.ExecutesAsync(() => TestOutputLogger.LogInformation("Async callback"));
+	}
 
     public override TestCollection Tests => new(
 

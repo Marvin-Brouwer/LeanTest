@@ -4,7 +4,6 @@ using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-// TODO DummyWrapperProxy for debug inspection purposes
 internal sealed class DummyFactory : DependencyFactory, IDummyFactory
 {
 	protected override string FieldName => "dummyInterceptor";

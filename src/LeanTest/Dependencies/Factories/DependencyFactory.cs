@@ -5,7 +5,6 @@ using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-// TODO DummyWrapperProxy for debug inspection purposes
 internal abstract class DependencyFactory
 {
 	private readonly ModuleBuilder _moduleBuilder;

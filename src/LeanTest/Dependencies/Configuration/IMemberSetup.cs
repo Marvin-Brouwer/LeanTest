@@ -1,12 +1,13 @@
 namespace LeanTest.Dependencies.Configuration;
 
-public interface IMemberSetup<TDependency> where TDependency : IDependency
+// TODO More parameter options
+public interface IMemberSetup<out TDependency> where TDependency : IDependency
 {
-	TDependency Executes(Action callBack);
 	TDependency Executes();
+	TDependency Executes(Action callBack);
+	TDependency Executes<T1>(Action<T1> callBack);
 }
 
-// TODO Task options? maybe valueTask options, perhaps have an extension for that
 // TODO More parameter options
 public interface IMemberSetup<TDependency, TReturn> where TDependency : IDependency
 {
