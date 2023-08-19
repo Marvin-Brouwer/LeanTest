@@ -57,6 +57,10 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 
 		_someSpy = Spy
 			.On<ISomeThing>(new SomeThing());
+		_someMock = Mock
+			.Of<ISomeThing>();
+		_outOfScopeDummy = Dummy
+			.Of<IServiceOutOfScope>();
 
 		try
 		{

@@ -9,6 +9,7 @@ namespace LeanTest.Dependencies.Factories;
 internal readonly record struct SpyFactory : ISpyFactory
 {
 	private readonly ModuleBuilder _moduleBuilder;
+	private static readonly Dictionary<Type, Type> GeneratedTypes = new();
 
 	public SpyFactory(ModuleBuilder moduleBuilder)
 	{
@@ -18,6 +19,7 @@ internal readonly record struct SpyFactory : ISpyFactory
 	ISpy<TService> ISpyFactory.On<TService>(TService service)
 		where TService : class
 	{
+		// TODO validate type isn't sealed? Or test with sealed class and see what happens
 		var invocationRecordList = new InvocationRecordList();
 		var invocationRecorder = new InvocationRecorder<TService>(service, invocationRecordList);
 		var instance = GenerateSpyClass<TService>(invocationRecorder);
@@ -29,6 +31,12 @@ internal readonly record struct SpyFactory : ISpyFactory
 		where TService : class
 	{
 		var serviceType = typeof(TService);
+		if (GeneratedTypes.TryGetValue(serviceType, out var type))
+		{
+			return serviceType
+				.InitializeType<TService>(invocationRecorder);
+		}
+
 		var typeBuilder = _moduleBuilder
 			.GenerateRuntimeType(serviceType, nameof(Spy<TService>));
 

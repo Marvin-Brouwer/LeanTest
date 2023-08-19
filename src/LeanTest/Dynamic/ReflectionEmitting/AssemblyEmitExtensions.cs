@@ -70,12 +70,18 @@ internal static class AssemblyEmitExtensions
 			System.IO.Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + ".dll")
 		);
 #endif
+		return generatedType.InitializeType<TService>(constructorParameters);
+	}
+
+	public static TService InitializeType<TService>(this Type generatedType, params object[] constructorParameters)
+		where TService : class
+	{
 
 #if DEBUG
 		// #1: Figure out why IL output breaks for constructor when adding parameters
 		var wrappedInstance = Activator.CreateInstance(generatedType)!;
 		var runtimeFields = generatedType.GetRuntimeFields().ToArray();
-		for (var i =0; i < constructorParameters.Length; i++)
+		for (var i = 0; i < constructorParameters.Length; i++)
 			runtimeFields[i].SetValue(wrappedInstance, constructorParameters[i]);
 #else
 		var wrappedInstance = Activator.CreateInstance(generatedType, constructorParameters)!;

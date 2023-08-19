@@ -1,17 +1,18 @@
+using LeanTest.Dependencies.Configuration;
 using LeanTest.Dependencies.Verification;
 
 using System.Reflection;
 
 namespace LeanTest.Dynamic.Invocation;
 
-internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
+internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 {
-	private readonly TService? _service;
 	private readonly InvocationRecordList _invocationRecords;
+	private readonly InvocationMarshall _invocationMarshall;
 
-	public InvocationRecorder(TService service, InvocationRecordList invocationRecords)
+	public RecordingInvocationMarshall(ConfiguredMethodSet configuredMethods, InvocationRecordList invocationRecords)
 	{
-		_service = service;
+		_invocationMarshall = new InvocationMarshall(configuredMethods);
 		_invocationRecords = invocationRecords;
 	}
 
@@ -20,7 +21,7 @@ internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 	{
 		try
 		{
-			var returnValue = (TReturn)methodInfo.Invoke(_service, parameters)!;
+			var returnValue = _invocationMarshall.RequestInvoke<TReturn>(methodInfo, parameters);
 			_invocationRecords.Add(methodInfo, parameters);
 			return returnValue;
 		}
@@ -36,7 +37,7 @@ internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 	{
 		try
 		{
-			_ = methodInfo.Invoke(_service, parameters)!;
+			_invocationMarshall.RequestInvoke(methodInfo, parameters);
 			_invocationRecords.Add(methodInfo, parameters);
 		}
 		catch (Exception ex)

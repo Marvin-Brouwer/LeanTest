@@ -10,6 +10,7 @@ namespace LeanTest.Dependencies.Factories;
 internal readonly record struct StubFactory : IStubFactory
 {
 	private readonly ModuleBuilder _moduleBuilder;
+	private static readonly Dictionary<Type, Type> GeneratedTypes = new();
 
 	public StubFactory(ModuleBuilder moduleBuilder)
 	{
@@ -31,6 +32,12 @@ internal readonly record struct StubFactory : IStubFactory
 		where TService : class
 	{
 		var serviceType = typeof(TService);
+		if (GeneratedTypes.TryGetValue(serviceType, out var type))
+		{
+			return serviceType
+				.InitializeType<TService>(invocationMarshall);
+		}
+
 		var typeBuilder = _moduleBuilder
 			.GenerateRuntimeType(serviceType, nameof(Stub<TService>));
 
@@ -49,6 +56,6 @@ internal readonly record struct StubFactory : IStubFactory
 		// TODO properties
 
 		return typeBuilder
-			.Instantiate<TService>((Object)invocationMarshall);
+			.Instantiate<TService>(invocationMarshall);
 	}
 }
