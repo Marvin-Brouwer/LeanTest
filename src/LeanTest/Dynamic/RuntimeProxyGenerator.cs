@@ -94,6 +94,10 @@ internal static class RuntimeProxyGenerator
 			);
 #endif
 
+#if WRITE_RUNTIME_DLL
+		var dllFileName = System.IO.Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + "." + className + ".dll");
+		using (var fs = File.OpenWrite(dllFileName))
+#endif
 		using (var ms = new MemoryStream())
 		{
 			var result = compilation.Emit(ms);
@@ -112,26 +116,17 @@ internal static class RuntimeProxyGenerator
 			}
 			else
 			{
+#if WRITE_RUNTIME_DLL
+				ms.Seek(0, SeekOrigin.Begin);
+				ms.CopyTo(fs);
+#endif
 				ms.Seek(0, SeekOrigin.Begin);
 
 				var assembly = AssemblyLoadContext.Default.LoadFromStream(ms);
 				var generatedType = assembly.GetType($"{namespaceName}.{className}")!;
-
-#if WRITE_RUNTIME_DLL
-				var generator = new Lokad.ILPack.AssemblyGenerator();
-				// Validate assembly
-				_ = generator.GenerateAssemblyBytes(generatedType.Assembly);
-				// Write assembly
-				generator.GenerateAssembly(
-					generatedType.Assembly,
-					Assembly.GetExecutingAssembly().GetLoadedModules().Select(m => m.Assembly),
-					System.IO.Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + "." + className + ".dll")
-				);
-#endif
 				
 			}
 		}
-
 	}
 
 	private static string GenerateMethods(Type serviceType)
