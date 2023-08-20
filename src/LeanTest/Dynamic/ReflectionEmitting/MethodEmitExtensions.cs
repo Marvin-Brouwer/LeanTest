@@ -37,13 +37,11 @@ internal static class MethodEmitExtensions
 
 		var methodBuilder = typeBuilder.DefineMethod(
 			method.Name, attibutes, method.ReturnType,
-			// TODO remove linq
-			parameters.Select(param => param.ParameterType).ToArray()
+			parameters.GetParameterTypes()
 		);
 		if (method.IsGenericMethod)
 		{
-			// TODO remove linq
-			var genericArgumentNames = method.GetGenericMethodDefinition().GetGenericArguments().Select(arg => arg.Name).ToArray();
+			var genericArgumentNames = method.GetGenericMethodDefinition().GetGenericArgumentNames();
 			methodBuilder.DefineGenericParameters(genericArgumentNames);
 		}
 

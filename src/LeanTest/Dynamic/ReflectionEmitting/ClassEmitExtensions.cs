@@ -52,7 +52,6 @@ internal static class ClassEmitExtensions
 		ctorIL.Emit(OpCodes.Nop);
 		// Load interceptor into interceptorField
 		ctorIL.Emit(OpCodes.Nop);
-		// TODO, is this necessary?
 		wrapperCtor.DefineParameter(1, ParameterAttributes.In, interceptorField.Name.TrimStart('_'));
 		ctorIL.Emit(OpCodes.Ldarg_0);
 		ctorIL.Emit(OpCodes.Ldarg, 1);

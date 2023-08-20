@@ -14,29 +14,22 @@ internal readonly record struct ReflectionReferenceConstants
 		.GetGenericMethodDefinition()!
 		.MakeGenericMethod(new[] { typeof(object) })!;
 
-	// TODO remove linq
-	internal static readonly MethodInfo InvokeGenericNoParameters = typeof(IInvokeInterceptor)
-		.GetMethods()
-		.First(method => method.Name == nameof(IInvokeInterceptor.RequestInvoke)
-			&& method.IsGenericMethod
-			&& method.GetParameters().Length == 1
-		)!;
-	internal static readonly MethodInfo InvokeGenericWithParameters = typeof(IInvokeInterceptor)
-		.GetMethods()
-		.First(method => method.Name == nameof(IInvokeInterceptor.RequestInvoke)
-			&& method.IsGenericMethod
-			&& method.GetParameters().Length > 1
-		)!;
-	internal static readonly MethodInfo InvokeVoidNoParameters = typeof(IInvokeInterceptor)
-		.GetMethods()
-		.First(method => method.Name == nameof(IInvokeInterceptor.RequestInvoke)
-			&& !method.IsGenericMethod
-			&& method.GetParameters().Length == 1
-		)!;
-	internal static readonly MethodInfo InvokeVoidWithParameters = typeof(IInvokeInterceptor)
-		.GetMethods()
-		.First(method => method.Name == nameof(IInvokeInterceptor.RequestInvoke)
-			&& !method.IsGenericMethod
-			&& method.GetParameters().Length > 1
-		)!;
+	internal static readonly MethodInfo InvokeGenericNoParameters = GetInterceptorMethod(false, false);
+	internal static readonly MethodInfo InvokeGenericWithParameters = GetInterceptorMethod(false, true);
+	internal static readonly MethodInfo InvokeVoidNoParameters = GetInterceptorMethod(true, false);
+	internal static readonly MethodInfo InvokeVoidWithParameters = GetInterceptorMethod(true, true);
+
+	private static MethodInfo GetInterceptorMethod(bool isVoid, bool hasParameters)
+	{
+		foreach(var method in typeof(IInvokeInterceptor).GetMethods())
+		{
+			if (isVoid && method.ReturnType != typeof(void)) continue;
+			if (!isVoid && method.ReturnType == typeof(void)) continue;
+			if (hasParameters && method.GetParameters().Length == 1) continue;
+
+			return method;
+		}
+
+		throw new NotSupportedException();
+	}
 }
