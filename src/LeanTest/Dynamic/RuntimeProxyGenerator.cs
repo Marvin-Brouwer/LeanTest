@@ -19,11 +19,18 @@ using Microsoft.CodeAnalysis.Emit;
 using System.Runtime.Loader;
 using LeanTest.Dependencies.Configuration;
 using static System.Net.Mime.MediaTypeNames;
+using Basic.Reference.Assemblies;
 
 namespace LeanTest.Dynamic;
 internal static class RuntimeProxyGenerator
 {
-	private const string InterceptorFieldName = "interceptor";
+	private static readonly PortableExecutableReference SystemRuntimeReference;
+
+	static RuntimeProxyGenerator()
+	{
+		var runtimeRef = Path.GetDirectoryName(typeof(System.Runtime.GCSettings)!.GetTypeInfo()!.Assembly!.Location)!;
+		SystemRuntimeReference = MetadataReference.CreateFromFile(Path.Combine(runtimeRef, "System.Runtime.dll"));
+	}
 
 	public static void Create(Type serviceType)
 	{
@@ -65,14 +72,16 @@ internal static class RuntimeProxyGenerator
 		// TODO cancellation
 		// TODO Language vesion as low as possible, this is to make sure attributes exist
 		var syntaxTree = CSharpSyntaxTree.ParseText(codeToCompile, new CSharpParseOptions(LanguageVersion.CSharp7));
-		var runtimeRef = Path.GetDirectoryName(typeof(System.Runtime.GCSettings)!.GetTypeInfo()!.Assembly!.Location)!;
 		var refPaths = new[] {
-			Path.Combine(runtimeRef, "System.Runtime.dll"),
 			typeof(MethodBase).GetTypeInfo().Assembly.Location,
 			typeof(IInvokeInterceptor).GetTypeInfo().Assembly.Location,
 			serviceType.GetTypeInfo().Assembly.Location,
 		};
-		var assemblyReferences = refPaths.Select(r => MetadataReference.CreateFromFile(r)).ToArray();
+		var assemblyReferences = refPaths
+			.Select(r => MetadataReference.CreateFromFile(r))
+			.Append(SystemRuntimeReference)
+			.ToArray();
+
 
 		var compilation = CSharpCompilation.Create(
 			assemblyName,
