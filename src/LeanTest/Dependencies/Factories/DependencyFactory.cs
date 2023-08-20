@@ -1,3 +1,4 @@
+using LeanTest.Dynamic;
 using LeanTest.Dynamic.Invocation;
 using LeanTest.Dynamic.ReflectionEmitting;
 
@@ -27,6 +28,7 @@ internal abstract class DependencyFactory
 			return type
 				.InitializeType<TService>(interceptor);
 		}
+		RuntimeProxyGenerator.Create(typeof(TService));
 
 		var typeBuilder = _moduleBuilder
 			.GenerateRuntimeType(serviceType);
