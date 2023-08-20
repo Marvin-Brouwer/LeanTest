@@ -66,7 +66,7 @@ internal sealed class RuntimeAssemblyContext
 		var runtimeBinFolder = new FileInfo(runtimeAssembly.Location).Directory!;
 		var simplifiedAssemblyName = AssemblyName!.Split('_')[0];
 
-		return Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + "_2.dll");
+		return Path.Join(runtimeBinFolder.FullName, simplifiedAssemblyName + ".dll");
 	}
 #endif
 

@@ -1,5 +1,7 @@
 using LeanTest.Dynamic.Invocation;
 
+using Microsoft.Extensions.Primitives;
+
 using System.Reflection;
 using System.Text;
 
@@ -52,15 +54,20 @@ internal static class ClassBuilder
 
 		methodBuilder.Append('\t', 2);
 		methodBuilder.Append("public ");
-		methodBuilder.Append(isVoidMethod ? "void" : method.ReturnType.FullName);
+		methodBuilder.Append(isVoidMethod
+			? "void"
+			: (method.ReturnType.FullName ?? method.ReturnType.Name).Trim()
+		);
 		methodBuilder.Append(' ');
 		methodBuilder.Append(method.Name);
 		if (method.IsGenericMethod)
 		{
 			methodBuilder.Append('<');
-			foreach (var genericArgument in method.GetGenericArguments())
+			var genericArguments = method.GetGenericArguments();
+			for (int i = 0; i < genericArguments.Length; i++)
 			{
-				methodBuilder.Append(genericArgument.Name);
+				if (i != 0) methodBuilder.Append(", ");
+				methodBuilder.Append(genericArguments[i].Name);
 			}
 			methodBuilder.Append('>');
 		}
@@ -71,7 +78,7 @@ internal static class ClassBuilder
 			{
 				if (i != 0) methodBuilder.Append(", ");
 				var parameter = method.GetParameters()[i];
-				methodBuilder.Append(parameter.ParameterType.FullName);
+				methodBuilder.Append(parameter.ParameterType.FullName ?? parameter.ParameterType.Name);
 				methodBuilder.Append(' ');
 				methodBuilder.Append(parameter.Name);
 			}
@@ -83,7 +90,7 @@ internal static class ClassBuilder
 		if (!isVoidMethod)
 		{
 			methodBuilder.Append('<');
-			methodBuilder.Append(method.ReturnType.FullName);
+			methodBuilder.Append(method.ReturnType.FullName ?? method.ReturnType.Name);
 			methodBuilder.Append('>');
 		}
 		methodBuilder.Append('(');
