@@ -1,6 +1,6 @@
 using LeanTest.Dependencies.Factories;
 using LeanTest.Dependencies.Providers;
-using LeanTest.Dynamic.ReflectionEmitting;
+using LeanTest.Dynamic.Generating;
 using LeanTest.Hosting;
 using LeanTest.Tests;
 using LeanTest.Tests.Naming;
@@ -21,11 +21,15 @@ public abstract record TestSuite<TSut> : ITestSuite
 		TestOutputLogger = TestContext.Current.TestLoggerFactory.CreateLogger<TSut>();
 		CancellationToken = TestContext.Current.TestCancellationToken;
 
-		var moduleBuilder = ServiceType.GenerateRuntimeModuleAssembly();
-		Stub = new StubFactory(moduleBuilder);
-		Spy = new SpyFactory(moduleBuilder);
-		Mock = new MockFactory(moduleBuilder);
-		Dummy = new DummyFactory(moduleBuilder);
+		var proxyGenerator = new RuntimeProxyGenerator(
+			TestContext.Current.AssemblyContext,
+			CancellationToken.ForTest
+		);
+
+		Stub = new StubFactory(proxyGenerator);
+		Spy = new SpyFactory(proxyGenerator);
+		Mock = new MockFactory(proxyGenerator);
+		Dummy = new DummyFactory(proxyGenerator);
 	}
 
 

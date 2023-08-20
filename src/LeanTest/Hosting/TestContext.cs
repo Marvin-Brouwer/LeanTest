@@ -1,4 +1,5 @@
 using LeanTest.Dependencies.Providers;
+using LeanTest.Dynamic.Generating;
 
 using Microsoft.Extensions.Logging;
 
@@ -27,5 +28,8 @@ internal record struct TestContext
 	/// which logs to the configured test runners output
 	/// </summary>
 	internal ILoggerFactory TestLoggerFactory;
+
+	/// <inheritdoc cref="RuntimeAssemblyContext"/>
+	internal RuntimeAssemblyContext AssemblyContext;
 }
 

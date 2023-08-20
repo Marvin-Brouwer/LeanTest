@@ -1,23 +1,21 @@
 using FluentAssertions;
 
-using LeanTest;
-using LeanTest.Dependencies;
 using LeanTest.Dependencies.Tests.Fixtures;
 
 using System;
 
-namespace ExampleProject.Tests.TestSuites.Services;
+namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
 public sealed record StubTests : TestSuite<IExampleService>
 {
-    private readonly IStub<IExampleService> _someStub;
+	private readonly IStub<IExampleService> _someStub;
 
-    public StubTests()
-    {
+	public StubTests()
+	{
 		_someStub = Stub.Of<IExampleService>();
-    }
+	}
 
-    public override TestCollection Tests => new(
+	public override TestCollection Tests => new(
 
 		TestClassic(For(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
 		{

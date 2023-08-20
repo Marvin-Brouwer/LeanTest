@@ -1,4 +1,5 @@
 using LeanTest.Dependencies.Providers;
+using LeanTest.Dynamic.Generating;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ internal class TestFactory
 	{
 		TestContext.Current.TestLoggerFactory = _loggerFactory;
 		TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
+		TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(assembly);
 
 		if (cancellationToken.IsCancellationRequested) yield break;
 		var assemblySenarios = InitializeScenariosForAssembly(assembly, cancellationToken);

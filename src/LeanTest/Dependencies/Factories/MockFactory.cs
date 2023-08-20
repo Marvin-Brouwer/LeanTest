@@ -1,23 +1,32 @@
 using LeanTest.Dependencies.Configuration;
+using LeanTest.Dependencies.Verification;
 using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dynamic.Generating;
 using LeanTest.Dynamic.Invocation;
-
-using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-internal sealed class MockFactory : DependencyFactory, IMockFactory
+internal sealed class MockFactory : IMockFactory
 {
-	public MockFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
+	private readonly RuntimeProxyGenerator _proxyGenerator;
+
+	public MockFactory(RuntimeProxyGenerator proxyGenerator)
+	{
+		_proxyGenerator = proxyGenerator;
+	}
 
 	IMock<TService> IMockFactory.Of<TService>()
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
+
 		var configuredMethods = new ConfiguredMethodSet();
 		var invocationRecordList = new InvocationRecordList();
 		var recordingInvocationMarshall = new RecordingInvocationMarshall(configuredMethods, invocationRecordList);
-		var instance = GenerateClass<TService>(recordingInvocationMarshall);
+
+		var instance = _proxyGenerator
+			.GenerateProxy<TService>()
+			.InitializeType<TService>(recordingInvocationMarshall);
 
 		return new Mock<TService>(configuredMethods, invocationRecordList, instance);
 	}

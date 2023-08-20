@@ -1,8 +1,6 @@
-using LeanTest.Dependencies.Verification;
-
 using System.Reflection;
 
-namespace LeanTest.Dynamic.Invocation;
+namespace LeanTest.Dependencies.Verification;
 
 internal sealed class InvocationRecordList
 {
@@ -10,7 +8,7 @@ internal sealed class InvocationRecordList
 
 	public InvocationRecordList()
 	{
-		_invocationRecords = new ();
+		_invocationRecords = new();
 	}
 
 	internal void Add(MethodBase methodInfo, object?[] parameters, Exception? ex = null)

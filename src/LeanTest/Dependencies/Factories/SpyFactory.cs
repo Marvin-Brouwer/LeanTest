@@ -1,21 +1,30 @@
+using LeanTest.Dependencies.Verification;
 using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dynamic.Generating;
 using LeanTest.Dynamic.Invocation;
-
-using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-internal sealed class SpyFactory : DependencyFactory, ISpyFactory
+internal sealed class SpyFactory : ISpyFactory
 {
-	public SpyFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
+	private readonly RuntimeProxyGenerator _proxyGenerator;
+
+	public SpyFactory(RuntimeProxyGenerator proxyGenerator)
+	{
+		_proxyGenerator = proxyGenerator;
+	}
 
 	ISpy<TService> ISpyFactory.On<TService>(TService service)
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
+
 		var invocationRecordList = new InvocationRecordList();
 		var invocationRecorder = new InvocationRecorder<TService>(service, invocationRecordList);
-		var instance = GenerateClass<TService>(invocationRecorder);
+
+		var instance = _proxyGenerator
+			.GenerateProxy<TService>()
+			.InitializeType<TService>(invocationRecorder);
 
 		return new Spy<TService>(invocationRecordList, instance);
 	}

@@ -1,18 +1,26 @@
+using LeanTest.Dynamic.Generating;
 using LeanTest.Dynamic.Invocation;
-
-using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-internal sealed class DummyFactory : DependencyFactory, IDummyFactory
+internal sealed class DummyFactory : IDummyFactory
 {
-	public DummyFactory(ModuleBuilder moduleBuilder) :base(moduleBuilder) { }
+	private readonly RuntimeProxyGenerator _proxyGenerator;
+	private readonly DummyInvocationMarshall _invocationMarshall;
+
+	public DummyFactory(RuntimeProxyGenerator proxyGenerator)
+	{
+		_proxyGenerator = proxyGenerator;
+		_invocationMarshall = new DummyInvocationMarshall();
+	}
 
 	TService IDummyFactory.Of<TService>()
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
-		var invocationMarshall = new DummyInvocationMarshall();
-		return GenerateClass<TService>(invocationMarshall);
+
+		return _proxyGenerator
+			.GenerateProxy<TService>()
+			.InitializeType<TService>(_invocationMarshall);
 	}
 }

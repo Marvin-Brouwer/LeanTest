@@ -1,22 +1,30 @@
 using LeanTest.Dependencies.Configuration;
 using LeanTest.Dependencies.Wrappers;
+using LeanTest.Dynamic.Generating;
 using LeanTest.Dynamic.Invocation;
-
-using System.Reflection.Emit;
 
 namespace LeanTest.Dependencies.Factories;
 
-internal sealed class StubFactory : DependencyFactory, IStubFactory
+internal sealed class StubFactory : IStubFactory
 {
-	public StubFactory(ModuleBuilder moduleBuilder) : base(moduleBuilder) { }
+	private readonly RuntimeProxyGenerator _proxyGenerator;
+
+	public StubFactory(RuntimeProxyGenerator proxyGenerator)
+	{
+		_proxyGenerator = proxyGenerator;
+	}
 
 	IStub<TService> IStubFactory.Of<TService>()
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
+
 		var configuredMethods = new ConfiguredMethodSet();
 		var invocationMarshall = new InvocationMarshall(configuredMethods);
-		var instance = GenerateClass<TService>(invocationMarshall);
+
+		var instance = _proxyGenerator
+		.GenerateProxy<TService>()
+			.InitializeType<TService>(invocationMarshall);
 
 		return new Stub<TService>(configuredMethods, instance);
 	}
