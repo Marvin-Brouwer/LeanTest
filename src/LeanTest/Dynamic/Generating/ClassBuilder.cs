@@ -1,7 +1,5 @@
 using LeanTest.Dynamic.Invocation;
 
-using Microsoft.Extensions.Primitives;
-
 using System.Reflection;
 using System.Text;
 

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace LeanTest.Hosting;
 
@@ -23,11 +24,16 @@ internal class TestHost<TAssembly> : IHostedService
 		applicationLifetime.ApplicationStopping.Register(runnerCancellationTokenSource.Cancel);
 
 		var assembly = typeof(TAssembly).Assembly;
-		var testScenarios = _serviceProvider
+		var testScenarios = await _serviceProvider
 			.GetRequiredService<TestFactory>()
-			.InitializeScenarios(assembly, runnerCancellationToken);
+			.InitializeScenarios(assembly, runnerCancellationToken)
+			.ToArrayAsync(cancellationToken);
 
 		await TestRunner.RunTests(testScenarios, runnerCancellationToken);
+
+		var testHostConfiguration = _serviceProvider.GetRequiredService<IOptions<TestHostingOptions>>();
+		if (testHostConfiguration.Value.CloseAfterCompletion)
+			applicationLifetime.StopApplication();
 	}
 
 	public Task StopAsync(CancellationToken cancellationToken)

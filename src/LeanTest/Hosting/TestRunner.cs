@@ -6,17 +6,17 @@ namespace LeanTest.Hosting;
 
 internal static class TestRunner
 {
-	public static async Task RunTests(IEnumerable<ITestScenario> scenarios, CancellationToken cancellationToken)
+	public static async Task RunTests(IReadOnlyList<ITestScenario> scenarios, CancellationToken cancellationToken)
 	{
 		var testTasks = InvokeTests(Shuffle(scenarios, cancellationToken), cancellationToken);
 		await Task.WhenAll(testTasks);
 	}
 
-	private static IReadOnlyCollection<ITestScenario> Shuffle(IEnumerable<ITestScenario> scenarios, CancellationToken cancellationToken)
+	private static IReadOnlyList<ITestScenario> Shuffle(IReadOnlyList<ITestScenario> scenarios, CancellationToken cancellationToken)
 	{
 		// https://stackoverflow.com/a/1262619/2319865
 		var provider = RandomNumberGenerator.Create();
-		var shuffledScenarios = scenarios.ToArray();
+		var shuffledScenarios = new ITestScenario[scenarios.Count];
 
 		int cursor = shuffledScenarios.Length;
 		while (cursor > 1)
@@ -29,9 +29,8 @@ internal static class TestRunner
 
 			var selector = box[0] % cursor; cursor--;
 
-			var value = shuffledScenarios[selector];
-			shuffledScenarios[selector] = shuffledScenarios[cursor];
-			shuffledScenarios[cursor] = value;
+			shuffledScenarios[selector] = scenarios[cursor];
+			shuffledScenarios[cursor] = scenarios[selector];
 		}
 
 		return shuffledScenarios;
@@ -39,7 +38,6 @@ internal static class TestRunner
 
 	private static IEnumerable<Task> InvokeTests(IReadOnlyCollection<ITestScenario> scenarios, CancellationToken cancellationToken)
 	{
-		// TODO batch threading
 		foreach (var scenario in scenarios)
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;

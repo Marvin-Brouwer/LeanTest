@@ -1,5 +1,6 @@
 using LeanTest.Hosting;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -8,20 +9,22 @@ using Microsoft.Extensions.Logging;
 var builder = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((application, configuration) =>
 	{
-		// TODO configure threading
-		if (!application.HostingEnvironment.IsDevelopment())
-		{
-			// TODO configure app stop after test run (for pipelines)
-		}
 	})
     .ConfigureHostConfiguration((configuration) =>
-    {
-    })
-    .ConfigureServices((services) =>
-    {
-        services.AddLeanTestInvoker();
+	{
+	})
+    .ConfigureServices((application, services) =>
+	{
+		services.AddLeanTestInvoker();
 		services.AddLeanTestHost<Program>();
-    })
+
+		if (!application.HostingEnvironment.IsDevelopment()) return;
+
+		services.Configure<TestHostingOptions>(testHost =>
+		{
+			testHost.CloseAfterCompletion = false;
+		});
+	})
     .ConfigureLogging((host, builder) =>
     {
 		// TODO also provide builder.AddDefaultLogger
@@ -35,6 +38,6 @@ var builder = Host.CreateDefaultBuilder(args)
 		}
     });
 
-await builder
-	.Build()
-	.StartAsync();
+var app = builder.Build();
+
+await app.StartAsync();
