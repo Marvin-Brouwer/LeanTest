@@ -5,9 +5,9 @@ using FluentAssertions;
 using LeanTest;
 using LeanTest.Dependencies;
 
-namespace ExampleProject.Tests.TestSuites.Services;
+namespace ExampleProject.Tests.TestSuites.Question;
 
-public sealed record ExampleBTests : TestSuite
+public sealed class ExampleBTests : TestSuite
 {
 	private readonly Stub<ISomeThing> _someStub;
 

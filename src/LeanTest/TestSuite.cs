@@ -12,7 +12,7 @@ using System.Linq.Expressions;
 
 namespace LeanTest;
 
-public abstract record TestSuite : ITestSuite
+public abstract class TestSuite : ITestSuite
 {
 	protected TestSuite()
 	{
@@ -30,7 +30,6 @@ public abstract record TestSuite : ITestSuite
 		Mock = new MockFactory(proxyGenerator);
 		Dummy = new DummyFactory(proxyGenerator);
 	}
-
 
 	#region Dependencies
 	protected readonly IStubFactory Stub;
@@ -73,6 +72,20 @@ public abstract record TestSuite : ITestSuite
 		return new TestScenario(
 			GetType(),
 			scenarioName,
+			// TODO these are just here for the example
+			null,
+			null,
+			Assert(test)
+		);
+	}
+	protected ITestScenario TestClassic(
+		string testName,
+		Action test
+	)
+	{
+		return new TestScenario(
+			GetType(),
+			testName,
 			// TODO these are just here for the example
 			null,
 			null,

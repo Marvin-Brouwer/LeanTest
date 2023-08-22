@@ -3,39 +3,33 @@ using ExampleProject.Services;
 using FluentAssertions;
 
 using LeanTest;
-using LeanTest.Dependencies;
 
 namespace ExampleProject.Tests.TestSuites.Question;
 
-public sealed class ExampleATests : TestSuite
+public sealed class ExampleETests : TestSuite
 {
-	private readonly Stub<ISomeThing> _someStub;
-
-	public ExampleATests()
+	public ExampleETests()
 	{
-		_someStub = Stub
+		var someStub = Stub
 			.Of<ISomeThing>();
-		_someStub
+		someStub
 			.Setup(s => s.DoThing("test"))
 			.Returns(true);
-		_someStub
+		someStub
 			.Setup(s => s.DoThing("test2"))
 			.Returns(false);
-	}
 
-	public override TestCollection Tests => new(
-		TestClassic(For<ExampleService>(sut => sut.DoThing)
-			.Given("SomeString").When("DoOtherThingReturnsTrue").Then("ReturnsExpected"), async () =>
+		TestClassic("DoThing_SomeString_DoOtherThingReturnsTrue_ReturnsExpected", async () =>
 		{
 			// Arrange
-			_someStub
+			someStub
 				.Setup(x => x.DoThing(Parameter.Is<string>()))
 				.Returns(true);
-			_someStub
+			someStub
 				.Setup(x => x.DoOtherThing())
 				.Returns(true);
 
-			var sut = new ExampleService(_someStub.Instance);
+			var sut = new ExampleService(someStub.Instance);
 			var input = "SomeString";
 			var expected = "SomeString";
 
@@ -44,6 +38,7 @@ public sealed class ExampleATests : TestSuite
 
 			// Assert
 			result.Should().Be(expected);
-		})
-	);
+		});
+	}
+
 }

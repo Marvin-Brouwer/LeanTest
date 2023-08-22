@@ -6,14 +6,14 @@ using LeanTest;
 using LeanTest.Dependencies;
 using LeanTest.Tests;
 
-namespace ExampleProject.Tests.TestSuites.Services;
+namespace ExampleProject.Tests.TestSuites.Question;
 
-public sealed record ExampleCTests : TestSuite
+public sealed class ExampleCTests : TestSuite
 {
-    private readonly Stub<ISomeThing> _someStub;
+	private readonly Stub<ISomeThing> _someStub;
 
 	public ExampleCTests()
-    {
+	{
 		_someStub = Stub
 			.Of<ISomeThing>();
 		_someStub

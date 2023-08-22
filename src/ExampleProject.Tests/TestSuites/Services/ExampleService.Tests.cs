@@ -19,7 +19,7 @@ using System;
 
 namespace ExampleProject.Tests.TestSuites.Services;
 
-public sealed record ExampleServiceTests : TestSuite
+public sealed class ExampleServiceTests : TestSuite
 {
     private readonly Stub<ISomeThing> _someStub;
     private readonly Spy<ISomeThing> _someSpy;
@@ -116,7 +116,7 @@ public sealed record ExampleServiceTests : TestSuite
 
     public override TestCollection Tests => new(
 
-		TestClassic(For(sut => sut.DoThing).Given("Some thing").When("Condition_for_something    else").Then("Result"), async () =>
+		TestClassic(For<IExampleService>(sut => sut.DoThing).Given("Some thing").When("Condition_for_something    else").Then("Result"), async () =>
 		{
 			// Arrange
 			_someStub
@@ -143,7 +143,7 @@ public sealed record ExampleServiceTests : TestSuite
 				.VerifyNoOtherCalls();
 		}),
 
-		TestTripleA(For(sut => sut.DoThing).Given("Something").When("Condition").Then("Result"),
+		TestTripleA(For<IExampleService>(sut => sut.DoThing).Given("Something").When("Condition").Then("Result"),
             Arrange(() =>
             {
 				_someStub
