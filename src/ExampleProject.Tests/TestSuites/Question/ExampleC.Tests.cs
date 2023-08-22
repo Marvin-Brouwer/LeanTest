@@ -6,6 +6,8 @@ using LeanTest;
 using LeanTest.Dependencies;
 using LeanTest.Tests;
 
+using System.Collections.Generic;
+
 namespace ExampleProject.Tests.TestSuites.Question;
 
 public sealed class ExampleCTests : TestSuite
@@ -24,8 +26,14 @@ public sealed class ExampleCTests : TestSuite
 			.Returns(false);
 	}
 
-	public ITestScenario DoThing_SomeString_DoOtherThingReturnsTrue_ReturnsExpected => TestClassic(
-		async () =>
+	private static IEnumerable<(int, bool)> NumbersForSomeTest()
+	{
+		yield return (1, true);
+	}
+
+	public ITestScenario DoThing_SomeString_DoOtherThingReturnsTrue_ReturnsExpected => Test(
+		NumbersForSomeTest,
+		async (number, isOkay) =>
 		{
 			// Arrange
 			_someStub
@@ -44,6 +52,5 @@ public sealed class ExampleCTests : TestSuite
 
 			// Assert
 			result.Should().Be(expected);
-		}
-	);
+		});
 }

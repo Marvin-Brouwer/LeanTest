@@ -50,6 +50,50 @@ public abstract class TestSuite : ITestSuite
 	#region Tests
 	public virtual TestCollection Tests { get; }
 
+	protected ITestScenario Test(
+		Action test
+	)
+	{
+		return new TestScenario(
+			GetType(),
+			"",
+			// TODO these are just here for the example
+			null,
+			null,
+			Assert(test)
+		);
+	}
+
+	protected ITestScenario Test<T1>(
+		Func<IEnumerable<T1>> seed,
+		Action<T1> test
+	)
+	{
+		return new TestScenario(
+			GetType(),
+			"",
+			// TODO these are just here for the example
+			null,
+			null,
+			Assert(test)
+		);
+	}
+
+	protected ITestScenario Test<T1, T2>(
+		Func<IEnumerable<(T1, T2)>> seed,
+		Action<T1, T2> test
+	)
+	{
+		return new TestScenario(
+			GetType(),
+			"",
+			// TODO these are just here for the example
+			null,
+			null,
+			Assert(test)
+		);
+	}
+
 	protected ITestScenario TestClassic(
 		Action test
 	)
