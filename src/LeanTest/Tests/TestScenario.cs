@@ -8,15 +8,13 @@ internal class TestScenario : ITestScenario
 
 	private readonly Type _suiteType;
 
-	public Type ServiceType { get; }
 	internal string Name { get; }
+	public Type SuiteType { get; }
 
-	public TestScenario(Type suiteType, Type serviceType, string scenarioName, ITestArangement? arrange, ITestAction? act, ITestAssertion assert)
+	public TestScenario(Type suiteType,  string scenarioName, ITestArangement? arrange, ITestAction? act, ITestAssertion assert)
 	{
-		ServiceType = serviceType;
 		Name = scenarioName;
-
-		_suiteType = suiteType;
+		SuiteType = suiteType;
 
 		_arrange = arrange;
 		_act = act;

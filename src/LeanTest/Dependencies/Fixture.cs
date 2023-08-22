@@ -1,7 +1,7 @@
-namespace LeanTest.Dependencies.Wrappers;
+namespace LeanTest.Dependencies;
 
-internal readonly record struct Fixture<TClass> : IFixture<TClass>
-	where TClass : notnull
+public sealed class Fixture<TClass> :
+	IDependency<TClass>
 {
 	private readonly Func<TClass> _initialValueFunction;
 	private readonly List<Func<TClass, TClass>> _mutations;
@@ -9,15 +9,19 @@ internal readonly record struct Fixture<TClass> : IFixture<TClass>
 	public Fixture(Func<TClass> initialValue)
 	{
 		_initialValueFunction = initialValue;
-		_mutations = new ();
+		_mutations = new();
 	}
 
+	/// <inheritdoc />
+	/// <remarks>
+	/// <b>This will apply all mutations on a new instance very time you call this.</b>
+	/// </remarks>
 	public TClass Instance
 	{
 		get
 		{
 			var instance = _initialValueFunction();
-			foreach(var mutation in _mutations)
+			foreach (var mutation in _mutations)
 			{
 				instance = mutation(instance);
 			}
@@ -25,7 +29,7 @@ internal readonly record struct Fixture<TClass> : IFixture<TClass>
 		}
 	}
 
-	public IFixture<TClass> AddMutation(Action<TClass> mutation)
+	public Fixture<TClass> AddMutation(Action<TClass> mutation)
 	{
 		_mutations.Add((instance) =>
 		{
@@ -36,7 +40,7 @@ internal readonly record struct Fixture<TClass> : IFixture<TClass>
 		return this;
 	}
 
-	public IFixture<TClass> AddMutation(Func<TClass, TClass> mutation)
+	public Fixture<TClass> AddMutation(Func<TClass, TClass> mutation)
 	{
 		_mutations.Add(mutation);
 		return this;

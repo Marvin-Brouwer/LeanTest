@@ -19,14 +19,14 @@ using System;
 
 namespace ExampleProject.Tests.TestSuites.Services;
 
-public sealed record ExampleServiceTests : TestSuite<ExampleService>
+public sealed record ExampleServiceTests : TestSuite
 {
-    private readonly IStub<ISomeThing> _someStub;
-    private readonly ISpy<ISomeThing> _someSpy;
-    private readonly IMock<ISomeThing> _someMock;
-	private readonly IFixture<SomeDataType> _someFixture;
+    private readonly Stub<ISomeThing> _someStub;
+    private readonly Spy<ISomeThing> _someSpy;
+    private readonly Mock<ISomeThing> _someMock;
+	private readonly Fixture<SomeDataType> _someFixture;
 	private readonly IServiceOutOfScope _outOfScopeDummy;
-	private readonly IMock<IExampleService> _asyncExampleMock;
+	private readonly Mock<IExampleService> _asyncExampleMock;
 
 	public ExampleServiceTests()
     {
@@ -119,14 +119,16 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 		TestClassic(For(sut => sut.DoThing).Given("Some thing").When("Condition_for_something    else").Then("Result"), async () =>
 		{
 			// Arrange
-			//_someStub
-			//	.Setup(x => x.DoThing(Parameter.Is<string>()))
-			//	.Returns((string _) => true);
-			//_someStub
-			//	.Setup(x => x.DoOtherThing())
-			//	.Returns(() => true);
+			_someStub
+				.Setup(x => x.DoThing(Parameter.Is<string>()))
+				.Returns(true);
+			_someStub
+				.Setup(x => x.DoOtherThing())
+				.Returns(true);
 
-			var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
+			var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
+			var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
+
 			var input = "SomeString";
 			var expected = "SomeString";
 
@@ -136,22 +138,24 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
 			// Assert
 			result.Should().Be(expected);
 
-			//_someSpy
-			//	.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-			//	.VerifyNoOtherCalls();
+			_someSpy
+				.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+				.VerifyNoOtherCalls();
 		}),
 
 		TestTripleA(For(sut => sut.DoThing).Given("Something").When("Condition").Then("Result"),
             Arrange(() =>
             {
-				//_someStub
-				//	.Setup(x => x.DoThing(Parameter.Is<string>()))
-				//	.Returns((string _) => true);
-				//_someStub
-				//	.Setup(x => x.DoOtherThing())
-				//	.Returns(() => true);
+				_someStub
+					.Setup(x => x.DoThing(Parameter.Is<string>()))
+					.Returns((string _) => true);
+				_someStub
+					.Setup(x => x.DoOtherThing())
+					.Returns(() => true);
 
-                var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, TestOutputLogger);
+				var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
+				var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
+
                 var input = "SomeString";
                 var expected = "SomeString";
 
@@ -165,10 +169,10 @@ public sealed record ExampleServiceTests : TestSuite<ExampleService>
             {
                 result.Should().Be(expected);
 
-				//_someSpy
-				//	.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-				//	.VerifyNoOtherCalls();
-            })
+				_someSpy
+					.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+					.VerifyNoOtherCalls();
+			})
         )
     );
 }

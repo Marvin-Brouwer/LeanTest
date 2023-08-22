@@ -15,7 +15,7 @@ internal sealed class MockFactory : IMockFactory
 		_proxyGenerator = proxyGenerator;
 	}
 
-	IMock<TService> IMockFactory.Of<TService>()
+	Mock<TService> IMockFactory.Of<TService>()
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens

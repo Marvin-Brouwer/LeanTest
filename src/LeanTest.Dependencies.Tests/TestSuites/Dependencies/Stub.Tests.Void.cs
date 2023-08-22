@@ -8,7 +8,7 @@ namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
 public sealed record StubTests : TestSuite<IExampleService>
 {
-	private readonly IStub<IExampleService> _someStub;
+	private readonly Stub<IExampleService> _someStub;
 
 	public StubTests()
 	{

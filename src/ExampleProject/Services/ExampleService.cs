@@ -4,6 +4,9 @@ namespace ExampleProject.Services;
 
 public class ExampleService : IExampleService
 {
+	public ExampleService(ISomeThing instance)
+	{
+	}
 
 	public ExampleService(ISomeThing something, IServiceOutOfScope outOfScope, ILogger<IExampleService> logger)
 	{

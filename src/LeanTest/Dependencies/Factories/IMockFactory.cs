@@ -2,5 +2,5 @@ namespace LeanTest.Dependencies.Factories;
 
 public interface IMockFactory
 {
-	IMock<TService> Of<TService>() where TService : class;
+	Mock<TService> Of<TService>() where TService : class;
 }

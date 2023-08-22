@@ -14,7 +14,7 @@ internal sealed class StubFactory : IStubFactory
 		_proxyGenerator = proxyGenerator;
 	}
 
-	IStub<TService> IStubFactory.Of<TService>()
+	Stub<TService> IStubFactory.Of<TService>()
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens

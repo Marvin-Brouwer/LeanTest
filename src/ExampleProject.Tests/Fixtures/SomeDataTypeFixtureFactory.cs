@@ -13,10 +13,10 @@ internal static class SomeDataTypeFixtureFactory
 		Name = "Foo",
 	};
 
-	public static IFixture<SomeDataType> ForSomeDataType(this IFixtureFactory factory) => factory.For(CreateDefault);
+	public static Fixture<SomeDataType> ForSomeDataType(this IFixtureFactory factory) => factory.For(CreateDefault);
 
-	public static IFixture<SomeDataType> WithName(this IFixture<SomeDataType> fixture, string name) =>
+	public static Fixture<SomeDataType> WithName(this Fixture<SomeDataType> fixture, string name) =>
 		fixture.AddMutation(data => data.Name = name);
-	public static IFixture<SomeDataType> WithRealName(this IFixture<SomeDataType> fixture) =>
+	public static Fixture<SomeDataType> WithRealName(this Fixture<SomeDataType> fixture) =>
 		fixture.AddMutation(data => data.Name = "Alice");
 }

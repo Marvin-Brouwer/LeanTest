@@ -14,7 +14,7 @@ internal sealed class SpyFactory : ISpyFactory
 		_proxyGenerator = proxyGenerator;
 	}
 
-	ISpy<TService> ISpyFactory.On<TService>(TService service)
+	Spy<TService> ISpyFactory.On<TService>(TService service)
 		where TService : class
 	{
 		// TODO validate type isn't sealed? Or test with sealed class and see what happens
