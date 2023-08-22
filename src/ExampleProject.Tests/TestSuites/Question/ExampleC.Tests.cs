@@ -43,7 +43,7 @@ public sealed class ExampleCTests : TestSuite
 				.Setup(x => x.DoOtherThing())
 				.Returns(true);
 
-			var sut = new ExampleService(_someStub.Instance);
+			var sut = new ExampleService(~ _someStub);
 			var input = "SomeString";
 			var expected = "SomeString";
 

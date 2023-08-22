@@ -1,6 +1,7 @@
 using FluentAssertions;
 
 using LeanTest.Dependencies.Tests.Fixtures;
+using LeanTest.Tests;
 
 using System;
 
@@ -15,144 +16,156 @@ public sealed class StubTests : TestSuite
 		_someStub = Stub.Of<IExampleService>();
 	}
 
-	public override TestCollection Tests => new(
+	#region NoParameters
 
-		TestClassic(For<IExampleService>(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidNoParameters())
-				.Executes();
+	public ITestScenario VoidNoParameters_Configured_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidNoParameters())
+			.Executes();
 
-			var sut = _someStub.Instance;
+		var sut = _someStub.Instance;
 
-			// Act
-			var result = () => sut.VoidNoParameters();
+		// Act
+		var result = () => sut.VoidNoParameters();
 
-			// Assert
-			result.Should().NotThrow();
-		}),
-		TestClassic(For<IExampleService>(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidNoParameters())
-				.Executes();
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
 
-			var sut = _someStub.Instance;
+	public ITestScenario VoidNoParameters_NotConfigured_Throws => Test(() =>
+	{
+		// Arrange
+		var sut = _someStub.Instance;
 
-			// Act
-			var result = () => sut.VoidNoParameters();
+		// Act
+		var result = () => sut.VoidNoParameters();
 
-			// Assert
-			result.Should().ThrowExactly<NotSupportedException>();
-		}),
-		TestClassic(For<IExampleService>(sut => sut.VoidNoParameters).Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidNoParameters())
-				.Executes(() => throw new Exception());
+		// Assert
+		result.Should()
+			.ThrowExactly<NotSupportedException>();
+	});
 
-			var sut = _someStub.Instance;
+	public ITestScenario VoidNoParameters_ConfiguredToThrow_Throws => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidNoParameters())
+			.Executes(() => throw new Exception());
 
-			// Act
-			var result = () => sut.VoidNoParameters();
+		var sut = _someStub.Instance;
 
-			// Assert
-			result.Should().ThrowExactly<Exception>();
-		}),
+		// Act
+		var result = () => sut.VoidNoParameters();
 
-		TestClassic(For<IExampleService>(sut => sut.VoidWithParameters).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
-				.Executes();
+		// Assert
+		result.Should()
+			.ThrowExactly<Exception>();
+	});
 
-			var sut = _someStub.Instance;
+	#endregion
 
-			// Act
-			var result = () => sut.VoidWithParameters("test");
+	#region WithParameters
 
-			// Assert
-			result.Should().NotThrow();
-		}),
-		TestClassic(For<IExampleService>(sut => sut.VoidWithParameters).Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
-				.Executes();
+	public ITestScenario VoidWithParameters_Configured_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
+			.Executes();
 
-			var sut = _someStub.Instance;
+		var sut = _someStub.Instance;
 
-			// Act
-			var result = () => sut.VoidWithParameters("test");
+		// Act
+		var result = () => sut.VoidWithParameters("Test");
 
-			// Assert
-			result.Should().ThrowExactly<NotSupportedException>();
-		}),
-		TestClassic(For<IExampleService>(sut => sut.VoidWithParameters).Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
-				.Executes(() => throw new Exception());
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
 
-			var sut = _someStub.Instance;
+	public ITestScenario VoidWithParameters_NotConfigured_Throws => Test(() =>
+	{
+		// Arrange
+		var sut = _someStub.Instance;
 
-			// Act
-			var result = () => sut.VoidWithParameters("test");
+		// Act
+		var result = () => sut.VoidWithParameters("Test");
 
-			// Assert
-			result.Should().ThrowExactly<Exception>();
-		}),
+		// Assert
+		result.Should()
+			.ThrowExactly<NotSupportedException>();
+	});
 
-		TestClassic(For<IExampleService>(sut => sut.VoidWithGenericParameters<int>).Given("MethodCallAttempted").When("Configured").Then("Successful"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
-				.Executes();
+	public ITestScenario VoidWithParameters_ConfiguredToThrow_Throws => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
+			.Executes(() => throw new Exception());
 
-			var sut = _someStub.Instance;
+		var sut = _someStub.Instance;
 
-			// Act
-			var result = () => sut.VoidWithGenericParameters(1, true);
+		// Act
+		var result = () => sut.VoidWithParameters("Test");
 
-			// Assert
-			result.Should().NotThrow();
-		}),
-		TestClassic(For<IExampleService>(sut => sut.VoidWithGenericParameters<int>).Given("MethodCallAttempted").When("NotConfigured").Then("Throws"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
-				.Executes();
+		// Assert
+		result.Should()
+			.ThrowExactly<Exception>();
+	});
 
-			var sut = _someStub.Instance;
+	#endregion
 
-			// Act
-			var result = () => sut.VoidWithGenericParameters(1, true);
+	#region GenericParameters
 
-			// Assert
-			result.Should().ThrowExactly<NotSupportedException>();
-		}),
-		TestClassic(For<IExampleService>(sut => sut.VoidWithGenericParameters<int>).Given("MethodCallAttempted").When("ConfiguredToThrow").Then("Throws"), () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
-				.Executes(() => throw new Exception());
+	public ITestScenario VoidWithGenericParameters_Configured_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters<int>(Parameter.Is<int>(), Parameter.Is<bool>()))
+			.Executes();
 
-			var sut = _someStub.Instance;
+		var sut = _someStub.Instance;
 
-			// Act
-			var result = () => sut.VoidWithGenericParameters(1, true);
+		// Act
+		var result = () => sut.VoidWithGenericParameters(2, true);
 
-			// Assert
-			result.Should().ThrowExactly<Exception>();
-		})
-	);
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITestScenario VoidWithGenericParameters_NotConfigured_Throws => Test(() =>
+	{
+		// Arrange
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters(2, true);
+
+		// Assert
+		result.Should()
+			.ThrowExactly<NotSupportedException>();
+	});
+
+	public ITestScenario VoidWithGenericParameters_ConfiguredToThrow_Throws => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters<int>(Parameter.Is<int>(), Parameter.Is<bool>()))
+			.Executes(() => throw new Exception());
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters(2, true);
+
+		// Assert
+		result.Should()
+			.ThrowExactly<Exception>();
+	});
+
+	#endregion
 }
