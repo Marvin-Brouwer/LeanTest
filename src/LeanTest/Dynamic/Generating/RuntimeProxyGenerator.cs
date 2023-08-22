@@ -89,6 +89,8 @@ internal sealed class RuntimeProxyGenerator
 #endif
 			ms.Seek(0, SeekOrigin.Begin);
 
+			// If this ever causes performance issues, we can also just generate an assembly per type
+			// And maybe just aggregate one #if WRITE_RUNTIME_DLL for ease of access.
 			var assembly = _assemblyContext.CreateCleanAssemblyLoadContext().LoadFromStream(ms);
 			var generatedType = assembly.GetType($"{_assemblyContext.NamespaceName}.{className}")!;
 
