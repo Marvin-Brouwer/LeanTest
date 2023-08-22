@@ -53,7 +53,7 @@ public sealed class StubTests : TestSuite
 		// Arrange
 		_someStub
 			.Setup(sut => sut.VoidNoParameters())
-			.Executes(() => throw new Exception());
+			.Throws(new DataMisalignedException());
 
 		var sut = _someStub.Instance;
 
@@ -62,7 +62,7 @@ public sealed class StubTests : TestSuite
 
 		// Assert
 		result.Should()
-			.ThrowExactly<Exception>();
+			.ThrowExactly<DataMisalignedException>();
 	});
 
 	#endregion
@@ -104,7 +104,7 @@ public sealed class StubTests : TestSuite
 		// Arrange
 		_someStub
 			.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
-			.Executes(() => throw new Exception());
+			.Throws(new DataMisalignedException());
 
 		var sut = _someStub.Instance;
 
@@ -113,7 +113,7 @@ public sealed class StubTests : TestSuite
 
 		// Assert
 		result.Should()
-			.ThrowExactly<Exception>();
+			.ThrowExactly<DataMisalignedException>();
 	});
 
 	#endregion
@@ -155,7 +155,7 @@ public sealed class StubTests : TestSuite
 		// Arrange
 		_someStub
 			.Setup(sut => sut.VoidWithGenericParameters<int>(Parameter.Is<int>(), Parameter.Is<bool>()))
-			.Executes(() => throw new Exception());
+			.Throws(new DataMisalignedException());
 
 		var sut = _someStub.Instance;
 
@@ -164,7 +164,7 @@ public sealed class StubTests : TestSuite
 
 		// Assert
 		result.Should()
-			.ThrowExactly<Exception>();
+			.ThrowExactly<DataMisalignedException>();
 	});
 
 	#endregion

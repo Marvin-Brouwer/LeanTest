@@ -17,6 +17,18 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 		ConfiguredMethods = configuredMethods;
 	}
 
+	public TDependency Throws(Func<Exception> exception)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForException(Method, exception));
+		return Dependency;
+	}
+
+	public TDependency Throws(Exception exception)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForException(Method, () => exception));
+		return Dependency;
+	}
+
 	public TDependency Executes(Action callBack)
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));

@@ -17,6 +17,13 @@ internal abstract record ConfiguredMethod(
 		var (method, parameters) = GetMethodFromExpression(member);
 		return new ConfiguredLambdaMethod(method, parameters, typeof(TReturn), returnDelegate);
 	}
+
+	internal static ConfiguredMethod ForException(LambdaExpression member, Func<Exception> exception)
+	{
+		var (method, parameters) = GetMethodFromExpression(member);
+		return new ConfiguredExceptionMethod(method, parameters, method.ReturnType, exception);
+	}
+
 	internal static ConfiguredMethod ForValue<TReturn>(LambdaExpression member, TReturn returnValue)
 	{
 		var (method, parameters) = GetMethodFromExpression(member);
@@ -52,6 +59,29 @@ internal sealed record ConfiguredValueMethod(
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
 {
 	public override object? Invoke(params object?[] parameters) => ReturnValue;
+}
+
+internal sealed record ConfiguredExceptionMethod(
+	MethodInfo Method, ParameterInfo[] Parameters, Type? ReturnType, Func<Exception> Exception
+) : ConfiguredMethod(Method, Parameters, ReturnType)
+{
+	// TODO analyzer to make sure they don't throw in the Throws(() => ..) expression
+	// TODO analyzer to suggest using Throws instead of Executes(() => throw ...) etc.
+	public override object? Invoke(params object?[] parameters)
+	{
+		Exception exception;
+
+		try
+		{
+			exception = Exception();
+		}
+		catch(Exception ex)
+		{
+			exception = ex;
+		}
+
+		throw exception;
+	}
 }
 
 internal sealed record ConfiguredLambdaMethod(
