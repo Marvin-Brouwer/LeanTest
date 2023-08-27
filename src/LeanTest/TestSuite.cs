@@ -3,16 +3,12 @@ using LeanTest.Dependencies.Providers;
 using LeanTest.Dynamic.Generating;
 using LeanTest.Hosting;
 using LeanTest.Tests;
-using LeanTest.Tests.Naming;
-using LeanTest.Tests.TestBody;
 
 using Microsoft.Extensions.Logging;
 
-using System.Linq.Expressions;
-
 namespace LeanTest;
 
-public abstract class TestSuite : ITestSuite
+public abstract class TestSuite
 {
 	protected TestSuite()
 	{
@@ -46,147 +42,23 @@ public abstract class TestSuite : ITestSuite
 	protected readonly ILoggerFactory TestOutputLoggerFactory;
 	#endregion
 
-	// TODO ask the public which is better
 	#region Tests
-	public virtual TestCollection Tests { get; }
+	protected TestCase Test(Action test) => new(test);
+	protected TestCase Test(Func<ValueTask> test) => new(test);
+	protected DataTestScenario Test<T1>(IEnumerable<T1> testData, Action<T1> test) =>
+		new (testData.Select(data => new object?[] { data }), (object?[] data) => test((T1)data[0]!));
+	protected DataTestScenario Test<T1>(IEnumerable<T1> testData, Func<T1, ValueTask> test) =>
+		new(testData.Select(data => new object?[] { data }), (object?[] data) => test((T1)data[0]!));
+	protected DataTestScenario Test<T1>(Func<IEnumerable<T1>> testData, Action<T1> test) => Test(testData(), test);
+	protected DataTestScenario Test<T1>(Func<IEnumerable<T1>> testData, Func<T1, ValueTask> test) => Test(testData(), test);
+	protected DataTestScenario Test<T1, T2>(IEnumerable<(T1, T2)> testData, Action<T1, T2> test) =>
+		new(testData.Select(data => new object?[] { data.Item1, data.Item2 }), (object?[] data) => test((T1)data[0]!, (T2)data[1]!));
+	protected DataTestScenario Test<T1, T2>(IEnumerable<(T1, T2)> testData, Func<T1, T2, ValueTask> test) =>
+		new(testData.Select(data => new object?[] { data.Item1, data.Item2 }), (object?[] data) => test((T1)data[0]!, (T2)data[1]!));
+	protected DataTestScenario Test<T1, T2>(Func<IEnumerable<(T1, T2)>> testData, Action<T1, T2> test) => Test(testData(), test);
+	protected DataTestScenario Test<T1, T2>(Func<IEnumerable<(T1, T2)>> testData, Func<T1, T2, ValueTask> test) => Test(testData(), test);
 
-	protected ITestScenario Test(
-		Action test
-	)
-	{
-		return new TestScenario(
-			GetType(),
-			"",
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
+	// TODO up to 5
 
-	protected ITestScenario Test<T1>(
-		Func<IEnumerable<T1>> seed,
-		Action<T1> test
-	)
-	{
-		return new TestScenario(
-			GetType(),
-			"",
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
-
-	protected ITestScenario Test<T1, T2>(
-		Func<IEnumerable<(T1, T2)>> seed,
-		Action<T1, T2> test
-	)
-	{
-		return new TestScenario(
-			GetType(),
-			"",
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
-
-	protected ITestScenario TestClassic(
-		Action test
-	)
-	{
-		return new TestScenario(
-			GetType(),
-			"",
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
-	protected ITestScenario TestClassic(
-		ITestName testName,
-		Action test
-	)
-	{
-		var scenarioName = testName.GetNormalizedName();
-		return new TestScenario(
-			GetType(),
-			scenarioName,
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
-	protected ITestScenario TestClassic(
-		string testName,
-		Action test
-	)
-	{
-		return new TestScenario(
-			GetType(),
-			testName,
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
-
-	protected ITestScenario TestClassic(
-		ITestName testName, Func<Task> test
-	)
-	{
-		var scenarioName = testName.GetNormalizedName();
-		return new TestScenario(
-			GetType(),
-			scenarioName,
-			// TODO these are just here for the example
-			null,
-			null,
-			Assert(test)
-		);
-	}
-
-	protected ITestScenario TestTripleA(
-		ITestArangement arrange, ITestAction act, ITestAssertion assert
-	)
-	{
-		return new TestScenario(
-			GetType(),
-			"",
-			arrange, act, assert
-		);
-	}
-
-	protected ITestScenario TestTripleA(
-		ITestName testName, ITestArangement arrange, ITestAction act, ITestAssertion assert
-	)
-	{
-		var scenarioName = testName.GetNormalizedName();
-		return new TestScenario(
-			GetType(),
-			scenarioName,
-			arrange, act, assert
-		);
-	}
-	#endregion
-
-	#region Naming
-	protected Given Given(string value) => new(null, value);
-	protected For For<TSut>(Expression<Func<TSut, Delegate>> methodExpression) => new(methodExpression);
-	#endregion
-
-	#region AAA
-	protected ITestArangement Arrange<TArrange>(TArrange arrange)
-		where TArrange : Delegate => new TestArrangement(arrange);
-	protected ITestAction Act<TAct>(TAct act)
-		where TAct : Delegate => new TestAction(act);
-	protected ITestAssertion Assert<TAssert>(TAssert assert)
-		where TAssert : Delegate => new TestAssertion(assert);
 	#endregion
 }

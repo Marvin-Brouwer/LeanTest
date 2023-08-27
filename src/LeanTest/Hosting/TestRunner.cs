@@ -1,47 +1,32 @@
 using LeanTest.Tests;
 
-using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 
 namespace LeanTest.Hosting;
 
-internal static class TestRunner
+internal class TestRunner
 {
-	public static async Task RunTests(IReadOnlyList<ITestScenario> scenarios, CancellationToken cancellationToken)
+	private readonly ILogger<TestRunner> _logger;
+
+	public TestRunner(ILogger<TestRunner> logger)
 	{
-		var testTasks = InvokeTests(Shuffle(scenarios, cancellationToken), cancellationToken);
+		_logger = logger;
+	}
+	public async Task RunTests(IReadOnlyList<TestRun> tests, CancellationToken cancellationToken)
+	{
+		_logger.LogDebug("Running {0} tests", tests.Count);
+		var testTasks = InvokeTests(tests.Shuffle(cancellationToken), cancellationToken);
 		await Task.WhenAll(testTasks);
 	}
 
-	private static IReadOnlyList<ITestScenario> Shuffle(IReadOnlyList<ITestScenario> scenarios, CancellationToken cancellationToken)
+
+	private IEnumerable<Task> InvokeTests(IReadOnlyCollection<TestRun> tests, CancellationToken cancellationToken)
 	{
-		// https://stackoverflow.com/a/1262619/2319865
-		var provider = RandomNumberGenerator.Create();
-		var shuffledScenarios = new ITestScenario[scenarios.Count];
-
-		int cursor = shuffledScenarios.Length;
-		while (cursor > 1)
-		{
-			if (cancellationToken.IsCancellationRequested) return Array.Empty<ITestScenario>();
-
-			var box = new byte[1];
-			do provider.GetBytes(box);
-			while (box[0] >= cursor * (byte.MaxValue / cursor));
-
-			var selector = box[0] % cursor; cursor--;
-
-			shuffledScenarios[selector] = scenarios[cursor];
-			shuffledScenarios[cursor] = scenarios[selector];
-		}
-
-		return shuffledScenarios;
-	}
-
-	private static IEnumerable<Task> InvokeTests(IReadOnlyCollection<ITestScenario> scenarios, CancellationToken cancellationToken)
-	{
-		foreach (var scenario in scenarios)
+		foreach (var test in tests)
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;
-			yield return scenario.Run(cancellationToken);
+			_logger.LogInformation("Running {0} {1}", test.SuiteName, test.TestName);
+			yield return test.Run(cancellationToken);
 		}
 	}
 }

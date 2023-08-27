@@ -24,12 +24,14 @@ internal class TestHost<TAssembly> : IHostedService
 		applicationLifetime.ApplicationStopping.Register(runnerCancellationTokenSource.Cancel);
 
 		var assembly = typeof(TAssembly).Assembly;
-		var testScenarios = await _serviceProvider
+		var testCases = await _serviceProvider
 			.GetRequiredService<TestFactory>()
-			.InitializeScenarios(assembly, runnerCancellationToken)
+			.InitializeTests(assembly, runnerCancellationToken)
 			.ToArrayAsync(cancellationToken);
 
-		await TestRunner.RunTests(testScenarios, runnerCancellationToken);
+		await _serviceProvider
+			.GetRequiredService<TestRunner>()
+			.RunTests(testCases, runnerCancellationToken);
 
 		var testHostConfiguration = _serviceProvider.GetRequiredService<IOptions<TestHostingOptions>>();
 		if (testHostConfiguration.Value.CloseAfterCompletion)

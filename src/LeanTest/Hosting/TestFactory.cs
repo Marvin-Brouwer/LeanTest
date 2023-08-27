@@ -13,13 +13,15 @@ namespace LeanTest.Hosting;
 internal class TestFactory
 {
 	private readonly ILoggerFactory _loggerFactory;
+	private readonly ILogger<TestFactory> _logger;
 
 	public TestFactory(ILoggerFactory loggerFactory)
 	{
 		_loggerFactory = loggerFactory;
+		_logger = loggerFactory.CreateLogger<TestFactory>();
 	}
 
-	public async IAsyncEnumerable<ITestScenario> InitializeScenarios(
+	public async IAsyncEnumerable<TestRun> InitializeTests(
 		Assembly assembly, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		TestContext.Current.TestLoggerFactory = _loggerFactory;
@@ -27,31 +29,59 @@ internal class TestFactory
 		TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(assembly);
 
 		if (cancellationToken.IsCancellationRequested) yield break;
-		var assemblySenarios = InitializeScenariosForAssembly(assembly, cancellationToken);
+		var assemblyTestCases = InitializeScenariosForAssembly(assembly, cancellationToken);
 		if (cancellationToken.IsCancellationRequested) yield break;
 
-		await foreach (var scenario in assemblySenarios)
+		await foreach (var cases in assemblyTestCases)
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;
-			yield return scenario;
+			yield return cases;
 		}
 	}
 
-	private async IAsyncEnumerable<ITestScenario> InitializeScenariosForAssembly(
+	private async IAsyncEnumerable<TestRun> InitializeScenariosForAssembly(
 		Assembly assembly, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
-		var suiteTypes = IndexTestSuites(assembly, cancellationToken);
-		var suites = InitializeSuites(suiteTypes, cancellationToken);
+		var suiteTypes = IndexTestSuites(assembly, cancellationToken)
+			.ToArray()
+			.Shuffle(cancellationToken);
+
+		_logger.LogDebug("Found {0} testSuites in {1}", suiteTypes.Count, assembly.FullName);
 		if (cancellationToken.IsCancellationRequested) yield break;
 
 		// Enumerate tests after logger's been inserted
-		await foreach (var suite in suites)
+		foreach (var suiteType in suiteTypes)
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;
-			foreach (var test in suite.Tests)
+
+			_logger.LogTrace("Initializing {0}", suiteType.FullName);
+			var suite = await InitializeSuite(suiteType);
+
+			foreach (var testProperty in suiteType.GetProperties())
 			{
 				if (cancellationToken.IsCancellationRequested) yield break;
-				yield return test;
+				if (testProperty.GetGetMethod() is null) yield break;
+				if (testProperty.PropertyType != typeof(ITest)) yield break;
+
+				var test = testProperty.GetValue(suite);
+				if (test is null) throw new NotSupportedException($"Type null is not supported");
+
+				if (test is TestCase testCase)
+				{
+					yield return new TestRun(testCase.TestBody, testProperty.Name!, suiteType.FullName ?? suiteType.Name);
+					continue;
+				}
+
+				if (test is DataTestScenario testScenario)
+				{
+					foreach (var dataRecord in testScenario.TestData)
+					{
+						yield return new TestRun(() => testScenario.TestBody(dataRecord), testProperty.Name!, suiteType.FullName ?? suiteType.Name);
+					}
+					continue;
+				}
+
+				throw new NotSupportedException($"Type {test.GetType()} is currently not supported");
 			}
 		}
 	}
@@ -61,32 +91,22 @@ internal class TestFactory
 		foreach (var assemblyScannedType in assembly.GetExportedTypes())
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;
-			if (!assemblyScannedType.IsAssignableTo(typeof(ITestSuite))) continue;
+			if (!assemblyScannedType.IsAssignableTo(typeof(TestSuite))) continue;
 
 			yield return assemblyScannedType;
 		}
 	}
 
-	private async IAsyncEnumerable<ITestSuite> InitializeSuites(
-		IEnumerable<Type> suiteTypes, [EnumeratorCancellation] CancellationToken cancellationToken)
-	{
-		foreach (var suiteType in suiteTypes)
-		{
-			if (cancellationToken.IsCancellationRequested) yield break;
-			yield return await InitializeSuite(suiteType);
-		}
-	}
-
-	private Task<ITestSuite> InitializeSuite(Type suiteType)
+	private Task<TestSuite> InitializeSuite(Type suiteType)
 	{
 		// Use a task completion source, this ensures it's wrapped in a task properly
 		// This means the parent task doesn't block when someone buils a huge testsuite constructor
-		var completion = new TaskCompletionSource<ITestSuite>();
+		var completion = new TaskCompletionSource<TestSuite>();
 
-		ITestSuite instance = default!;
+		TestSuite instance = default!;
 		try
 		{
-			instance = (ITestSuite)Activator.CreateInstance(suiteType)!;
+			instance = (TestSuite)Activator.CreateInstance(suiteType)!;
 			completion.SetResult(instance);
 		}
 		catch (Exception ex)
@@ -95,7 +115,7 @@ internal class TestFactory
 		}
 
 		Debug.Assert(instance is not null,
-			$"Types passed to {nameof(InitializeSuite)} are known to be {nameof(ITestSuite)}");
+			$"Types passed to {nameof(InitializeSuite)} are known to be {nameof(TestSuite)}");
 
 		return completion.Task;
 	}

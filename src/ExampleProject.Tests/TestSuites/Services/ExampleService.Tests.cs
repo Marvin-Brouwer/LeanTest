@@ -12,10 +12,12 @@ using FluentAssertions;
 using LeanTest;
 using LeanTest.Dependencies;
 using LeanTest.Dependencies.Async;
+using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Collections.Generic;
 
 namespace ExampleProject.Tests.TestSuites.Services;
 
@@ -114,65 +116,96 @@ public sealed class ExampleServiceTests : TestSuite
 			.ExecutesAsync(() => TestOutputLogger.LogInformation("Async callback"));
 	}
 
-    public override TestCollection Tests => new(
+	public ITest DoThing_SomeCondition_SomeAdditinalCondition_Returns => Test(async () =>
+	{
+		// Arrange
+		_someStub
+			.Setup(x => x.DoThing(Parameter.Is<string>()))
+			.Returns(true);
+		_someStub
+			.Setup(x => x.DoOtherThing())
+			.Returns(true);
 
-		TestClassic(For<IExampleService>(sut => sut.DoThing).Given("Some thing").When("Condition_for_something    else").Then("Result"), async () =>
-		{
-			// Arrange
-			_someStub
-				.Setup(x => x.DoThing(Parameter.Is<string>()))
-				.Returns(true);
-			_someStub
-				.Setup(x => x.DoOtherThing())
-				.Returns(true);
+		var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
+		var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
 
-			var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
-			var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
+		var input = "SomeString";
+		var expected = "SomeString";
 
-			var input = "SomeString";
-			var expected = "SomeString";
+		// Act
+		var result = await sut.DoThing(input);
 
-			// Act
-			var result = await sut.DoThing(input);
+		// Assert
+		result.Should().Be(expected);
 
-			// Assert
-			result.Should().Be(expected);
+		_someSpy
+			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			.VerifyNoOtherCalls();
+	});
 
-			_someSpy
-				.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-				.VerifyNoOtherCalls();
-		}),
+	private static IEnumerable<int> Numbers => new int[] { 1, 2, 3, 4 };
+	public ITest SomeData_SomeNumber => Test(Numbers, async (number) =>
+	{
+		_ = number;
+		// Arrange
+		_someStub
+			.Setup(x => x.DoThing(Parameter.Is<string>()))
+			.Returns(true);
+		_someStub
+			.Setup(x => x.DoOtherThing())
+			.Returns(true);
 
-		TestTripleA(For<IExampleService>(sut => sut.DoThing).Given("Something").When("Condition").Then("Result"),
-            Arrange(() =>
-            {
-				_someStub
-					.Setup(x => x.DoThing(Parameter.Is<string>()))
-					.Returns((string _) => true);
-				_someStub
-					.Setup(x => x.DoOtherThing())
-					.Returns(() => true);
+		var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
+		var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
 
-				var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
-				var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
+		var input = "SomeString";
+		var expected = "SomeString";
 
-                var input = "SomeString";
-                var expected = "SomeString";
+		// Act
+		var result = await sut.DoThing(input);
 
-                return (sut, input, expected);
-            }),
-            Act(async (ExampleService sut, string input) =>
-			
-                await sut.DoThing(input)
-            ),
-            Assert((string result, string expected) =>
-            {
-                result.Should().Be(expected);
+		// Assert
+		result.Should().Be(expected);
 
-				_someSpy
-					.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-					.VerifyNoOtherCalls();
-			})
-        )
-    );
+		_someSpy
+			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			.VerifyNoOtherCalls();
+	});
+
+	private static IEnumerable<(int, bool)> GenerateCoolNumbers()
+	{
+		yield return (1, false);
+		yield return (2, false);
+		yield return (3, true);
+		yield return (4, false);
+	}
+
+	public ITest SomeData_CoolNumbers => Test(GenerateCoolNumbers, async (number, isCool) =>
+	{
+		_ = number;
+		_ = isCool;
+		// Arrange
+		_someStub
+			.Setup(x => x.DoThing(Parameter.Is<string>()))
+			.Returns(true);
+		_someStub
+			.Setup(x => x.DoOtherThing())
+			.Returns(true);
+
+		var logger = TestOutputLoggerFactory.CreateLogger<IExampleService>();
+		var sut = new ExampleService(_someStub.Instance, _outOfScopeDummy, logger);
+
+		var input = "SomeString";
+		var expected = "SomeString";
+
+		// Act
+		var result = await sut.DoThing(input);
+
+		// Assert
+		result.Should().Be(expected);
+
+		_someSpy
+			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			.VerifyNoOtherCalls();
+	});
 }

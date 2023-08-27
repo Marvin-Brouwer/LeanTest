@@ -9,6 +9,7 @@ public static class HostExensions
 		.AddHostedService<TestHost<TAssemblyMarker>>();
 	public static IServiceCollection AddLeanTestInvoker(this IServiceCollection services)
 	{
+		services.TryAddSingleton<TestRunner>();
 		services.TryAddSingleton<TestFactory>();
 		services.AddOptions<TestHostingOptions>();
 

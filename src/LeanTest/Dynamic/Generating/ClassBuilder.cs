@@ -54,7 +54,7 @@ internal static class ClassBuilder
 		methodBuilder.Append("public ");
 		methodBuilder.Append(isVoidMethod
 			? "void"
-			: (method.ReturnType.FullName ?? method.ReturnType.Name).Trim()
+			: FormatType(method.ReturnType)
 		);
 		methodBuilder.Append(' ');
 		methodBuilder.Append(method.Name);
@@ -76,7 +76,7 @@ internal static class ClassBuilder
 			{
 				if (i != 0) methodBuilder.Append(", ");
 				var parameter = method.GetParameters()[i];
-				methodBuilder.Append(parameter.ParameterType.FullName ?? parameter.ParameterType.Name);
+				methodBuilder.Append(FormatType(parameter.ParameterType));
 				methodBuilder.Append(' ');
 				methodBuilder.Append(parameter.Name);
 			}
@@ -88,7 +88,7 @@ internal static class ClassBuilder
 		if (!isVoidMethod)
 		{
 			methodBuilder.Append('<');
-			methodBuilder.Append(method.ReturnType.FullName ?? method.ReturnType.Name);
+			methodBuilder.Append(FormatType(method.ReturnType));
 			methodBuilder.Append('>');
 		}
 		methodBuilder.Append('(');
@@ -112,5 +112,29 @@ internal static class ClassBuilder
 		methodBuilder.AppendLine();
 		methodBuilder.Append('\t', 3);
 		methodBuilder.Append(");");
+	}
+
+	private static string FormatType(Type returnType)
+	{
+		if (!returnType.IsGenericType)
+			return (returnType.FullName ?? returnType.Name).Trim();
+
+		var genericType = returnType.GetGenericTypeDefinition();
+		var bareTypeName = (genericType.FullName ?? genericType.Name).Split('`')[0];
+
+		var genericTypeBuilder = new StringBuilder(32);
+		genericTypeBuilder.Append(bareTypeName);
+		genericTypeBuilder.Append('<');
+		var innerTypes = returnType.GetGenericArguments();
+		for (int i = 0; i < innerTypes.Length; i++)
+		{
+			if (i != 0) genericTypeBuilder.Append(", ");
+
+			var innerType = innerTypes[i]!;
+			genericTypeBuilder.Append(FormatType(innerType));
+		}
+		genericTypeBuilder.Append('>');
+
+		return genericTypeBuilder.ToString();
 	}
 }

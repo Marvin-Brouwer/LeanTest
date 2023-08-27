@@ -18,7 +18,7 @@ public sealed class StubTests : TestSuite
 
 	#region NoParameters
 
-	public ITestScenario VoidNoParameters_Configured_Returns => Test(() =>
+	public ITest VoidNoParameters_Configured_Returns => Test(() =>
 	{
 		// Arrange
 		_someStub
@@ -35,7 +35,7 @@ public sealed class StubTests : TestSuite
 			.NotThrow();
 	});
 
-	public ITestScenario VoidNoParameters_NotConfigured_Throws => Test(() =>
+	public ITest VoidNoParameters_NotConfigured_Throws => Test(async () =>
 	{
 		// Arrange
 		var sut = _someStub.Instance;
@@ -48,7 +48,7 @@ public sealed class StubTests : TestSuite
 			.ThrowExactly<NotSupportedException>();
 	});
 
-	public ITestScenario VoidNoParameters_ConfiguredToThrow_Throws => Test(() =>
+	public ITest VoidNoParameters_ConfiguredToThrow_Throws => Test(() =>
 	{
 		// Arrange
 		_someStub
@@ -69,7 +69,7 @@ public sealed class StubTests : TestSuite
 
 	#region WithParameters
 
-	public ITestScenario VoidWithParameters_Configured_Returns => Test(() =>
+	public ITest VoidWithParameters_Configured_Returns => Test(() =>
 	{
 		// Arrange
 		_someStub
@@ -86,7 +86,7 @@ public sealed class StubTests : TestSuite
 			.NotThrow();
 	});
 
-	public ITestScenario VoidWithParameters_NotConfigured_Throws => Test(() =>
+	public ITest VoidWithParameters_NotConfigured_Throws => Test(() =>
 	{
 		// Arrange
 		var sut = _someStub.Instance;
@@ -99,7 +99,7 @@ public sealed class StubTests : TestSuite
 			.ThrowExactly<NotSupportedException>();
 	});
 
-	public ITestScenario VoidWithParameters_ConfiguredToThrow_Throws => Test(() =>
+	public ITest VoidWithParameters_ConfiguredToThrow_Throws => Test(() =>
 	{
 		// Arrange
 		_someStub
@@ -120,7 +120,7 @@ public sealed class StubTests : TestSuite
 
 	#region GenericParameters
 
-	public ITestScenario VoidWithGenericParameters_Configured_Returns => Test(() =>
+	public ITest VoidWithGenericParameters_Configured_Returns => Test(() =>
 	{
 		// Arrange
 		_someStub
@@ -137,7 +137,7 @@ public sealed class StubTests : TestSuite
 			.NotThrow();
 	});
 
-	public ITestScenario VoidWithGenericParameters_NotConfigured_Throws => Test(() =>
+	public ITest VoidWithGenericParameters_NotConfigured_Throws => Test(() =>
 	{
 		// Arrange
 		var sut = _someStub.Instance;
@@ -150,7 +150,7 @@ public sealed class StubTests : TestSuite
 			.ThrowExactly<NotSupportedException>();
 	});
 
-	public ITestScenario VoidWithGenericParameters_ConfiguredToThrow_Throws => Test(() =>
+	public ITest VoidWithGenericParameters_ConfiguredToThrow_Throws => Test(() =>
 	{
 		// Arrange
 		_someStub
