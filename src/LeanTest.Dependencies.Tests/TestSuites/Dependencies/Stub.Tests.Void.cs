@@ -7,7 +7,7 @@ using System;
 
 namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
-public sealed class StubTests : TestSuite
+public sealed class StubTests : TestSuite.UnitTests
 {
 	private readonly Stub<IExampleService> _someStub;
 
@@ -124,7 +124,7 @@ public sealed class StubTests : TestSuite
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters<int>(Parameter.Is<int>(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -154,7 +154,7 @@ public sealed class StubTests : TestSuite
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters<int>(Parameter.Is<int>(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
 			.Throws(new DataMisalignedException());
 
 		var sut = _someStub.Instance;

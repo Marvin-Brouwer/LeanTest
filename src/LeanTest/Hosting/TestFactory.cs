@@ -91,22 +91,22 @@ internal class TestFactory
 		foreach (var assemblyScannedType in assembly.GetExportedTypes())
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;
-			if (!assemblyScannedType.IsAssignableTo(typeof(TestSuite))) continue;
+			if (!assemblyScannedType.IsAssignableTo(typeof(TestSuite.UnitTests))) continue;
 
 			yield return assemblyScannedType;
 		}
 	}
 
-	private Task<TestSuite> InitializeSuite(Type suiteType)
+	private Task<TestSuite.UnitTests> InitializeSuite(Type suiteType)
 	{
 		// Use a task completion source, this ensures it's wrapped in a task properly
 		// This means the parent task doesn't block when someone buils a huge testsuite constructor
-		var completion = new TaskCompletionSource<TestSuite>();
+		var completion = new TaskCompletionSource<TestSuite.UnitTests>();
 
-		TestSuite instance = default!;
+		TestSuite.UnitTests instance = default!;
 		try
 		{
-			instance = (TestSuite)Activator.CreateInstance(suiteType)!;
+			instance = (TestSuite.UnitTests)Activator.CreateInstance(suiteType)!;
 			completion.SetResult(instance);
 		}
 		catch (Exception ex)
@@ -115,7 +115,7 @@ internal class TestFactory
 		}
 
 		Debug.Assert(instance is not null,
-			$"Types passed to {nameof(InitializeSuite)} are known to be {nameof(TestSuite)}");
+			$"Types passed to {nameof(InitializeSuite)} are known to be {typeof(TestSuite.UnitTests).Name}");
 
 		return completion.Task;
 	}

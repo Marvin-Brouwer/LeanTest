@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace ExampleProject.Tests.TestSuites.Services;
 
-public sealed class ExampleServiceTests : TestSuite
+public sealed class ExampleServiceTests : TestSuite.UnitTests
 {
     private readonly Stub<ISomeThing> _someStub;
     private readonly Spy<ISomeThing> _someSpy;
@@ -143,10 +143,11 @@ public sealed class ExampleServiceTests : TestSuite
 			.VerifyNoOtherCalls();
 	});
 
-	private static IEnumerable<int> Numbers => new int[] { 1, 2, 3, 4 };
+	private static IEnumerable<int> Numbers => [1, 2, 3, 4];
 	public ITest SomeData_SomeNumber => Test(Numbers, async (number) =>
 	{
 		_ = number;
+
 		// Arrange
 		_someStub
 			.Setup(x => x.DoThing(Parameter.Is<string>()))
@@ -168,7 +169,15 @@ public sealed class ExampleServiceTests : TestSuite
 		result.Should().Be(expected);
 
 		_someSpy
+			// TODO analyzer
+			.Verify(Times.Once, x => x.DoThing(Parameter.Is<string>()))
+			.Verify(Times.Exactly(1), x => x.DoThing(Parameter.Is<string>()))
 			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			.VerifyExactly(1, x => x.DoThing(Parameter.Is<string>()))
+			.VerifyAtLeast(1, x => x.DoThing(Parameter.Is<string>()))
+			.VerifyAtMost(1, x => x.DoThing(Parameter.Is<string>()))
+			.VerifyBetween(0, 1, x => x.DoThing(Parameter.Is<string>()))
+			.VerifyBetween(1, 2, true, x => x.DoThing(Parameter.Is<string>()))
 			.VerifyNoOtherCalls();
 	});
 
@@ -207,5 +216,7 @@ public sealed class ExampleServiceTests : TestSuite
 		_someSpy
 			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
 			.VerifyNoOtherCalls();
+		_someMock
+			.VerifyNoCalls();
 	});
 }

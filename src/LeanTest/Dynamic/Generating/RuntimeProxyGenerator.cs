@@ -1,4 +1,5 @@
 using LeanTest.Dynamic.Invocation;
+using LeanTest.Exceptions;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -57,11 +58,46 @@ internal sealed class RuntimeProxyGenerator
 			.ReferencedAssemblies
 			.Concat(assemblyReferences);
 
+		var specificDiagnosticOptions = new Dictionary<string, ReportDiagnostic> {
+			["TODO sealed?"] = ReportDiagnostic.Hidden
+		};
 		var compilation = CSharpCompilation.Create(
 			_assemblyContext.NamespaceName,
 			syntaxTrees: syntaxTrees,
 			references: references,
-			options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+			options: new CSharpCompilationOptions(
+				OutputKind.DynamicallyLinkedLibrary,
+				false,
+				serviceType.Namespace,
+				null,
+				null,
+				null,
+#if DEBUG
+				OptimizationLevel.Debug,
+#else
+				OptimizationLevel.Release,
+#endif
+				checkOverflow: false,
+				true,
+				null,
+				null,
+				default,
+				null,
+				Platform.AnyCpu,
+				ReportDiagnostic.Default,
+				// TODO what is this?
+				warningLevel: 4,
+				specificDiagnosticOptions,
+				true,
+				true,
+				null,
+				null,
+				null,
+				null,
+				null,
+				false,
+				MetadataImportOptions.All
+			)
 		);
 
 		var result = compilation.Emit(ms, cancellationToken: _cancellationToken);
@@ -78,7 +114,7 @@ internal sealed class RuntimeProxyGenerator
 			}
 
 			// TODO better exception
-			throw new Exception("TODO better exception");
+			throw new LeanTestException("TODO better exception");
 		}
 		else
 		{
