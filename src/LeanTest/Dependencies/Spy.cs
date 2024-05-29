@@ -11,6 +11,7 @@ public sealed class Spy<TService> :
 	IVerifyableDependency<TService, Spy<TService>>
 {
 	private readonly InvocationRecordList _invocationRecordList;
+	private readonly InvocationChecker _invocationChecker;
 
 	/// <inheritdoc />
 	public TService Instance { get; }
@@ -25,27 +26,31 @@ public sealed class Spy<TService> :
 		// TODO, this probably isn't threadsafe, perhaps it's cool to have a context associated with the current thread,
 		// or in other words the current Test(() => ....)
 		_invocationRecordList = invocationRecordList;
+		_invocationChecker = new InvocationChecker(invocationRecordList);
 		Instance = service;
 	}
 
 	public Spy<TService> Verify(ITimesConstraint times, Expression<Func<TService>> member)
 	{
-		throw new NotImplementedException();
+		_invocationChecker.Verify(times, member);
+		return this;
 	}
-
 	public Spy<TService> Verify<TValue>(ITimesConstraint times, Expression<Func<TService, TValue>> member)
 	{
-		throw new NotImplementedException();
+		_invocationChecker.Verify(times, member);
+		return this;
 	}
 
 	public Spy<TService> Verify(ITimesConstraint times, Expression<Func<TService, Task>> member)
 	{
-		throw new NotImplementedException();
+		_invocationChecker.Verify(times, member);
+		return this;
 	}
 
 	public Spy<TService> Verify<TValue>(ITimesConstraint times, Expression<Func<TService, Task<TValue>>> member)
 	{
-		throw new NotImplementedException();
+		_invocationChecker.Verify(times, member);
+		return this;
 	}
 
 	public Spy<TService> VerifyOnce(Expression<Func<TService>> member) =>
@@ -113,12 +118,6 @@ public sealed class Spy<TService> :
 	public Spy<TService> VerifyNever<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Never, member);
 
-	public void VerifyNoOtherCalls()
-	{
-		throw new NotImplementedException();
-	}
-	public void VerifyNoCalls()
-	{
-		throw new NotImplementedException();
-	}
+	public void VerifyNoOtherCalls() => _invocationChecker.VerifyNoOtherCalls();
+	public void VerifyNoCalls() => _invocationChecker.VerifyNoCalls();
 }

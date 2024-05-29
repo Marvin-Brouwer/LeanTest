@@ -12,7 +12,11 @@ public sealed class Mock<TService> :
 	IVerifyableDependency<TService, Mock<TService>>
 {
 	private readonly InvocationRecordList _invocationRecordList;
+	private readonly InvocationChecker _invocationChecker;
 	private readonly ConfiguredMethodSet _configuredMethods;
+
+	/// <inheritdoc />
+	public TService Instance { get; }
 
 	/// <summary>
 	/// This is merely a shorthand for <see cref="Mock{TService}.Instance"/>
@@ -21,13 +25,15 @@ public sealed class Mock<TService> :
 
 	internal Mock(ConfiguredMethodSet configuredMethods, InvocationRecordList invocationRecordList, TService instance)
 	{
+		// TODO, this probably isn't threadsafe, perhaps it's cool to have a context associated with the current thread,
+		// or in other words the current Test(() => ....)
 		_configuredMethods = configuredMethods;
+		// TODO, this probably isn't threadsafe, perhaps it's cool to have a context associated with the current thread,
+		// or in other words the current Test(() => ....)
 		_invocationRecordList = invocationRecordList;
+		_invocationChecker = new InvocationChecker(invocationRecordList);
 		Instance = instance;
 	}
-
-	/// <inheritdoc />
-	public TService Instance { get; }
 
 	public IMemberSetup<Mock<TService>> Setup(Expression<Action<TService>> member) =>
 		new MemberSetup<Mock<TService>>(this, member, _configuredMethods);
@@ -37,25 +43,24 @@ public sealed class Mock<TService> :
 
 	public Mock<TService> Verify(ITimesConstraint times, Expression<Func<TService>> member)
 	{
-		// TODO
+		_invocationChecker.Verify(times, member);
 		return this;
 	}
-
 	public Mock<TService> Verify<TValue>(ITimesConstraint times, Expression<Func<TService, TValue>> member)
 	{
-		// TODO
+		_invocationChecker.Verify(times, member);
 		return this;
 	}
 
 	public Mock<TService> Verify(ITimesConstraint times, Expression<Func<TService, Task>> member)
 	{
-		// TODO
+		_invocationChecker.Verify(times, member);
 		return this;
 	}
 
 	public Mock<TService> Verify<TValue>(ITimesConstraint times, Expression<Func<TService, Task<TValue>>> member)
 	{
-		// TODO
+		_invocationChecker.Verify(times, member);
 		return this;
 	}
 
@@ -124,12 +129,6 @@ public sealed class Mock<TService> :
 	public Mock<TService> VerifyNever<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Never, member);
 
-	public void VerifyNoOtherCalls()
-	{
-		// TODO
-	}
-	public void VerifyNoCalls()
-	{
-		throw new NotImplementedException();
-	}
+	public void VerifyNoOtherCalls() => _invocationChecker.VerifyNoOtherCalls();
+	public void VerifyNoCalls() => _invocationChecker.VerifyNoCalls();
 }
