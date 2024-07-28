@@ -12,7 +12,7 @@ namespace LeanTest.Hosting;
 /// Using reflection cannot set these values on an instance of <see cref="TestSuite{TSut}"/> before the constructor
 /// gets invoked.
 /// </summary>
-internal record struct TestContext
+public record struct TestContext
 {
 	/// <summary>
 	/// Access a <see cref="ThreadStatic"/> shared instance of this class. 
@@ -31,5 +31,12 @@ internal record struct TestContext
 
 	/// <inheritdoc cref="RuntimeAssemblyContext"/>
 	internal RuntimeAssemblyContext AssemblyContext;
+
+	static TestContext()
+	{
+		Current.TestLoggerFactory = LoggerFactory.Create((c) => { });
+		Current.TestCancellationToken = new CancellationTokenProvider(CancellationToken.None);
+		Current.AssemblyContext = new RuntimeAssemblyContext(typeof(TestContext).Assembly);
+	}
 }
 

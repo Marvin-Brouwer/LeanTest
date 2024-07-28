@@ -66,13 +66,13 @@ internal class TestFactory
 				var test = testProperty.GetValue(suite);
 				if (test is null) throw new NotSupportedException($"Type null is not supported");
 
-				if (test is TestCase testCase)
+				if (test is UnitTestCase testCase)
 				{
 					yield return new TestRun(testCase.TestBody, testProperty.Name!, suiteType.FullName ?? suiteType.Name);
 					continue;
 				}
 
-				if (test is DataTestScenario testScenario)
+				if (test is UnitTestDataScenario testScenario)
 				{
 					foreach (var dataRecord in testScenario.TestData)
 					{

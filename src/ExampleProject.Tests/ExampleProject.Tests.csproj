@@ -1,25 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
+		<IsPackable>false</IsPackable>
 
-    <LangVersion>preview</LangVersion>
+		<OutputType>Exe</OutputType>
+	</PropertyGroup>
 
-    <OutputType>Exe</OutputType>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="FluentAssertions" Version="6.11.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="6.11.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ExampleProject\ExampleProject.csproj" />
-    <ProjectReference Include="..\LeanTest\LeanTest.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\ExampleProject\ExampleProject.csproj" />
+		<!-- TODO: Figure out why Fixie doesn't need this -->
+		<ProjectReference Include="..\LeanTest.TestAdapter\LeanTest.TestAdapter.csproj" />
+		<ProjectReference Include="..\LeanTest\LeanTest.csproj" />
+	</ItemGroup>
 
 </Project>

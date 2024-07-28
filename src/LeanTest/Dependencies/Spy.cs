@@ -2,7 +2,6 @@ using LeanTest.Dependencies.Definitions;
 using LeanTest.Dependencies.Providers;
 using LeanTest.Dependencies.Verification;
 
-using System.Diagnostics.Metrics;
 using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies;

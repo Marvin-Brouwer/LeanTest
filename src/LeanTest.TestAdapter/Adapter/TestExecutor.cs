@@ -1,9 +1,12 @@
+using LeanTest.TestAdapter.Execution;
+
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 using System.Diagnostics;
 
-namespace LeanTest.Hosting.TestAdapter;
+namespace LeanTest.TestAdapter.Adapter;
 
 [ExtensionUri(Id)]
 public sealed class TestExecutor : ITestExecutor
@@ -24,7 +27,7 @@ public sealed class TestExecutor : ITestExecutor
 			.Token;
 	}
 
-	public TestExecutor() : this (CancellationToken.None) { }
+	public TestExecutor() : this(CancellationToken.None) { }
 	public void Cancel() => _cancellationSource.Cancel();
 
 	public void RunTests(IEnumerable<string>? sources, IRunContext? runContext, IFrameworkHandle? frameworkHandle) => throw new NotSupportedException();
@@ -34,6 +37,27 @@ public sealed class TestExecutor : ITestExecutor
 		if (runContext?.IsBeingDebugged == true && _shouldAttach && !Debugger.IsAttached)
 			Debugger.Launch();
 
-		throw new NotImplementedException();
+		if (frameworkHandle is null) return;
+		if (runContext is null) return;
+		if (tests is null) return;
+
+		var logger = frameworkHandle.Wrap();
+
+		if (_cancellationToken.IsCancellationRequested)
+		{
+			const string preRunCancellationMessage = "Cancellation requested before running tests";
+			logger.LogWarning(preRunCancellationMessage);
+
+			foreach (var testCase in tests)
+				frameworkHandle.RecordResult(new TestResult(testCase)
+				{
+					Outcome = TestOutcome.None,
+					ErrorMessage = preRunCancellationMessage
+				}); ;
+			return;
+		}
+
+		var testExecutor = new LeanTestExecutor(logger, frameworkHandle, _cancellationToken);
+		testExecutor.ExecuteTests(tests);
 	}
 }

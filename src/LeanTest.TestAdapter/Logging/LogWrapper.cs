@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace LeanTest.TestAdapter.Logging;
-
 internal sealed class LogWrapper : ILogger
 {
 	private readonly IMessageLogger _messageLogger;

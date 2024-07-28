@@ -3,17 +3,18 @@ using LeanTest.TestAdapter.Logging;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace LeanTest.Hosting.TestAdapter;
+namespace LeanTest.TestAdapter.Adapter;
+
 internal static class TestAdapterExtensions
 {
 	public static bool IsTestAssembly(this string assemblyPath)
 	{
-		var fixieAssemblies = new[]
+		var testAssemblies = new[]
 		{
 			"LeanTest.dll"
 		};
 
-		if (fixieAssemblies.Contains(Path.GetFileName(assemblyPath)))
+		if (testAssemblies.Contains(Path.GetFileName(assemblyPath)))
 			return false;
 
 		return File.Exists(Path.Combine(FolderPath(assemblyPath), "LeanTest.dll"));
