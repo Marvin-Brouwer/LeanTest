@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-namespace LeanTest.TestAdapter.Logging;
+namespace LeanTest.Hosting.TestAdapter;
 
 internal sealed class LogWrapper : ILogger
 {

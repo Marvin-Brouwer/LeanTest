@@ -39,6 +39,7 @@ internal class TestFactory
 		}
 	}
 
+	// TODO, move this out and create an alternative that uses the TestHostContext
 	private async IAsyncEnumerable<TestRun> InitializeScenariosForAssembly(
 		Assembly assembly, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{

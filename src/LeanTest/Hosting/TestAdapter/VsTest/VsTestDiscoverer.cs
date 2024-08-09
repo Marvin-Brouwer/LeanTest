@@ -1,4 +1,4 @@
-using LeanTest.TestAdapter.Constants;
+using LeanTest.Hosting.TestAdapter;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
@@ -6,23 +6,19 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
-using Newtonsoft.Json;
-
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text;
 
-using static System.Net.Mime.MediaTypeNames;
-
 using MsTestCase = Microsoft.VisualStudio.TestPlatform.ObjectModel.TestCase;
+using LeanTest.Hosting.TestAdapter.Constants;
 
-namespace LeanTest.TestAdapter.Adapter;
+namespace LeanTest.Hosting.TestAdapter.VsTest;
 
-[DefaultExecutorUri(TestExecutor.Id)]
 [FileExtension(".exe"), FileExtension(".dll")]
-internal class TestDiscoverer : ITestDiscoverer
+public abstract class VsTestDiscoverer : ITestDiscoverer
 {
 	private ILogger _logger = null!;
 
@@ -68,7 +64,7 @@ internal class TestDiscoverer : ITestDiscoverer
 
 	private IEnumerable<MsTestCase> GetTestsForAssembly(string assemblyPath)
 	{
-		var assemblyLoadContext = new AssemblyLoadContext($"{nameof(TestDiscoverer)}.{assemblyPath}", true);
+		var assemblyLoadContext = new AssemblyLoadContext($"{nameof(VsTestDiscoverer)}.{assemblyPath}", true);
 		try
 		{
 			var assembly = assemblyLoadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(assemblyPath));
@@ -96,16 +92,16 @@ internal class TestDiscoverer : ITestDiscoverer
 
 					if (test is UnitTestDataScenario dt)
 					{
-						for (var index = 0; index < dt.TestData.Count; index ++)
+						for (var index = 0; index < dt.TestData.Count; index++)
 						{
 							var testData = dt.TestData[index];
 							var (fullyQualifiedName, displayName) = testProperty.GetTestNames(testSuite.Name, testData);
 
-							var msTestCase = new MsTestCase(fullyQualifiedName, TestExecutor.Uri, assemblyPath)
+							var msTestCase = new MsTestCase(fullyQualifiedName, VsTestExecutor.Uri, assemblyPath)
 							{
 								Id = StringToGUID(displayName),
 								DisplayName = displayName,
-								CodeFilePath = testSuite.AssemblyQualifiedName,
+								CodeFilePath = string.Concat(testSuite.Name, ".", testProperty.Name),
 								LineNumber = dt.LineNumber,
 								Traits = {
 									{  "Type" , "Unit" },
@@ -117,6 +113,7 @@ internal class TestDiscoverer : ITestDiscoverer
 							{
 								msTestCase.SetPropertyValue(TestProperties.PropertyName, testProperty.Name);
 								msTestCase.SetPropertyValue(TestProperties.DataParametersIndex, index);
+								msTestCase.SetPropertyValue(TestProperties.SuiteTypeName, testSuite.AssemblyQualifiedName);
 							}
 							catch (Exception ex)
 							{
@@ -131,11 +128,11 @@ internal class TestDiscoverer : ITestDiscoverer
 					{
 						var (fullyQualifiedName, displayName) = testProperty.GetTestNames(testSuite.Name);
 
-						var msTestCase = new MsTestCase(fullyQualifiedName, TestExecutor.Uri, assemblyPath)
+						var msTestCase = new MsTestCase(fullyQualifiedName, VsTestExecutor.Uri, assemblyPath)
 						{
 							Id = StringToGUID(displayName),
 							DisplayName = displayName,
-							CodeFilePath = testSuite.AssemblyQualifiedName,
+							CodeFilePath = string.Concat(testSuite.Name, ".", testProperty.Name),
 							LineNumber = tc.LineNumber,
 							Traits = {
 								{  "Type" , "Unit" },
@@ -145,6 +142,7 @@ internal class TestDiscoverer : ITestDiscoverer
 						try
 						{
 							msTestCase.SetPropertyValue(TestProperties.PropertyName, testProperty.Name);
+							msTestCase.SetPropertyValue(TestProperties.SuiteTypeName, testSuite.AssemblyQualifiedName);
 						}
 						catch (Exception ex)
 						{

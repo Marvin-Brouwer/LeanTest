@@ -1,9 +1,8 @@
-using LeanTest.TestAdapter.Logging;
-
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Logging;
 
 namespace LeanTest.Hosting.TestAdapter;
+
 internal static class TestAdapterExtensions
 {
 	public static bool IsTestAssembly(this string assemblyPath)

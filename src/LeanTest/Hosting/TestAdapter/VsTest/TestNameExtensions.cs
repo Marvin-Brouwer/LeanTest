@@ -1,8 +1,7 @@
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 
-namespace LeanTest.TestAdapter.Adapter;
+namespace LeanTest.Hosting.TestAdapter.VsTest;
 
 internal static class TestNameExtensions
 {

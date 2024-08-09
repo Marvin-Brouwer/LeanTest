@@ -1,46 +1,74 @@
+using LeanTest.Hosting.Options;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace LeanTest.Hosting;
 
-internal class TestHost<TAssembly> : IHostedService
+// TODO cleanup unused
+public static class TestHost
 {
-	private readonly IServiceProvider _serviceProvider;
-
-	public TestHost(IServiceProvider serviceProvider)
+	static TestHost()
 	{
-		_serviceProvider = serviceProvider;
+		
 	}
 
-	public async Task StartAsync(CancellationToken cancellationToken)
-	{
-		var runnerCancellationTokenSource = new CancellationTokenSource();
-		var runnerCancellationToken = CancellationTokenSource
-			.CreateLinkedTokenSource(runnerCancellationTokenSource.Token, cancellationToken)
-			.Token;
+	// TODO infer TProgram from stackFrome or something and then check if it's the same as the test context
+	public static IHostBuilder CreateDefault<TProgram>(string[]? args) where TProgram : class, new() => Host
+		.CreateDefaultBuilder(args)
+			.ConfigureAppConfiguration((application, configuration) =>
+			{
+				var logConfig = new Dictionary<string, string>
+				{
+					["Logging:LogLevel:Default"] = "Warning",
+					["Logging:LogLevel:Microsoft"] = "Warning",
+					["Logging:LogLevel:System"] = "Warning",
+					["Logging:LogLevel:LeanTest.Hosting.TestFactory"] = "Warning",
+					["Logging:LogLevel:LeanTest.Hosting.TestRunner"] = "Warning",
+				};
+#if (DEBUG)
+				logConfig = new Dictionary<string, string>
+				{
+					["Logging:LogLevel:Default"] = "Trace",
+					["Logging:LogLevel:Microsoft"] = "Warning",
+					["Logging:LogLevel:System"] = "Warning",
+					["Logging:LogLevel:LeanTest.Hosting.TestFactory"] = "Trace",
+					["Logging:LogLevel:LeanTest.Hosting.TestRunner"] = "Trace",
+				};
+#endif
+				configuration.AddInMemoryCollection(logConfig);
+			})
+			.ConfigureHostConfiguration((configuration) =>
+			{
+			})
+			.ConfigureServices((application, services) =>
+			{
+				services.AddLeanTestInvoker();
+				services.AddLeanTestHost<TProgram>();
+			})
+			.ConfigureLogging((host, builder) =>
+			{
+				builder
+					.ClearProviders()
+					.AddFilter("Default", LogLevel.Warning)
+					.AddFilter("Microsoft", LogLevel.Warning)
+					.AddFilter("System", LogLevel.Warning);
 
-		var applicationLifetime = _serviceProvider.GetRequiredService<IHostApplicationLifetime>();
-		applicationLifetime.ApplicationStopping.Register(runnerCancellationTokenSource.Cancel);
-
-		var assembly = typeof(TAssembly).Assembly;
-		var testCases = await _serviceProvider
-			.GetRequiredService<TestFactory>()
-			.InitializeTests(assembly, runnerCancellationToken)
-			.ToArrayAsync(cancellationToken);
-
-		await _serviceProvider
-			.GetRequiredService<TestRunner>()
-			.RunTests(testCases, runnerCancellationToken);
-
-		var testHostConfiguration = _serviceProvider.GetRequiredService<IOptions<TestHostingOptions>>();
-		if (testHostConfiguration.Value.CloseAfterCompletion)
-			applicationLifetime.StopApplication();
-	}
-
-	public Task StopAsync(CancellationToken cancellationToken)
-	{
-		// Unecessary to stop tasks due to CancellationToken everywhere
-		return Task.CompletedTask;
-	}
+				// TODO also provide builder.AddDefaultLogger
+				if (!host.HostingEnvironment.IsDevelopment())
+				{
+					builder
+						.SetMinimumLevel(LogLevel.Information)
+						.AddSimpleConsole();
+				}
+				else
+				{
+					builder
+						.AddDebug()
+						.AddConsole();
+				}
+			});
 }
