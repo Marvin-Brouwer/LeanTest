@@ -9,11 +9,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>$(DefineConstants);WRITE_RUNTIME_DLL</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants>$(DefineConstants);WRITE_RUNTIME_DLL</DefineConstants>
+		<DefineConstants>$(DefineConstants);WRITE_RUNTIME_DLL;ATTACH_EXECUTION</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup>

@@ -64,22 +64,19 @@ public abstract class VsTestExecutor : ITestExecutor
 		// before returning from this function.
 		// XUnit does the same thing: https://github.com/xunit/visualstudio.xunit/blob/0ea6e6cb0991237daf727dfb69e64ced205f4553/src/xunit.runner.visualstudio/VsTestRunner.cs#L157C1-L159C43
 		InvokeTestConsole(tests.ToArray(), frameworkHandle, logger).GetAwaiter().GetResult();
-
-		// TODO REplace functionality
-		//var testExecutor = new LeanTestExecutor(logger, frameworkHandle, _cancellationToken);
-		//testExecutor.ExecuteTests(tests);
 	}
 
 	private Task InvokeTestConsole(IReadOnlyList<TestCase> tests, IFrameworkHandle frameworkHandle, ILogger logger)
 	{
-		// TODO maybe this can be found with the runContext or something?
 		var module = tests
 			.Select(test => test.GetPropertyValue<string>(TestProperties.SuiteTypeName, null))
 			.Where(typeName => typeName is not null)
 			.Select(typeName => Type.GetType(typeName!)!)
 			.Select(suiteType => suiteType.Assembly)
-			.First();
+			// We expect this to be run per test project, so only one AssemblyModule should be present
+			.Single();
 
+		// Set these globally scoped so the EntryPoint can use these.
 		TestAdapterContext.HostCancelationToken = _cancellationToken;;
 		TestAdapterContext.HostExecutionRecorder = frameworkHandle;
 		TestAdapterContext.HostLogger = logger;
@@ -92,8 +89,10 @@ public abstract class VsTestExecutor : ITestExecutor
 			$"Please make sure to define it as a console application, and a Program.cs with a TestHostBuilder is defined."
 		);
 
-		var asyncEntryPoint = entryPoint.DeclaringType!.GetMethod(entryPoint.Name + "$", BindingFlags.Static | BindingFlags.NonPublic);
 
+		// TODO: We put an AsyncEntryPoint thing here, if we don't need async functionality here we might as well just call the regular entrypoint.
+		// Since we call .GetAwaiter().GetResult() here anyway.
+		var asyncEntryPoint = entryPoint.DeclaringType!.GetMethod(entryPoint.Name + "$", BindingFlags.Static | BindingFlags.NonPublic);
 		if (asyncEntryPoint is null) return SyncFallback(entryPoint);
 		else return (Task)asyncEntryPoint.Invoke(asyncEntryPoint, [Array.Empty<string>()])!;
 	}
