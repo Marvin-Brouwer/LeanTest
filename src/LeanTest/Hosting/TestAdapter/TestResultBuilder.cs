@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 using System.Diagnostics;
+using System.Text;
 
 namespace LeanTest.Hosting.TestAdapter;
 
@@ -38,6 +39,7 @@ internal class TestResultBuilder
 	public TestResult PassTest(TestCase testCase, IReadOnlyList<TestResultMessage> testLogs)
 	{
 		_logger.LogDebug("Passed {testName}", testCase.FullyQualifiedName);
+		var messageBuilder = new StringBuilder();
 
 		var result = new TestResult(testCase)
 		{
@@ -45,12 +47,14 @@ internal class TestResultBuilder
 			ComputerName = Environment.MachineName
 		};
 
-		// TODO figure out why messages don't work;
 		foreach (var log in testLogs)
 		{
 			result.Messages.Add(log);
+			messageBuilder.AppendLine(log.Text);
 		}
 
+		// Because regular messages don't show up in the VS Test panel, we misuse the ErrorMessage for that
+		result.ErrorMessage = messageBuilder.ToString();
 
 		return result;
 	}
@@ -58,20 +62,25 @@ internal class TestResultBuilder
 	public TestResult FailTest(TestCase testCase, Exception exception, IReadOnlyList<TestResultMessage> testLogs)
 	{
 		_logger.LogError("Failed {testName}, {reason}", testCase.FullyQualifiedName, exception.Message);
+		var messageBuilder = new StringBuilder();
 
 		var result = new TestResult(testCase)
 		{
 			Outcome = TestOutcome.Failed,
 			ComputerName = Environment.MachineName,
-			ErrorMessage = exception.Message,
-			ErrorStackTrace = exception.StackTrace
+			// Because regular messages don't show up in the VS Test panel, we misuse the ErrorMessage for that
+			// Because we don't have that, we prepend the Message to the stacktrace.
+			ErrorStackTrace = exception.Message + Environment.NewLine + exception.StackTrace
 		};
 
-		// TODO figure out why messages don't work;
 		foreach (var log in testLogs)
 		{
 			result.Messages.Add(log);
+			messageBuilder.AppendLine(log.Text);
 		}
+
+		// Because regular messages don't show up in the VS Test panel, we misuse the ErrorMessage for that
+		result.ErrorMessage = messageBuilder.ToString();
 
 		return result;
 	}
