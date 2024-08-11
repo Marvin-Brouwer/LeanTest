@@ -3,13 +3,13 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 using System.Diagnostics;
 
-namespace LeanTest.TestAdapter.Execution;
+namespace LeanTest.Hosting.TestAdapter;
 
-internal class ResultBuilder
+internal class TestResultBuilder
 {
-	private readonly ILogger _logger;
+	private readonly ILogger<TestResultBuilder> _logger;
 
-	public ResultBuilder(ILogger logger)
+	public TestResultBuilder(ILogger<TestResultBuilder> logger)
 	{
 		_logger = logger;
 	}
@@ -35,25 +35,44 @@ internal class ResultBuilder
 		};
 	}
 
-	public TestResult PassTest(TestCase testCase)
+	public TestResult PassTest(TestCase testCase, IReadOnlyList<TestResultMessage> testLogs)
 	{
 		_logger.LogDebug("Passed {testName}", testCase.FullyQualifiedName);
 
-		return new TestResult(testCase)
+		var result = new TestResult(testCase)
 		{
 			Outcome = TestOutcome.Passed,
+			ComputerName = Environment.MachineName
 		};
+
+		// TODO figure out why messages don't work;
+		foreach (var log in testLogs)
+		{
+			result.Messages.Add(log);
+		}
+
+
+		return result;
 	}
 
-	public TestResult FailTest(TestCase testCase, Exception exception)
+	public TestResult FailTest(TestCase testCase, Exception exception, IReadOnlyList<TestResultMessage> testLogs)
 	{
 		_logger.LogError("Failed {testName}, {reason}", testCase.FullyQualifiedName, exception.Message);
 
-		return new TestResult(testCase)
+		var result = new TestResult(testCase)
 		{
 			Outcome = TestOutcome.Failed,
+			ComputerName = Environment.MachineName,
 			ErrorMessage = exception.Message,
 			ErrorStackTrace = exception.StackTrace
 		};
+
+		// TODO figure out why messages don't work;
+		foreach (var log in testLogs)
+		{
+			result.Messages.Add(log);
+		}
+
+		return result;
 	}
 }

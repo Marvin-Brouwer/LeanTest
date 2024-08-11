@@ -16,8 +16,6 @@ public abstract class VsTestExecutor : ITestExecutor
 
 	private readonly CancellationTokenSource _cancellationSource;
 	private readonly CancellationToken _cancellationToken;
-	// TODO this should come from settings
-	private readonly bool _shouldAttach = true;
 
 	public VsTestExecutor() : this(CancellationToken.None) { }
 	public VsTestExecutor(CancellationToken cancellationToken)
@@ -34,8 +32,7 @@ public abstract class VsTestExecutor : ITestExecutor
 
 	public void RunTests(IEnumerable<TestCase>? tests, IRunContext? runContext, IFrameworkHandle? frameworkHandle)
 	{
-		if (runContext?.IsBeingDebugged == true && _shouldAttach && !Debugger.IsAttached)
-			Debugger.Launch();
+		if (runContext?.IsBeingDebugged == true && !Debugger.IsAttached) Debugger.Launch();
 
 		if (frameworkHandle is null) return;
 		if (runContext is null) return;
@@ -44,7 +41,11 @@ public abstract class VsTestExecutor : ITestExecutor
 		// Credits to fixie: https://github.com/fixie/fixie/blob/57631d69b938a8efd88c5646ea60124cb72bdbb1/src/Fixie.TestAdapter/VsTestExecutor.cs#L209C1-L214C6
 		HandlePoorVsTestImplementationDetails(runContext, frameworkHandle);
 
-		var logger = frameworkHandle.Wrap();
+#if DEBUG
+		var logger = frameworkHandle.Wrap(LogLevel.Debug);
+#else
+		var logger = frameworkHandle.Wrap(LogLevel.Information);
+#endif
 
 		if (_cancellationToken.IsCancellationRequested)
 		{
@@ -73,13 +74,20 @@ public abstract class VsTestExecutor : ITestExecutor
 			.Where(typeName => typeName is not null)
 			.Select(typeName => Type.GetType(typeName!)!)
 			.Select(suiteType => suiteType.Assembly)
+			// Apparently dynamic loaded assemblies aren't idempotent
+			.DistinctBy(assembly => assembly.FullName ?? assembly.Location)
 			// We expect this to be run per test project, so only one AssemblyModule should be present
 			.Single();
+
+		logger.LogInformation("Running tests on assembly: {AssemblyName}", module.FullName);
+		logger.LogDebug("Configuring TestAdapterContext");
 
 		// Set these globally scoped so the EntryPoint can use these.
 		TestAdapterContext.HostCancelationToken = _cancellationToken;;
 		TestAdapterContext.HostExecutionRecorder = frameworkHandle;
-		TestAdapterContext.HostLogger = logger;
+		// Default to the lowest level, we'll use this to forward as an ILogProvider and configure the wrapping logger to the configured setting
+		// TODO perhaps we don't even need this.
+		TestAdapterContext.HostLogger = frameworkHandle.Wrap(LogLevel.Trace); ;
 		TestAdapterContext.CurrentFilteredTestCases = tests;
 
 		var entryPoint = module.EntryPoint;
@@ -89,6 +97,7 @@ public abstract class VsTestExecutor : ITestExecutor
 			$"Please make sure to define it as a console application, and a Program.cs with a TestHostBuilder is defined."
 		);
 
+		logger.LogDebug("Invoking test program");
 
 		// TODO: We put an AsyncEntryPoint thing here, if we don't need async functionality here we might as well just call the regular entrypoint.
 		// Since we call .GetAwaiter().GetResult() here anyway.

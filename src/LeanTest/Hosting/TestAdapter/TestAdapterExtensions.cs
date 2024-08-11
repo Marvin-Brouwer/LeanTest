@@ -22,9 +22,9 @@ internal static class TestAdapterExtensions
 		return new FileInfo(assemblyPath).Directory!.FullName;
 	}
 
-	public static ILogger Wrap(this IMessageLogger logger)
+	public static ILogger Wrap(this IMessageLogger logger, LogLevel minimumLogLevel)
 	{
-		return new LogWrapper(logger);
+		return new LogWrapper(logger, minimumLogLevel);
 	}
 
 }

@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace LeanTest.Hosting;
 
@@ -39,7 +40,7 @@ public static class TestHost
 					["Logging:LogLevel:LeanTest.Hosting.TestRunner"] = "Trace",
 				};
 #endif
-				configuration.AddInMemoryCollection(logConfig);
+				configuration.AddInMemoryCollection(logConfig!);
 			})
 			.ConfigureHostConfiguration((configuration) =>
 			{
@@ -52,7 +53,7 @@ public static class TestHost
 			.ConfigureLogging((host, builder) =>
 			{
 				builder
-					.ClearProviders()
+					//.ClearProviders()
 					.AddFilter("Default", LogLevel.Warning)
 					.AddFilter("Microsoft", LogLevel.Warning)
 					.AddFilter("System", LogLevel.Warning);
@@ -70,5 +71,7 @@ public static class TestHost
 						.AddDebug()
 						.AddConsole();
 				}
+				builder
+					.AddProvider(ContextAwareLogProvider.Instance);
 			});
 }

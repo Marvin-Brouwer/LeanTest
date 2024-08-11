@@ -1,3 +1,5 @@
+using LeanTest.Hosting.TestAdapter.Standalone;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -25,7 +27,7 @@ internal class TestHostService<TAssembly> : IHostedService
 
 		var assembly = typeof(TAssembly).Assembly;
 		var testCases = await _serviceProvider
-			.GetRequiredService<TestFactory>()
+			.GetRequiredService<ITestFactory>()
 			.InitializeTests(assembly, runnerCancellationToken)
 			.ToArrayAsync(cancellationToken);
 

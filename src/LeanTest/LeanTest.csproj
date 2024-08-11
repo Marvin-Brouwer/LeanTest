@@ -36,7 +36,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Hosting\Console\" />
-	  <Folder Include="Hosting\TestAdapter\Standalone\" />
 	</ItemGroup>
 
 </Project>

@@ -3,40 +3,45 @@ using LeanTest.Dynamic.Generating;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace LeanTest.Hosting;
+namespace LeanTest.Hosting.TestAdapter.Standalone;
 
-internal class TestFactory
+// TODO Implement discovery protocol
+internal class DiscoveringTestFactory : ITestFactory
 {
 	private readonly ILoggerFactory _loggerFactory;
-	private readonly ILogger<TestFactory> _logger;
+	private readonly ILogger<DiscoveringTestFactory> _logger;
 
-	public TestFactory(ILoggerFactory loggerFactory)
+	public DiscoveringTestFactory(ILoggerFactory loggerFactory)
 	{
 		_loggerFactory = loggerFactory;
-		_logger = loggerFactory.CreateLogger<TestFactory>();
+		_logger = loggerFactory.CreateLogger<DiscoveringTestFactory>();
 	}
 
-	public async IAsyncEnumerable<TestRun> InitializeTests(
+	public async IAsyncEnumerable<TestCase> InitializeTests(
 		Assembly assembly, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
-		TestContext.Current.TestLoggerFactory = _loggerFactory;
-		TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
-		TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(assembly);
+		yield break;
+		throw new NotImplementedException("TODO Parity fix");
 
-		if (cancellationToken.IsCancellationRequested) yield break;
-		var assemblyTestCases = InitializeScenariosForAssembly(assembly, cancellationToken);
-		if (cancellationToken.IsCancellationRequested) yield break;
+		//TestContext.Current.TestLoggerFactory = _loggerFactory;
+		//TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
+		//TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(assembly);
 
-		await foreach (var cases in assemblyTestCases)
-		{
-			if (cancellationToken.IsCancellationRequested) yield break;
-			yield return cases;
-		}
+		//if (cancellationToken.IsCancellationRequested) yield break;
+		//var assemblyTestCases = InitializeScenariosForAssembly(assembly, cancellationToken);
+		//if (cancellationToken.IsCancellationRequested) yield break;
+
+		//await foreach (var cases in assemblyTestCases)
+		//{
+		//	if (cancellationToken.IsCancellationRequested) yield break;
+		//	yield return cases;
+		//}
 	}
 
 	// TODO, move this out and create an alternative that uses the TestHostContext

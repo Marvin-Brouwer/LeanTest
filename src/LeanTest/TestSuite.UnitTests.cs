@@ -14,8 +14,6 @@ public static partial class TestSuite
 	{
 		protected UnitTests()
 		{
-			TestOutputLoggerFactory = TestContext.Current.TestLoggerFactory;
-			TestOutputLogger = TestContext.Current.TestLoggerFactory.CreateLogger(GetType());
 			CancellationToken = TestContext.Current.TestCancellationToken;
 
 			var proxyGenerator = new RuntimeProxyGenerator(
@@ -40,8 +38,8 @@ public static partial class TestSuite
 		protected readonly ITimesContstraintProvider Times = TimesContstraintProvider.Instance;
 
 		protected readonly ICancellationTokenProvider CancellationToken;
-		protected readonly ILogger TestOutputLogger;
-		protected readonly ILoggerFactory TestOutputLoggerFactory;
+		protected ILogger TestOutputLogger => TestOutputLoggerFactory.CreateLogger(GetType());
+		protected ILoggerFactory TestOutputLoggerFactory => TestContext.Current.TestLoggerFactory;
 		#endregion
 
 		#region Tests

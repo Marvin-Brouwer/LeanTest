@@ -24,7 +24,11 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 
 	public void DiscoverTests(IEnumerable<string> sources, IDiscoveryContext discoveryContext, IMessageLogger logger, ITestCaseDiscoverySink discoverySink)
 	{
-		_logger = logger.Wrap();
+#if DEBUG
+		_logger = logger.Wrap(LogLevel.Debug);
+#else
+		_logger = logger.Wrap(LogLevel.Information);
+#endif
 
 #if (ATTACH_DISCOVERY)
 		if (sources.All(source => source.EndsWith("LeanTest.TestAdapter.dll"))) return;
@@ -38,7 +42,7 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 	{
 		if (!assemblyPath.IsTestAssembly())
 		{
-			_logger.LogInformation("Skipping {assemblyPath} because it is not a test assembly.", assemblyPath);
+			_logger.LogDebug("Skipping {assemblyPath} because it is not a test assembly.", assemblyPath);
 			return;
 		}
 		try
@@ -50,7 +54,7 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 				return;
 			}
 
-			_logger.LogDebug("Found {testCount} test(s) in {assemblyPath}", testCases.Length, assemblyPath);
+			_logger.LogInformation("Found {testCount} test(s) in {assemblyPath}", testCases.Length, assemblyPath);
 
 			foreach (var testCase in testCases)
 				discoverySink.SendTestCase(testCase);

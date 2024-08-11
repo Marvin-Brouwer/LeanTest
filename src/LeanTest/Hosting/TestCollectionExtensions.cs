@@ -9,7 +9,7 @@ internal static class TestCollectionExtensions
 
 		// https://stackoverflow.com/a/1262619/2319865
 		var provider = RandomNumberGenerator.Create();
-		var shuffledList = new T[list.Count];
+		var shuffledList = list.ToArray();
 
 		int cursor = shuffledList.Length;
 		while (cursor > 1)
@@ -22,8 +22,9 @@ internal static class TestCollectionExtensions
 
 			var selector = box[0] % cursor; cursor--;
 
-			shuffledList[selector] = list[cursor];
-			shuffledList[cursor] = list[selector];
+			var value = shuffledList[selector];
+			shuffledList[selector] = shuffledList[cursor];
+			shuffledList[cursor] = value;
 		}
 
 		return shuffledList;
