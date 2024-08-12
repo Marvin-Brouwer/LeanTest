@@ -95,6 +95,13 @@ internal class TestRunner
 			return;
 		}
 
+		var testAssembly = testSuiteType.Assembly;
+		var resultStreamingLoggerFactory = new TestCaseLoggerFactory(_logOptions);
+
+		TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
+		TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(testAssembly);
+		TestContext.Current.TestLoggerFactory = resultStreamingLoggerFactory;
+
 		// We can assume the suite succeeds instantiation because we already need this during discovery phase.
 		// If this fails, the test should break horribly too.
 		var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuiteType)!;
@@ -103,13 +110,6 @@ internal class TestRunner
 			EndTest(testCase, _resultBuilder.CancelTest(testCase));
 			return;
 		}
-
-		var testAssembly = suite.GetType().Assembly;
-		var resultStreamingLoggerFactory = new TestCaseLoggerFactory(_logOptions);
-
-		TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
-		TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(testAssembly);
-		TestContext.Current.TestLoggerFactory = resultStreamingLoggerFactory;
 
 		var test = testSuiteType.GetProperty(testPropertyName)?.GetValue(suite);
 		if (test is UnitTestDataScenario dt)
