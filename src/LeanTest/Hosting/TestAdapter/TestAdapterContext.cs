@@ -12,7 +12,7 @@ namespace LeanTest.Hosting.TestAdapter;
 public static class TestAdapterContext
 {
 	public static ITestExecutionRecorder? HostExecutionRecorder { get; internal set; }
-	public static ILogger? HostLogger { get; internal set; }
+	public static IMessageLogger? HostMessageLogger { get; internal set; }
 	public static IReadOnlyList<TestCase>? CurrentFilteredTestCases { get; internal set; }
 	public static CancellationToken HostCancelationToken { get; internal set; }
 }

@@ -85,9 +85,7 @@ public abstract class VsTestExecutor : ITestExecutor
 		// Set these globally scoped so the EntryPoint can use these.
 		TestAdapterContext.HostCancelationToken = _cancellationToken;;
 		TestAdapterContext.HostExecutionRecorder = frameworkHandle;
-		// Default to the lowest level, we'll use this to forward as an ILogProvider and configure the wrapping logger to the configured setting
-		// TODO perhaps we don't even need this.
-		TestAdapterContext.HostLogger = frameworkHandle.Wrap(LogLevel.Trace); ;
+		TestAdapterContext.HostMessageLogger = frameworkHandle;
 		TestAdapterContext.CurrentFilteredTestCases = tests;
 
 		var entryPoint = module.EntryPoint;

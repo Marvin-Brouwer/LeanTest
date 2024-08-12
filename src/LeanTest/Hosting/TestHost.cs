@@ -1,4 +1,5 @@
 using LeanTest.Hosting.Options;
+using LeanTest.Hosting.TestAdapter;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,16 +54,24 @@ public static class TestHost
 			.ConfigureLogging((host, builder) =>
 			{
 				builder
-					//.ClearProviders()
 					.AddFilter("Default", LogLevel.Warning)
 					.AddFilter("Microsoft", LogLevel.Warning)
-					.AddFilter("System", LogLevel.Warning);
+					.AddFilter("System", LogLevel.Warning)
+#if DEBUG
+					.AddFilter(TestAdapterLoggerProvider.CategoryName, LogLevel.Debug);
+#else
+					;
+#endif
 
 				// TODO also provide builder.AddDefaultLogger
 				if (!host.HostingEnvironment.IsDevelopment())
 				{
 					builder
+#if(DEBUG)
+						.SetMinimumLevel(LogLevel.Trace)
+#else
 						.SetMinimumLevel(LogLevel.Information)
+#endif
 						.AddSimpleConsole();
 				}
 				else
@@ -71,7 +80,11 @@ public static class TestHost
 						.AddDebug()
 						.AddConsole();
 				}
-				builder
-					.AddProvider(ContextAwareLogProvider.Instance);
+				if (TestAdapterContext.HostMessageLogger is not null)
+				{
+					builder.ClearProviders();
+					builder.Services.AddSingleton(TestAdapterContext.HostMessageLogger);
+					builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, TestAdapterLoggerProvider>());
+				}
 			});
 }

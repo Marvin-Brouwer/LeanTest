@@ -105,7 +105,7 @@ internal class TestRunner
 		}
 
 		var testAssembly = suite.GetType().Assembly;
-		var resultStreamingLoggerFactory = new ResultStreamingLoggerFactory(_logOptions);
+		var resultStreamingLoggerFactory = new TestCaseLoggerFactory(_logOptions);
 
 		TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
 		TestContext.Current.AssemblyContext = new RuntimeAssemblyContext(testAssembly);

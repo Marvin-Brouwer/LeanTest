@@ -5,43 +5,46 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace LeanTest.Hosting;
 
-internal class ResultStreamingLoggerFactory : ILoggerFactory
+internal sealed class TestCaseLoggerFactory : ILoggerFactory
 {
 	private readonly IList<TestResultMessage> _logs;
 	public IReadOnlyList<TestResultMessage> Logs => _logs.AsReadOnly();
 
 	private readonly LoggerFilterOptions _settings;
 
-	public ResultStreamingLoggerFactory(IOptions<LoggerFilterOptions> factoryOptions)
+	public TestCaseLoggerFactory(IOptions<LoggerFilterOptions> factoryOptions)
 	{
 		_logs = new List<TestResultMessage>();
 		_settings = factoryOptions.Value;
 	}
 
-	public ILogger CreateLogger(string categoryName) => new ResultStreamingLogger(_logs, categoryName, _settings);
+	public ILogger CreateLogger(string categoryName) => new TestCaseLogger(_logs, categoryName, _settings);
 
-	public void AddProvider(ILoggerProvider provider)
-	{
+	public void AddProvider(ILoggerProvider provider) =>
 		throw new NotSupportedException("This loggerfactory only supports one type of logger");
-	}
 
 	// Redirect the NullLoggerProvider, it does nothing.
 	public void Dispose() => NullLoggerFactory.Instance.Dispose();
 
-	private class ResultStreamingLogger : ILogger
+	private sealed class TestCaseLogger : ILogger
 	{
+		private const string CategoryName = "LeanTest.TestLogger";
+
 		private IList<TestResultMessage> _logs;
-		private string _categoryName;
+		private string _testCategoryName;
 		private LoggerFilterOptions _settings;
+		private readonly string _providerName;
 		private readonly LoggerFilterRule? _logRule;
 		private readonly LogLevel _minLogLevel;
 
-		public ResultStreamingLogger(IList<TestResultMessage> logs, string categoryName, LoggerFilterOptions settings)
+		public TestCaseLogger(IList<TestResultMessage> logs, string categoryName, LoggerFilterOptions settings)
 		{
 			_logs = logs;
-			_categoryName = categoryName;
+			_testCategoryName = categoryName + "." + CategoryName;
 			_settings = settings;
-			_logRule = _settings.Rules.LastOrDefault(rule => rule.ProviderName?.Equals(nameof(ResultStreamingLogger)) == true);
+
+			_providerName = GetType().FullName!;
+			_logRule = _settings.Rules.LastOrDefault(rule => rule.CategoryName?.Equals(nameof(CategoryName)) == true);
 			_minLogLevel = _logRule?.LogLevel ?? _settings.MinLevel;
 		}
 
@@ -58,9 +61,15 @@ internal class ResultStreamingLoggerFactory : ILoggerFactory
 		{
 			if (!IsEnabled(logLevel)) return;
 
-			// TODO figure out how _logRule.Filter works
+			var filterLogLevel = _settings.Rules
+				.Where(rule => rule.Filter?.Invoke(_providerName, _testCategoryName, logLevel) == true)
+				.Select(rule => rule.LogLevel)
+				.Where(level => level is not null)
+				.Aggregate(_minLogLevel, (aggregate, current) => (current!.Value < aggregate) ? current.Value : aggregate);
 
-			_logs.Add(new TestResultMessage(_categoryName, $"[{logLevel:G}] {formatter(state, exception)}"));
+			if (logLevel <= filterLogLevel) return;
+
+			_logs.Add(new TestResultMessage(_testCategoryName, $"[{logLevel:G}] {formatter(state, exception)}"));
 		}
 	}
 }
