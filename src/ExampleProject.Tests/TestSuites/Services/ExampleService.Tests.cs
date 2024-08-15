@@ -208,7 +208,6 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		var expected = "SomeString";
 
 		// Act
-		// TODO the result of this is somehow not making it to the test log
 		TestOutputLogger.LogInformation("Test log {input}", input);
 		var result = await sut.DoThing(input);
 

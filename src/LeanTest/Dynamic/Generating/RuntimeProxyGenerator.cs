@@ -41,7 +41,10 @@ internal sealed class RuntimeProxyGenerator
 			typeof(IInvokeInterceptor).GetTypeInfo().Assembly,
 			serviceType.GetTypeInfo().Assembly,
 		};
-		// TODO cache?
+
+		// Currently this is not cached, it doesn't seem necessary since the eventual generated assembly is cached
+		// by "_assemblyContext.TryGetType"
+		// However, if we do experience performance issues this might be a good spot to optimize.
 		var originalAssemblyReferences = serviceType.GetTypeInfo().Assembly
 			.GetReferencedAssemblies()
 			.Select(rn => Assembly.Load(rn.FullName));
@@ -59,6 +62,7 @@ internal sealed class RuntimeProxyGenerator
 			.Concat(assemblyReferences);
 
 		var specificDiagnosticOptions = new Dictionary<string, ReportDiagnostic> {
+			// TODO forgot what this is, 
 			["TODO sealed?"] = ReportDiagnostic.Hidden
 		};
 		var compilation = CSharpCompilation.Create(
@@ -85,8 +89,13 @@ internal sealed class RuntimeProxyGenerator
 				null,
 				Platform.AnyCpu,
 				ReportDiagnostic.Default,
-				// TODO what is this?
+#if DEBUG
+				// https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/errors-warnings#warninglevel
 				warningLevel: 4,
+#else
+				// Set warninglevel to 0, we don't want to see any warnings from generated code.
+				warningLevel: 0
+#endif
 				specificDiagnosticOptions,
 				true,
 				true,
@@ -118,15 +127,16 @@ internal sealed class RuntimeProxyGenerator
 		}
 		else
 		{
+			ms.Seek(0, SeekOrigin.Begin);
 #if WRITE_RUNTIME_DLL
 			using var fs = File.OpenWrite(_assemblyContext.GetOutputDllPath());
-			ms.Seek(0, SeekOrigin.Begin);
 			ms.CopyTo(fs);
-#endif
 			ms.Seek(0, SeekOrigin.Begin);
+#endif
 
 			// If this ever causes performance issues, we can also just generate an assembly per type
 			// And maybe just aggregate one #if WRITE_RUNTIME_DLL for ease of access.
+			// Or just don't use _assemblyContext.GetOutputDllPath() and create an "{assemblyName}.g.dll" instead
 			var assembly = _assemblyContext.CreateCleanAssemblyLoadContext().LoadFromStream(ms);
 			var generatedType = assembly.GetType($"{_assemblyContext.NamespaceName}.{className}")!;
 

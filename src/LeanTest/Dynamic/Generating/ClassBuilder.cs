@@ -13,10 +13,12 @@ internal static class ClassBuilder
 		using {{typeof(MethodBase).Namespace}};
 		using {{typeof(IInvokeInterceptor).Namespace}};
 		using {{serviceType.Namespace}};
-
+		using System.CodeDom.Compiler;
+				
 		namespace {{context.NamespaceName}}
 		{
-			public class {{className}} : {{serviceType.Name}}
+			[GeneratedCode("{{typeof(ClassBuilder).Assembly.GetName().Name}}" ,"{{typeof(ClassBuilder).Assembly.GetName().Version}}")]
+			public sealed class {{className}} : {{serviceType.Name}}
 			{
 				private readonly IInvokeInterceptor _interceptor;
 
