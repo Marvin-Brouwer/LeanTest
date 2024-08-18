@@ -1,5 +1,4 @@
 using LeanTest.Dynamic.Invocation;
-using LeanTest.Exceptions;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -8,7 +7,6 @@ using System.Reflection;
 
 namespace LeanTest.Dynamic.Generating;
 
-// TODO Replace LINQ with Methods.
 internal sealed class RuntimeProxyGenerator
 {
 	private readonly RuntimeAssemblyContext _assemblyContext;
@@ -54,95 +52,28 @@ internal sealed class RuntimeProxyGenerator
 			.Select(r => MetadataReference.CreateFromFile(r.Location))
 			.ToArray<MetadataReference>()!;
 
-		var syntaxTrees = _assemblyContext
-			.GeneratedSyntaxTrees
-			.Append(syntaxTree);
-		var references = _assemblyContext
-			.ReferencedAssemblies
-			.Concat(assemblyReferences);
-
-		var specificDiagnosticOptions = new Dictionary<string, ReportDiagnostic> {
-			// TODO forgot what this is, 
-			["TODO sealed?"] = ReportDiagnostic.Hidden
-		};
-		var compilation = CSharpCompilation.Create(
-			_assemblyContext.NamespaceName,
-			syntaxTrees: syntaxTrees,
-			references: references,
-			options: new CSharpCompilationOptions(
-				OutputKind.DynamicallyLinkedLibrary,
-				false,
-				serviceType.Namespace,
-				null,
-				null,
-				null,
-#if DEBUG
-				OptimizationLevel.Debug,
-#else
-				OptimizationLevel.Release,
-#endif
-				checkOverflow: false,
-				true,
-				null,
-				null,
-				default,
-				null,
-				Platform.AnyCpu,
-				ReportDiagnostic.Default,
-#if DEBUG
-				// https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/errors-warnings#warninglevel
-				warningLevel: 4,
-#else
-				// Set warninglevel to 0, we don't want to see any warnings from generated code.
-				warningLevel: 0
-#endif
-				specificDiagnosticOptions,
-				true,
-				true,
-				null,
-				null,
-				null,
-				null,
-				null,
-				false,
-				MetadataImportOptions.All
-			)
+		var compilation = CSharpCompilationPreset.CreateNew(
+			serviceType,
+			_assemblyContext,
+			syntaxTree,
+			assemblyReferences
 		);
 
 		var result = compilation.Emit(ms, cancellationToken: _cancellationToken);
-		if (!result.Success)
-		{
-			var failures = result.Diagnostics.Where(diagnostic =>
-				diagnostic.IsWarningAsError ||
-				diagnostic.Severity == DiagnosticSeverity.Error
-			);
+		if (!result.Success) throw RuntimeProxyGeneratorException.CompilationFaillure(serviceType, result.Diagnostics);
 
-			foreach (Diagnostic diagnostic in failures)
-			{
-				Console.Error.WriteLine("\t{0}: {1}", diagnostic.Id, diagnostic.GetMessage());
-			}
-
-			// TODO better exception
-			throw new LeanTestException("TODO better exception");
-		}
-		else
-		{
-			ms.Seek(0, SeekOrigin.Begin);
+		ms.Seek(0, SeekOrigin.Begin);
 #if WRITE_RUNTIME_DLL
-			using var fs = File.OpenWrite(_assemblyContext.GetOutputDllPath());
-			ms.CopyTo(fs);
-			ms.Seek(0, SeekOrigin.Begin);
+		using var fs = File.OpenWrite(_assemblyContext.GetOutputDllPath());
+		ms.CopyTo(fs);
+		ms.Seek(0, SeekOrigin.Begin);
 #endif
 
-			// If this ever causes performance issues, we can also just generate an assembly per type
-			// And maybe just aggregate one #if WRITE_RUNTIME_DLL for ease of access.
-			// Or just don't use _assemblyContext.GetOutputDllPath() and create an "{assemblyName}.g.dll" instead
-			var assembly = _assemblyContext.CreateCleanAssemblyLoadContext().LoadFromStream(ms);
-			var generatedType = assembly.GetType($"{_assemblyContext.NamespaceName}.{className}")!;
+		var assembly = _assemblyContext.CreateCleanAssemblyLoadContext().LoadFromStream(ms);
+		var generatedType = assembly.GetType($"{_assemblyContext.NamespaceName}.{className}")!;
 
-			_assemblyContext.Add(serviceType, generatedType, syntaxTree, assemblyReferences);
+		_assemblyContext.Add(serviceType, generatedType, syntaxTree, assemblyReferences);
 
-			return generatedType;
-		}
+		return generatedType;
 	}
 }

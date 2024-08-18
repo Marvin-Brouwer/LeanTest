@@ -1,10 +1,10 @@
 using LeanTest.Dependencies.Definitions;
-using LeanTest.Exceptions;
 
 using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Verification;
 
+// TODO Implement like TimesContstraint
 internal class InvocationChecker
 {
 	private readonly InvocationRecordList _invocationRecordList;
@@ -41,6 +41,6 @@ internal class InvocationChecker
 	}
 	public void VerifyNoCalls()
 	{
-		if (_invocationRecordList.HasItems) throw new LeanTestException("TODO");
+		if (_invocationRecordList.HasItems) throw new NotImplementedException("TODO implement like the TimesConstaint");
 	}
 }

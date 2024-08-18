@@ -9,7 +9,6 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 	protected readonly LambdaExpression Method;
 	protected readonly ConfiguredMethodSet ConfiguredMethods;
 
-
 	internal MemberSetup(TDependency dependency, LambdaExpression method, ConfiguredMethodSet configuredMethods)
 	{
 		Dependency = dependency;

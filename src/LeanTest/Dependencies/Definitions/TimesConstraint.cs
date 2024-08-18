@@ -57,7 +57,6 @@ internal sealed class TimesConstraint(Check InvocationCheck, Warning FaillureWar
 	public Exception? VerifyInvocations(uint invocationCount, string name)
 	{
 		if (InvocationCheck(invocationCount)) return null;
-		// TODO Custom exception
-		return new LeanTestException(FaillureWarning(invocationCount, name));
+		return new TimesConstraintVerficationFaillure(FaillureWarning(invocationCount, name));
 	}
 }

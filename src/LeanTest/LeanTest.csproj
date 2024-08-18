@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net7.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -16,6 +16,14 @@
 		<WriteRuntimeDll>false</WriteRuntimeDll>
 		<WriteRuntimeDll Condition="'$(DefineConstants.Contains(WRITE_RUNTIME_DLL))'">true</WriteRuntimeDll>
 	</PropertyGroup>
+
+	<Target Name="CleanGeneratedDlls" BeforeTargets="BeforeClean" Condition="$(WriteRuntimeDll)">
+		<Message Text="Cleaning generated dlls" Importance="high"/>
+		<ItemGroup>
+			<_GeneratedFilesToDelete Include="$(SolutionDir)**\*.g.dll"/>
+		</ItemGroup>
+		<Delete Files='@(_GeneratedFilesToDelete)'/>
+	</Target>
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.GuardClauses" Version="4.5.0" />

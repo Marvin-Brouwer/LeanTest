@@ -33,12 +33,8 @@ internal abstract record ConfiguredMethod(
 	private static (MethodInfo method, ParameterInfo[] parameters) GetMethodFromExpression(LambdaExpression member)
 	{
 		if (member.Body is not MethodCallExpression methodExpression)
-		{
-			// TODO, better exception
-			throw new NotSupportedException();
-		}
-		//new System.Linq.Expressions.Expression.MethodCallExpressionProxy(new System.Linq.Expressions.Expression.LambdaExpressionProxy(member).Body).Method
-		// TODO figure these out
+			throw InvalidCallBackConfigurationException.For<MethodCallExpression>(member);
+
 		var method = methodExpression.Method;
 		var parameters = method.GetParameters();
 

@@ -1,9 +1,21 @@
+#if (!NET8_0_OR_GREATER)
+using System.Runtime.Serialization;
+#endif
+
 namespace LeanTest.Exceptions;
 
-// TODO Make abstract and fix all places with expressive classes
-public class LeanTestException : Exception
+#if (!NET8_0_OR_GREATER)
+[Serializable]
+#endif
+public abstract class LeanTestException : Exception
 {
-	public LeanTestException(string? message) : base(message)
-	{
-	}
+	protected LeanTestException(string? message) : base(message) { }
+	private LeanTestException() { }
+
+#if (!NET8_0_OR_GREATER)
+	/// <inheritdoc />
+	protected LeanTestException(in SerializationInfo info, in StreamingContext context) : base(info, context) { }
+	/// <inheritdoc />
+	protected LeanTestException(in string message) : base(message) { }
+#endif
 }

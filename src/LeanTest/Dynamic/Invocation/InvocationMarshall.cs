@@ -4,8 +4,6 @@ using System.Reflection;
 
 namespace LeanTest.Dynamic.Invocation;
 
-// TODO NotSupportedException => Custom exception
-
 internal sealed class InvocationMarshall : IInvokeInterceptor
 {
 	private readonly ConfiguredMethodSet _configuredMethods;
@@ -21,7 +19,7 @@ internal sealed class InvocationMarshall : IInvokeInterceptor
 		object?[] parameters)
 	{
 		if (!_configuredMethods.TryFind<TReturn>(methodInfo, parameters, out var configuredMethod))
-			throw new NotSupportedException();
+			throw new InvocationNotFoundException(methodInfo, parameters, typeof(TReturn));
 
 		return (TReturn)configuredMethod.Invoke(parameters)!;
 	}
@@ -31,9 +29,8 @@ internal sealed class InvocationMarshall : IInvokeInterceptor
 		MethodBase methodInfo,
 		object?[] parameters)
 	{
-
 		if (!_configuredMethods.TryFind(methodInfo, parameters, out var configuredMethod))
-			throw new NotSupportedException();
+			throw new InvocationNotFoundException(methodInfo, parameters);
 
 		_ = configuredMethod.Invoke(parameters)!;
 	}
