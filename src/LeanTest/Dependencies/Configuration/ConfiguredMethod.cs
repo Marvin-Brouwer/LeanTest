@@ -3,11 +3,9 @@ using System.Reflection;
 
 namespace LeanTest.Dependencies.Configuration;
 
-internal abstract record ConfiguredMethod(
-	MethodInfo Method, ParameterInfo[] Parameters, Type? ReturnType
-)
-{
-	internal static ConfiguredMethod ForCallback(LambdaExpression member, Delegate? callbackDelegate = null)
+internal abstract record ConfiguredMethod(MethodBase Method, ParameterInfo[] Parameters, Type ReturnType)
+	: MethodDefinition(Method, Parameters, ReturnType)
+{	internal static ConfiguredMethod ForCallback(LambdaExpression member, Delegate? callbackDelegate = null)
 	{
 		var (method, parameters) = GetMethodFromExpression(member);
 		return new ConfiguredVoidMethod(method, parameters, callbackDelegate);
@@ -36,7 +34,7 @@ internal abstract record ConfiguredMethod(
 			throw InvalidCallBackConfigurationException.For<MethodCallExpression>(member);
 
 		var method = methodExpression.Method;
-		var parameters = method.GetParameters();
+		var parameters = method .GetParameters();
 
 		return (method, parameters);
 	}
@@ -51,14 +49,14 @@ internal abstract record ConfiguredMethod(
 }
 
 internal sealed record ConfiguredValueMethod(
-	MethodInfo Method, ParameterInfo[] Parameters, Type? ReturnType, object? ReturnValue
+	MethodBase Method, ParameterInfo[] Parameters, Type ReturnType, object? ReturnValue
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
 {
 	public override object? Invoke(params object?[] parameters) => ReturnValue;
 }
 
 internal sealed record ConfiguredExceptionMethod(
-	MethodInfo Method, ParameterInfo[] Parameters, Type? ReturnType, Func<Exception> Exception
+	MethodBase Method, ParameterInfo[] Parameters, Type ReturnType, Func<Exception> Exception
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
 {
 	// TODO analyzer to make sure they don't throw in the Throws(() => ..) expression
@@ -81,7 +79,7 @@ internal sealed record ConfiguredExceptionMethod(
 }
 
 internal sealed record ConfiguredLambdaMethod(
-	MethodInfo Method, ParameterInfo[] Parameters, Type? ReturnType, Delegate? returnDelegate
+	MethodBase Method, ParameterInfo[] Parameters, Type ReturnType, Delegate? returnDelegate
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
 {
 	public override object? Invoke(params object?[] parameters)
@@ -94,7 +92,7 @@ internal sealed record ConfiguredLambdaMethod(
 	}
 }
 internal sealed record ConfiguredVoidMethod(
-	MethodInfo Method, ParameterInfo[] Parameters, Delegate? callbackDelegate
+	MethodBase Method, ParameterInfo[] Parameters, Delegate? callbackDelegate
 ) : ConfiguredMethod(Method, Parameters, typeof(void))
 {
 	public override object? Invoke(params object?[] parameters)
