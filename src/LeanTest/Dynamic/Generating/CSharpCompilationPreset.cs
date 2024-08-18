@@ -7,21 +7,21 @@ namespace LeanTest.Dynamic.Generating;
 internal static class CSharpCompilationPreset
 {
 	/// <inheritdoc cref="CompilationOptions.SpecificDiagnosticOptions">
-	private static readonly Dictionary<string, ReportDiagnostic> _specificDiagnosticOptions = new Dictionary<string, ReportDiagnostic>
+	private static readonly Dictionary<string, ReportDiagnostic> _specificDiagnosticOptions = new ()
 	{
-		// TODO forgot what this is, 
+		// TODO determine which diagnostics we hide
+		// This might be necessary to allow inheriting from sealed classes perhaps.
 		["TODO sealed?"] = ReportDiagnostic.Hidden
 	};
-
-	private static CSharpCompilationOptions CreateOptions(string? serviceTypeNamespace) => new (
+	private static readonly CSharpCompilationOptions _defaultOptions = new (
 
 #region output
 		// We generate a dependency, so a DLL
 		outputKind: OutputKind.DynamicallyLinkedLibrary,
 		// Just include verything and we're fine
 		platform: Platform.AnyCpu,
-		// Use the passed namespace as a module name
-		moduleName: serviceTypeNamespace,
+		// We configure this using the .WithModuleName()
+		moduleName: null,
 		// Not required for a library
 		mainTypeName: null,
 		// Not required for a library
@@ -117,7 +117,8 @@ internal static class CSharpCompilationPreset
 			assemblyContext.NamespaceName,
 			syntaxTrees: mergedSyntaxTrees,
 			references: mergedReferences,
-			options: CreateOptions(serviceType.Namespace)
+			options: _defaultOptions
+				.WithModuleName(serviceType.Namespace)
 		);
 	}
 }

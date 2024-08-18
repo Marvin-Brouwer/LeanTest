@@ -1,6 +1,7 @@
 
 
 using LeanTest.Dependencies.Tests.Fixtures;
+using LeanTest.Dynamic.Invocation;
 
 
 namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
@@ -43,7 +44,7 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Assert
 		result.Should()
-			.ThrowExactly<NotSupportedException>();
+			.ThrowExactly<InvocationNotFoundException>();
 	});
 
 	public ITest VoidNoParameters_ConfiguredToThrow_Throws => Test(() =>
@@ -94,7 +95,7 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Assert
 		result.Should()
-			.ThrowExactly<NotSupportedException>();
+			.ThrowExactly<InvocationNotFoundException>();
 	});
 
 	public ITest VoidWithParameters_ConfiguredToThrow_Throws => Test(() =>
@@ -145,7 +146,7 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Assert
 		result.Should()
-			.ThrowExactly<NotSupportedException>();
+			.ThrowExactly<InvocationNotFoundException>();
 	});
 
 	public ITest VoidWithGenericParameters_ConfiguredToThrow_Throws => Test(() =>
