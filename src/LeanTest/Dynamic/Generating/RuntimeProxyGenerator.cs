@@ -25,6 +25,8 @@ internal sealed class RuntimeProxyGenerator
 		// However, I failed to save the library :(
 		// And perhaps it's better to have a "funky" mocks/stubs package separately for these situations.
 		// Situations like TelemetryClient etc.
+		// Perhaps it's worth repurposing https://github.com/Marvin-Brouwer/TSpy?tab=readme-ov-file
+		// Or maybe (I forgot the name) the ProductivityTools library from Microsoft from way back when.
 		if (serviceType.IsSealed) throw RuntimeProxyGeneratorException.SealedType(serviceType);
 
 		if (_assemblyContext.TryGetType(serviceType, out var generatedProxyType))

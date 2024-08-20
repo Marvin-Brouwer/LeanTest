@@ -9,6 +9,7 @@ public sealed record class UnitTestDataScenario: ITest
 {
 	public IReadOnlyList<object?[]> TestData { get; }
 	public Func<object?[], ValueTask> TestBody { get; }
+	public string FilePath { get; }
 	public int LineNumber { get; }
 
 	// TODO this should be taskCompletionSource
@@ -19,7 +20,7 @@ public sealed record class UnitTestDataScenario: ITest
 	};
 
 	// TODO extract
-	private static int GetLineNumber()
+	private (string filePath, int lineNumber) GetFileMetaData()
 	{
 		try
 		{
@@ -30,14 +31,14 @@ public sealed record class UnitTestDataScenario: ITest
 				if (frame.GetMethod() is not MethodInfo methodInfo) continue;
 				if (methodInfo.ReturnType != typeof(ITest)) continue;
 
-				return frame.GetFileLineNumber();
+				return (frame.GetFileName()!, frame.GetFileLineNumber());
 			}
-			return -1;
+			return (GetType().FullName!, -1);
 		}
 		catch (Exception ex)
 		{
 			if (!Debugger.IsAttached) Debugger.Launch();
-			return -2;
+			return (ex.Message, -1);
 		}
 	}
 
@@ -49,7 +50,9 @@ public sealed record class UnitTestDataScenario: ITest
 		TestData = testData;
 		TestBody = testBody;
 
-		LineNumber = GetLineNumber();
+		var (filePath, lineNumber) = GetFileMetaData();
+		FilePath = filePath;
+		LineNumber = lineNumber;
 	}
 	public UnitTestDataScenario(IEnumerable<object?[]> testData, Action<object?[]> testAction) : this(testData.ToImmutableList(), Wrap(testAction)) { }
 }

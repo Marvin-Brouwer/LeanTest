@@ -87,6 +87,8 @@ public abstract class LeanTestDiscoverer : ITestDiscoverer
 						DisplayName =
 							testSuite.Name + " [FAILED]" + Environment.NewLine +
 							instantiationException,
+						// TODO: Perhaps it's best to actually parse the stacktrace and fish out the fileName
+						// Otherwise: https://stackoverflow.com/questions/10960071/how-to-find-path-to-cs-file-by-its-type-in-c-sharp
 						CodeFilePath = testSuite.Name,
 						LineNumber = instantiationException.StackTrace is not null
 							? int.Parse(instantiationException.StackTrace?
@@ -122,7 +124,7 @@ public abstract class LeanTestDiscoverer : ITestDiscoverer
 							{
 								Id = StringToGUID(displayName),
 								DisplayName = displayName,
-								CodeFilePath = string.Concat(testSuite.Name, ".", testProperty.Name),
+								CodeFilePath = dt.FilePath,
 								LineNumber = dt.LineNumber,
 								Traits = {
 									{  "Type" , "Unit" },
@@ -153,7 +155,7 @@ public abstract class LeanTestDiscoverer : ITestDiscoverer
 						{
 							Id = StringToGUID(displayName),
 							DisplayName = displayName,
-							CodeFilePath = string.Concat(testSuite.Name, ".", testProperty.Name),
+							CodeFilePath = tc.FilePath,
 							LineNumber = tc.LineNumber,
 							Traits = {
 								{  "Type" , "Unit" },
