@@ -2,19 +2,17 @@ using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Factories;
 
-// TODO store last match? Or how are we going to solve this?
+/// <inheritdoc />
 internal readonly record struct ParameterFactory : IParameterFactory
 {
 	internal static readonly IParameterFactory Instance = new ParameterFactory();
 
-	public TParam Is<TParam>()
-	{
-		throw new NotImplementedException();
-	}
-
+	public TParam Is<TParam>() => default!;
 	public TParam Matches<TParam>(Expression<Func<TParam, bool>> match)
 	{
-		throw new NotImplementedException();
+		// We only use this to configure the parameter
+		_ = match;
+		return Is<TParam>();
 	}
 
 	// TODO see if this still works

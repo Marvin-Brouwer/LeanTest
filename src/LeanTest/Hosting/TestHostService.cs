@@ -1,5 +1,3 @@
-using LeanTest.Hosting.TestAdapter.Standalone;
-
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;

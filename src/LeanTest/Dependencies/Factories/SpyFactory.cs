@@ -16,8 +16,6 @@ internal sealed class SpyFactory : ISpyFactory
 	Spy<TService> ISpyFactory.On<TService>(TService service)
 		where TService : class
 	{
-		// TODO validate type isn't sealed? Or test with sealed class and see what happens
-
 		var invocationRecordList = new InvocationRecordList();
 		var invocationRecorder = new InvocationRecorder<TService>(service, invocationRecordList);
 

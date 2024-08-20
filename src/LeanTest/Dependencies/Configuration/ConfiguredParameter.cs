@@ -1,3 +1,5 @@
+using FluentSerializer.Core.Extensions;
+
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -13,16 +15,14 @@ public abstract class ConfiguredParameter
 	public static ConfiguredParameter ForParameter(ParameterInfo parameter) => new TypeConstrainedParameter
 	{
 		Parameter = parameter,
-		// TODO steal from serializer
-		IsNullable = false, //parameter.ParameterType.IsNullable()
+		IsNullable = parameter.IsNullable(),
 		ParameterType = parameter.ParameterType,
 	};
 
 	public static ConfiguredParameter ForType(ParameterInfo parameter, Type parameterType) => new TypeConstrainedParameter
 	{
 		Parameter = parameter,
-		// TODO steal from serializer
-		IsNullable = false, //parameterType.IsNullable()
+		IsNullable = parameter.IsNullable(),
 		ParameterType = parameterType,
 	};
 
@@ -67,7 +67,6 @@ internal sealed class ValueConstrainedParameter : ConfiguredParameter
 internal sealed class TypeConstrainedParameter : ConfiguredParameter
 {
 	public required Type ParameterType { get; init; }
-	// TODO steal from serializer
 	public required bool IsNullable { get; init; }
 
 	public override bool MatchesRequirements<T>(T? obj) where T : default

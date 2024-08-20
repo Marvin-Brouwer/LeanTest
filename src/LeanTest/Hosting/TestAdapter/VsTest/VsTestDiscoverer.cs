@@ -1,4 +1,3 @@
-using LeanTest.Hosting.TestAdapter;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
@@ -82,8 +81,26 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 				var (suite, instantiationException) = InstantiateUnitTestSuite(testSuite);
 				if (instantiationException is not null)
 				{
-					// TODO register as instantly failing testcase
-					throw instantiationException;
+					var msTestCase = new MsTestCase(testSuite.FullName!, VsTestExecutor.Uri, assemblyPath)
+					{
+						Id = StringToGUID(testSuite.FullName!),
+						DisplayName =
+							testSuite.Name + " [FAILED]" + Environment.NewLine +
+							instantiationException,
+						CodeFilePath = testSuite.Name,
+						LineNumber = instantiationException.StackTrace is not null
+							? int.Parse(instantiationException.StackTrace?
+								.Split(Environment.NewLine)
+								.Reverse()
+								.Skip(1)
+								.First()!
+								.Split(":line ")
+								.ElementAtOrDefault(1) ?? "0")
+							: -1
+					};
+
+					yield return msTestCase;
+					yield break;
 				}
 				foreach (var testProperty in testSuite.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 				{
@@ -173,8 +190,12 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 			var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuite)!;
 			return (suite, null);
 		}
+		catch (TargetInvocationException ex) when (ex.InnerException is not null) {
+			return (null, ex.InnerException);
+		}
 		catch (Exception ex)
 		{
+			if (!Debugger.IsAttached) Debugger.Launch();
 			return (null, ex);
 		}
 	}

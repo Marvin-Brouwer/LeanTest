@@ -33,6 +33,29 @@ public sealed class RuntimeProxyGeneratorException : LeanTestException
 		return new(faillures, diagnostics, message.ToString());
 	}
 
+	/// <summary>
+	/// Fake the Diagnostic thrown by attempting to inherit from a sealed type.
+	/// This is just to short cirquit compiling an entire proxy that fails anyway.
+	/// </summary>
+	internal static RuntimeProxyGeneratorException SealedType(Type serviceType)
+	{
+		// https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0509?f1url=%3FappId%3Droslyn%26k%3Dk(CS0509)
+		var description = $"Proxy generated class cannot derive from sealed type '{serviceType.Name}'";
+		var descriptor = new DiagnosticDescriptor(
+			$"CS0509", "Failed to compile \"{serviceType.FullName}\".", description, "Compiler", DiagnosticSeverity.Error, true,
+			description, "https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0509?f1url=%3FappId%3Droslyn%26k%3Dk(CS0509)"
+		);
+
+		var diagnostic = Diagnostic.Create(descriptor, Location.None);
+
+		var faillures = new List<Diagnostic>
+		{
+			diagnostic
+		};
+
+		return new(faillures, faillures, diagnostic.GetMessage());
+	}
+
 	public IReadOnlyList<Diagnostic> Faillures { get; }
 	public IReadOnlyList<Diagnostic> FullDiagnostics { get; }
 

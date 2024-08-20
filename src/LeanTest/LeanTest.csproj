@@ -18,11 +18,11 @@
 	</PropertyGroup>
 
 	<Target Name="CleanGeneratedDlls" BeforeTargets="BeforeClean" Condition="$(WriteRuntimeDll)">
-		<Message Text="Cleaning generated dlls" Importance="high"/>
+		<Message Text="Cleaning generated dlls" Importance="high" />
 		<ItemGroup>
-			<_GeneratedFilesToDelete Include="$(SolutionDir)**\*.g.dll"/>
+			<_GeneratedFilesToDelete Include="$(SolutionDir)**\*.g.dll" />
 		</ItemGroup>
-		<Delete Files='@(_GeneratedFilesToDelete)'/>
+		<Delete Files="@(_GeneratedFilesToDelete)" />
 	</Target>
 
 	<ItemGroup>

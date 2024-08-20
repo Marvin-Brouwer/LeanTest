@@ -15,12 +15,7 @@ internal sealed class DummyFactory : IDummyFactory
 	}
 
 	TService IDummyFactory.Of<TService>()
-		where TService : class
-	{
-		// TODO validate type isn't sealed? Or test with sealed class and see what happens
-
-		return _proxyGenerator
+		where TService : class => _proxyGenerator
 			.GenerateProxy<TService>()
 			.InitializeType<TService>(_invocationMarshall);
-	}
 }

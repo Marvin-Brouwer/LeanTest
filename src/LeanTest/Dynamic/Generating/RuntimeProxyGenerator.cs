@@ -21,6 +21,12 @@ internal sealed class RuntimeProxyGenerator
 	public Type GenerateProxy<TServiceType>()
 	{
 		var serviceType = typeof(TServiceType);
+		// TODO perhaps this is a good spot to figure out whether that library that outputs IL code provides a solution?
+		// However, I failed to save the library :(
+		// And perhaps it's better to have a "funky" mocks/stubs package separately for these situations.
+		// Situations like TelemetryClient etc.
+		if (serviceType.IsSealed) throw RuntimeProxyGeneratorException.SealedType(serviceType);
+
 		if (_assemblyContext.TryGetType(serviceType, out var generatedProxyType))
 			return generatedProxyType;
 

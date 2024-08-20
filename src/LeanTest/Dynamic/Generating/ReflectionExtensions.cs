@@ -19,7 +19,7 @@ internal static class ReflectionExtensions
 	}
 
 	public static TService InitializeType<TService>(this Type generatedType, params object[] constructorParameters)
-		where TService : class
+		where TService : notnull
 	{
 		var wrappedInstance = Activator.CreateInstance(generatedType, constructorParameters)!;
 		return (TService)wrappedInstance;

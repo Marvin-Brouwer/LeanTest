@@ -1,5 +1,3 @@
-using LeanTest.Exceptions;
-
 using static LeanTest.Dependencies.Definitions.TimesConstraint;
 
 namespace LeanTest.Dependencies.Definitions;

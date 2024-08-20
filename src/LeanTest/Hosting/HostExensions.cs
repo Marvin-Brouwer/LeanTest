@@ -6,7 +6,6 @@ using LeanTest.Hosting.TestAdapter.VsTest;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 namespace LeanTest.Hosting;
 

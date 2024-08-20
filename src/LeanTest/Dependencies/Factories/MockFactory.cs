@@ -17,8 +17,6 @@ internal sealed class MockFactory : IMockFactory
 	Mock<TService> IMockFactory.Of<TService>()
 		where TService : class
 	{
-		// TODO validate type isn't sealed? Or test with sealed class and see what happens
-
 		var configuredMethods = new ConfiguredMethodSet();
 		var invocationRecordList = new InvocationRecordList();
 		var recordingInvocationMarshall = new RecordingInvocationMarshall(configuredMethods, invocationRecordList);
@@ -29,5 +27,10 @@ internal sealed class MockFactory : IMockFactory
 
 		return new Mock<TService>(configuredMethods, invocationRecordList, instance);
 	}
+}
+
+public sealed class TestClass
+{
+	public int MyProperty { get; set; }
 }
 

@@ -15,11 +15,9 @@ internal sealed class RuntimeAssemblyContext
 	{
 		var originalAssemblyName = originalAssembly.GetName()!;
 
-		// TODO package release date
-
 		// This doesn't need to be completely random, this just needs to be random engouh to prevent namespace classes.
 		// Based on: https://stackoverflow.com/a/41723783/2319865
-		var ticks = new DateTime(2016, 1, 1).Ticks;
+		var ticks = new DateTime(2023, 1, 1).Ticks;
 		var timeId = DateTime.Now.Ticks - ticks;
 		AssemblyName = $"{originalAssemblyName.Name}.RuntimeGenerated_{timeId:x}";
 		NamespaceName = AssemblyName;

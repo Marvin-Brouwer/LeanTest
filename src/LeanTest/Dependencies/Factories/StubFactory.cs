@@ -16,13 +16,11 @@ internal sealed class StubFactory : IStubFactory
 	Stub<TService> IStubFactory.Of<TService>()
 		where TService : class
 	{
-		// TODO validate type isn't sealed? Or test with sealed class and see what happens
-
 		var configuredMethods = new ConfiguredMethodSet();
 		var invocationMarshall = new InvocationMarshall(configuredMethods);
 
 		var instance = _proxyGenerator
-		.GenerateProxy<TService>()
+			.GenerateProxy<TService>()
 			.InitializeType<TService>(invocationMarshall);
 
 		return new Stub<TService>(configuredMethods, instance);

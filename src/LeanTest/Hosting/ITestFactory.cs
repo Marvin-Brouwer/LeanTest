@@ -1,5 +1,3 @@
-using LeanTest.Tests;
-
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 using System.Reflection;

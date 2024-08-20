@@ -1,4 +1,3 @@
-using LeanTest.Hosting.Options;
 using LeanTest.Hosting.TestAdapter;
 
 using Microsoft.Extensions.Configuration;
@@ -6,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console;
 
 namespace LeanTest.Hosting;
 

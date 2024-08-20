@@ -4,14 +4,15 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Text;
 
 namespace LeanTest.Dynamic.Generating;
+
 internal static class CSharpCompilationPreset
 {
 	/// <inheritdoc cref="CompilationOptions.SpecificDiagnosticOptions">
 	private static readonly Dictionary<string, ReportDiagnostic> _specificDiagnosticOptions = new ()
 	{
-		// TODO determine which diagnostics we hide
-		// This might be necessary to allow inheriting from sealed classes perhaps.
-		["TODO sealed?"] = ReportDiagnostic.Hidden
+		// To anyone who knows how this works, this doesn't seem to hide the error.
+		// https://learn.microsoft.com/en-us/dotnet/csharp/misc/cs0509?f1url=%3FappId%3Droslyn%26k%3Dk(CS0509)
+		["CS0509"] = ReportDiagnostic.Suppress
 	};
 	private static readonly CSharpCompilationOptions _defaultOptions = new (
 
