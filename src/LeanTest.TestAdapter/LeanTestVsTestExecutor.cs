@@ -4,6 +4,5 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace LeanTest.TestAdapter;
 
-[DefaultExecutorUri(VsTestExecutor.Id)]
-internal sealed class TestDiscoverer
-	: VsTestDiscoverer;
+[ExtensionUri(Id)]
+internal sealed class LeanTestVsTestExecutor : LeanTestExecutor;

@@ -17,7 +17,7 @@ using LeanTest.Hosting.TestAdapter.Constants;
 namespace LeanTest.Hosting.TestAdapter.VsTest;
 
 [FileExtension(".exe"), FileExtension(".dll")]
-public abstract class VsTestDiscoverer : ITestDiscoverer
+public abstract class LeanTestDiscoverer : ITestDiscoverer
 {
 	private ILogger _logger = null!;
 
@@ -67,7 +67,7 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 
 	private IEnumerable<MsTestCase> GetTestsForAssembly(string assemblyPath)
 	{
-		var assemblyLoadContext = new AssemblyLoadContext($"{nameof(VsTestDiscoverer)}.{assemblyPath}", true);
+		var assemblyLoadContext = new AssemblyLoadContext($"{nameof(LeanTestDiscoverer)}.{assemblyPath}", true);
 		try
 		{
 			var assembly = assemblyLoadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(assemblyPath));
@@ -81,7 +81,7 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 				var (suite, instantiationException) = InstantiateUnitTestSuite(testSuite);
 				if (instantiationException is not null)
 				{
-					var msTestCase = new MsTestCase(testSuite.FullName!, VsTestExecutor.Uri, assemblyPath)
+					var msTestCase = new MsTestCase(testSuite.FullName!, LeanTestExecutor.Uri, assemblyPath)
 					{
 						Id = StringToGUID(testSuite.FullName!),
 						DisplayName =
@@ -118,7 +118,7 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 							var testData = dt.TestData[index];
 							var (fullyQualifiedName, displayName) = testProperty.GetTestNames(testSuite.Name, testData);
 
-							var msTestCase = new MsTestCase(fullyQualifiedName, VsTestExecutor.Uri, assemblyPath)
+							var msTestCase = new MsTestCase(fullyQualifiedName, LeanTestExecutor.Uri, assemblyPath)
 							{
 								Id = StringToGUID(displayName),
 								DisplayName = displayName,
@@ -149,7 +149,7 @@ public abstract class VsTestDiscoverer : ITestDiscoverer
 					{
 						var (fullyQualifiedName, displayName) = testProperty.GetTestNames(testSuite.Name);
 
-						var msTestCase = new MsTestCase(fullyQualifiedName, VsTestExecutor.Uri, assemblyPath)
+						var msTestCase = new MsTestCase(fullyQualifiedName, LeanTestExecutor.Uri, assemblyPath)
 						{
 							Id = StringToGUID(displayName),
 							DisplayName = displayName,

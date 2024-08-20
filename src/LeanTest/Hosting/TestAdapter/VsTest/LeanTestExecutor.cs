@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 using System.Diagnostics;
 using System.Reflection;
 
-public abstract class VsTestExecutor : ITestExecutor
+public abstract class LeanTestExecutor : ITestExecutor
 {
 	public const string Id = "executor://leantest.testadapter/";
 	public static readonly Uri Uri = new(Id);
@@ -17,8 +17,8 @@ public abstract class VsTestExecutor : ITestExecutor
 	private readonly CancellationTokenSource _cancellationSource;
 	private readonly CancellationToken _cancellationToken;
 
-	public VsTestExecutor() : this(CancellationToken.None) { }
-	public VsTestExecutor(CancellationToken cancellationToken)
+	public LeanTestExecutor() : this(CancellationToken.None) { }
+	public LeanTestExecutor(CancellationToken cancellationToken)
 	{
 		_cancellationSource = new CancellationTokenSource();
 		_cancellationToken = CancellationTokenSource
