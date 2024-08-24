@@ -9,7 +9,6 @@ namespace LeanTest.Dependencies.Factories;
 /// This isn't really a factory, however, "IParameterEpxressionRepresentationProvider" sounds strange.
 /// And, the other providing classes are called IXFactory too.
 /// </internalRemark>
-// TODO steal more from Moq -> Convert to GitHub task
 public interface IParameterFactory
 {
 	TParam Is<TParam>();

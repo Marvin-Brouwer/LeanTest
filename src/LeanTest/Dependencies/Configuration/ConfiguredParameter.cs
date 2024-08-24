@@ -36,9 +36,8 @@ public abstract class ConfiguredParameter
 			}
 			catch
 			{
-                // TODO: This should really never happen, however, now we hide it  -> Create GitHub task
-                // How should we handle this?
-                return false;
+				// https://github.com/Marvin-Brouwer/LeanTest/issues/7
+				return false;
 			}
 		};
 

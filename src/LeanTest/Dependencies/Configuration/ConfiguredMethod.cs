@@ -68,13 +68,12 @@ internal sealed record ConfiguredValueMethod(
 	public override object? Invoke(params object?[] parameters) => ReturnValue;
 }
 
+// https://github.com/Marvin-Brouwer/LeanTest/issues/5
 internal sealed record ConfiguredExceptionMethod<TException>(
 	MethodBase Method, Parameters Parameters, Type ReturnType, Func<TException> Exception
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
 	where TException : Exception
 {
-	// TODO-analyzer to make sure they don't throw in the Throws(() => ..) expression
-	// TODO-analyzer to suggest using Throws instead of Executes(() => throw ...) etc.
 	public override object? Invoke(params object?[] parameters)
 	{
 		throw Exception();

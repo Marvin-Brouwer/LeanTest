@@ -270,7 +270,7 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2, T3, T4, T5>(SimulatedAsyncCallback);
 	}
 
-	// TODO-analyzer to prevent this under 5 params
+	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
 	public static TDependency ExecutesAsync<TDependency>(
 		this IMemberSetup<TDependency, Task> memberSetup, DynamicAction asyncCallback
 	)
@@ -293,6 +293,7 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns(SimulatedAsyncCallback);
 	}
 
+	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
 	public static TDependency ExecutesAsync<TDependency>(
 		this IMemberSetup<TDependency, ValueTask> memberSetup, DynamicAction asyncCallback
 	)
