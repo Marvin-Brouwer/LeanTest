@@ -34,7 +34,7 @@ public sealed class StubTests : TestSuite.UnitTests
 			.NotThrow();
 	});
 
-	public ITest VoidNoParameters_NotConfigured_Throws => Test(async () =>
+	public ITest VoidNoParameters_NotConfigured_Throws => Test(() =>
 	{
 		// Arrange
 		var sut = _someStub.Instance;

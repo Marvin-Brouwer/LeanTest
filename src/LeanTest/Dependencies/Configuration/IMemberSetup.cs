@@ -16,7 +16,7 @@ public interface IMemberSetup<out TDependency> where TDependency : IDependency
 	TDependency Executes<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callBack);
 	TDependency Executes<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callBack);
 
-	// TODO-analyzer to prevent this under 5 params
+	// TODO-analyzer to prevent this under 5 params  -> Convert to GitHub task
 	TDependency Executes(DynamicAction callBack);
 }
 
@@ -33,6 +33,6 @@ public interface IMemberSetup<TDependency, TReturn> where TDependency : IDepende
 	TDependency Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TReturn> callBack);
 	TDependency Returns<T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, TReturn> callBack);
 
-	// TODO-analyzer to prevent this under 5 params
+	// TODO-analyzer to prevent this under 5 params -> Convert to GitHub task
 	TDependency Returns(DynamicFunction<TReturn> callBack);
 }
