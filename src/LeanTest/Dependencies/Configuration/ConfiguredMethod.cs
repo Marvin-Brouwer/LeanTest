@@ -1,6 +1,3 @@
-using LeanTest.Dependencies.Factories;
-
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -14,89 +11,26 @@ internal abstract record ConfiguredMethod(MethodBase Method, Parameters Paramete
 	// For now that adds unneccesary complexity.
 	internal static ConfiguredMethod ForCallback(LambdaExpression member, Delegate? callbackDelegate = null)
 	{
-		var (method, parameters) = GetMethodFromExpression(member);
+		var (method, parameters) = member.GetMethodFromExpression();
 		return new ConfiguredVoidMethod(method, parameters, callbackDelegate);
 	}
 	internal static ConfiguredMethod ForCallback<TReturn>(LambdaExpression member, Delegate returnDelegate)
 	{
-		var (method, parameters) = GetMethodFromExpression(member);
+		var (method, parameters) = member.GetMethodFromExpression();
 		return new ConfiguredLambdaMethod(method, parameters, typeof(TReturn), returnDelegate);
 	}
 
 	internal static ConfiguredMethod ForException<TException>(LambdaExpression member, Func<TException> exception)
 		where TException : Exception
 	{
-		var (method, parameters) = GetMethodFromExpression(member);
+		var (method, parameters) = member.GetMethodFromExpression();
 		return new ConfiguredExceptionMethod<TException>(method, parameters, method.ReturnType, exception);
 	}
 
 	internal static ConfiguredMethod ForValue<TReturn>(LambdaExpression member, TReturn returnValue)
 	{
-		var (method, parameters) = GetMethodFromExpression(member);
+		var (method, parameters) = member.GetMethodFromExpression();
 		return new ConfiguredValueMethod(method, parameters, typeof(TReturn), returnValue);
-	}
-
-	private static (MethodInfo method, Parameters parameters) GetMethodFromExpression(LambdaExpression member)
-	{
-		if (member.Body is not MethodCallExpression methodExpression)
-			throw InvalidCallBackConfigurationException.For<MethodCallExpression>(member);
-
-		var method = methodExpression.Method;
-		var parameters = method.GetParameters() ?? Array.Empty<ParameterInfo>();
-		var configuredParameters = new ConfiguredParameter[parameters.Length];
-		// Keep track of the "parameterSpecificity", this basically just means that a higher number get's filtered first
-		var parameterSpecificity = 0;
-
-		for (int  i = 0; i < parameters.Length; i++)
-		{
-			var originalParameter = parameters[i];
-			var argument = methodExpression.Arguments[i];
-			// TODO handle nulls correctly
-			if (argument.NodeType == ExpressionType.Constant) {
-				parameterSpecificity = 1;
-				configuredParameters[i] = ConfiguredParameter.ForConstant(originalParameter, (ConstantExpression)argument);
-				continue;
-			}
-			if (argument.NodeType != ExpressionType.Call)
-			{
-				configuredParameters[i] = ConfiguredParameter.ForParameter(originalParameter);
-				continue;
-			}
-
-			if (argument is not MethodCallExpression argumentConfiguration)
-			{
-				configuredParameters[i] = ConfiguredParameter.ForParameter(originalParameter);
-				continue;
-			}
-			if (argumentConfiguration.Method.DeclaringType != typeof(IParameterFactory))
-			{
-				configuredParameters[i] = ConfiguredParameter.ForParameter(originalParameter);
-				continue;
-			}
-
-			parameterSpecificity = argumentConfiguration.Method.Name == nameof(IParameterFactory.Matches)
-				? 3
-				: 2;
-
-			configuredParameters[i] = argumentConfiguration.Method.Name switch
-			{
-				nameof(IParameterFactory.Is) => ConfiguredParameter.ForType(
-					originalParameter,
-					argumentConfiguration.Method.GetGenericArguments().First()
-				),
-				nameof(IParameterFactory.Matches) => ConfiguredParameter.ForMatch(
-					originalParameter,
-					(UnaryExpression)argumentConfiguration.Arguments.First()
-				),
-				nameof(IParameterFactory.IsReference) => ConfiguredParameter.ForType(
-					originalParameter,
-					argumentConfiguration.Method.GetGenericArguments().First()
-				),
-				_ => throw new UnreachableException()
-			};
-		}
-
-		return (method, new Parameters(configuredParameters, parameterSpecificity));
 	}
 
 	/// <summary>
@@ -148,28 +82,28 @@ internal sealed record ConfiguredExceptionMethod<TException>(
 }
 
 internal sealed record ConfiguredLambdaMethod(
-	MethodBase Method, Parameters Parameters, Type ReturnType, Delegate? returnDelegate
+	MethodBase Method, Parameters Parameters, Type ReturnType, Delegate? ReturnDelegate
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
 {
 	public override object? Invoke(params object?[] parameters)
 	{
-		if (returnDelegate is null) return null;
+		if (ReturnDelegate is null) return null;
 
 		return parameters.Length == 0
-			? returnDelegate.DynamicInvoke(null)!
-			: returnDelegate.DynamicInvoke(parameters)!;
+			? ReturnDelegate.DynamicInvoke(null)!
+			: ReturnDelegate.DynamicInvoke(parameters)!;
 	}
 }
 internal sealed record ConfiguredVoidMethod(
-	MethodBase Method, Parameters Parameters, Delegate? callbackDelegate
+	MethodBase Method, Parameters Parameters, Delegate? CallbackDelegate
 ) : ConfiguredMethod(Method, Parameters, typeof(void))
 {
 	public override object? Invoke(params object?[] parameters)
 	{
-		if (callbackDelegate is null) return null;
+		if (CallbackDelegate is null) return null;
 
 		return parameters.Length == 0
-			? callbackDelegate.DynamicInvoke(null)!
-			: callbackDelegate.DynamicInvoke(parameters)!;
+			? CallbackDelegate.DynamicInvoke(null)!
+			: CallbackDelegate.DynamicInvoke(parameters)!;
 	}
 }

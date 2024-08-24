@@ -21,11 +21,13 @@ internal class DiscoveringTestFactory : ITestFactory
 		_logger = loggerFactory.CreateLogger<DiscoveringTestFactory>();
 	}
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 	public async IAsyncEnumerable<TestCase> InitializeTests(
 		Assembly assembly, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		yield break;
 		throw new NotImplementedException("TODO Parity fix");
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
 		//TestContext.Current.TestLoggerFactory = _loggerFactory;
 		//TestContext.Current.TestCancellationToken = new CancellationTokenProvider(cancellationToken);
@@ -50,7 +52,7 @@ internal class DiscoveringTestFactory : ITestFactory
 			.ToArray()
 			.Shuffle(cancellationToken);
 
-		_logger.LogDebug("Found {0} testSuites in {1}", suiteTypes.Count, assembly.FullName);
+		_logger.LogDebug("Found {amount} testSuites in {assemblyName}", suiteTypes.Count, assembly.FullName);
 		if (cancellationToken.IsCancellationRequested) yield break;
 
 		// Enumerate tests after logger's been inserted
@@ -58,7 +60,7 @@ internal class DiscoveringTestFactory : ITestFactory
 		{
 			if (cancellationToken.IsCancellationRequested) yield break;
 
-			_logger.LogTrace("Initializing {0}", suiteType.FullName);
+			_logger.LogTrace("Initializing {testSuiteName}", suiteType.FullName);
 			var suite = await InitializeSuite(suiteType);
 
 			foreach (var testProperty in suiteType.GetProperties())
@@ -67,9 +69,7 @@ internal class DiscoveringTestFactory : ITestFactory
 				if (testProperty.GetGetMethod() is null) yield break;
 				if (testProperty.PropertyType != typeof(ITest)) yield break;
 
-				var test = testProperty.GetValue(suite);
-				if (test is null) throw new NotSupportedException($"Type null is not supported");
-
+				var test = testProperty.GetValue(suite) ?? throw new NotSupportedException($"Type null is not supported");
 				if (test is UnitTestCase testCase)
 				{
 					yield return new TestRun(testCase.TestBody, testProperty.Name!, suiteType.FullName ?? suiteType.Name);
@@ -116,6 +116,7 @@ internal class DiscoveringTestFactory : ITestFactory
 		catch (Exception ex)
 		{
 			// TODO handle constructor exceptions
+			_ = ex;
 		}
 
 		Debug.Assert(instance is not null,

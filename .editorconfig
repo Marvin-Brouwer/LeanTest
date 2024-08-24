@@ -27,3 +27,6 @@ dotnet_separate_import_directive_groups = true
 
 # Default severity for analyzer diagnostics with category 'Roslynator'
 dotnet_analyzer_diagnostic.category-Roslynator.severity = silent
+
+# IDE0290: Use primary constructor
+csharp_style_prefer_primary_constructors = false

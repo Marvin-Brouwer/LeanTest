@@ -58,11 +58,13 @@ internal readonly record struct TestRun(
 		try
 		{
 			await TestBody();
+			_ = cancellationToken;
 		}
 		catch (Exception ex)
 		{
 			// TODO
 			//throw;
+			_ = ex;
 		} 
 	}
 }

@@ -8,7 +8,6 @@ namespace LeanTest.Dependencies.Async;
 
 public static partial class AsyncMemberSetupExtensions
 {
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Func<TReturn> asyncCallback
 	)
@@ -28,7 +27,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Func<TReturn> asyncCallback
 	)
@@ -50,7 +48,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Func<T1, TReturn> asyncCallback
 	)
@@ -72,7 +69,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Func<T1, TReturn> asyncCallback
 	)
@@ -95,7 +91,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Func<T1, T2, TReturn> asyncCallback
 	)
@@ -117,7 +112,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Func<T1, T2, TReturn> asyncCallback
 	)
@@ -140,7 +134,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, T3, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Func<T1, T2, T3, TReturn> asyncCallback
 	)
@@ -162,7 +155,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2, T3>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, T3, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Func<T1, T2, T3, TReturn> asyncCallback
 	)
@@ -185,7 +177,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2, T3>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, T3, T4, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Func<T1, T2, T3, T4, TReturn> asyncCallback
 	)
@@ -207,7 +198,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2, T3, T4>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, T3, T4, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Func<T1, T2, T3, T4, TReturn> asyncCallback
 	)
@@ -230,7 +220,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2, T3, T4>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, T3, T4, T5, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Func<T1, T2, T3, T4, T5, TReturn> asyncCallback
 	)
@@ -252,7 +241,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns<T1, T2, T3, T4, T5>(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, T1, T2, T3, T4, T5, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Func<T1, T2, T3, T4, T5, TReturn> asyncCallback
 	)
@@ -276,7 +264,6 @@ public static partial class AsyncMemberSetupExtensions
 	}
 
 	// TODO-analyzer to prevent this under 5 params
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, TReturn>(
 		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, DynamicFunction<TReturn> asyncCallback
 	)
@@ -298,7 +285,6 @@ public static partial class AsyncMemberSetupExtensions
 			.Returns(SimulatedAsyncCallback);
 	}
 
-	[Pure]
 	public static TDependency ReturnsAsync<TDependency, TReturn>(
 		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, DynamicFunction<TReturn> asyncCallback
 	)
