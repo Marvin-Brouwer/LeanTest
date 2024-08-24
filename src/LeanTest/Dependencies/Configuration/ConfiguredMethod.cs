@@ -10,6 +10,8 @@ namespace LeanTest.Dependencies.Configuration;
 
 internal abstract record ConfiguredMethod(MethodBase Method, Parameters Parameters, Type ReturnType)
 {
+	// [Performance] If for we get performance remarks, we could split this out int he same T1..T5 setup all the way down
+	// For now that adds unneccesary complexity.
 	internal static ConfiguredMethod ForCallback(LambdaExpression member, Delegate? callbackDelegate = null)
 	{
 		var (method, parameters) = GetMethodFromExpression(member);
@@ -21,10 +23,11 @@ internal abstract record ConfiguredMethod(MethodBase Method, Parameters Paramete
 		return new ConfiguredLambdaMethod(method, parameters, typeof(TReturn), returnDelegate);
 	}
 
-	internal static ConfiguredMethod ForException(LambdaExpression member, Func<Exception> exception)
+	internal static ConfiguredMethod ForException<TException>(LambdaExpression member, Func<TException> exception)
+		where TException : Exception
 	{
 		var (method, parameters) = GetMethodFromExpression(member);
-		return new ConfiguredExceptionMethod(method, parameters, method.ReturnType, exception);
+		return new ConfiguredExceptionMethod<TException>(method, parameters, method.ReturnType, exception);
 	}
 
 	internal static ConfiguredMethod ForValue<TReturn>(LambdaExpression member, TReturn returnValue)
@@ -131,26 +134,16 @@ internal sealed record ConfiguredValueMethod(
 	public override object? Invoke(params object?[] parameters) => ReturnValue;
 }
 
-internal sealed record ConfiguredExceptionMethod(
-	MethodBase Method, Parameters Parameters, Type ReturnType, Func<Exception> Exception
+internal sealed record ConfiguredExceptionMethod<TException>(
+	MethodBase Method, Parameters Parameters, Type ReturnType, Func<TException> Exception
 ) : ConfiguredMethod(Method, Parameters, ReturnType)
+	where TException : Exception
 {
-	// TODO analyzer to make sure they don't throw in the Throws(() => ..) expression
-	// TODO analyzer to suggest using Throws instead of Executes(() => throw ...) etc.
+	// TODO-analyzer to make sure they don't throw in the Throws(() => ..) expression
+	// TODO-analyzer to suggest using Throws instead of Executes(() => throw ...) etc.
 	public override object? Invoke(params object?[] parameters)
 	{
-		Exception exception;
-
-		try
-		{
-			exception = Exception();
-		}
-		catch(Exception ex)
-		{
-			exception = ex;
-		}
-
-		throw exception;
+		throw Exception();
 	}
 }
 

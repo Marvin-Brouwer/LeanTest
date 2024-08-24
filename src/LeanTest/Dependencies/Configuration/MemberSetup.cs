@@ -16,13 +16,13 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 		ConfiguredMethods = configuredMethods;
 	}
 
-	public TDependency Throws(Func<Exception> exception)
+	public TDependency Throws<TException>(Func<TException> exception) where TException : Exception
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForException(Method, exception));
 		return Dependency;
 	}
 
-	public TDependency Throws(Exception exception)
+	public TDependency Throws<TException>(TException exception) where TException : Exception
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForException(Method, () => exception));
 		return Dependency;
@@ -40,6 +40,36 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 	}
 
 	public TDependency Executes<T1>(Action<T1> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Executes<T1, T2>(Action<T1, T2> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Executes<T1, T2, T3>(Action<T1, T2, T3> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Executes<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Executes<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Executes(DynamicAction callBack)
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
 		return Dependency;
@@ -62,6 +92,36 @@ internal class MemberSetup<TDependency, TReturn> : MemberSetup<TDependency>, IMe
 		return Dependency;
 	}
 	public TDependency Returns<T1>(Func<T1, TReturn> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Returns<T1, T2>(Func<T1, T2, TReturn> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Returns<T1, T2, T3>(Func<T1, T2, T3, TReturn> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TReturn> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Returns<T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, TReturn> callBack)
+	{
+		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
+		return Dependency;
+	}
+
+	public TDependency Returns(DynamicFunction<TReturn> callBack)
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
 		return Dependency;
