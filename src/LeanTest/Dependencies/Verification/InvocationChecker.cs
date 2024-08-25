@@ -23,7 +23,7 @@ internal class InvocationChecker
 		if (constraintMatch is not null) throw constraintMatch;
 	}
 
-	public void Verify<TService>(ITimesConstraint timesConstraint, Expression<Func<TService>> member)
+	public void Verify<TService>(ITimesConstraint timesConstraint, Expression<Action<TService>> member)
 	{
 		var (method, parameters) = member.GetMethodFromExpression();
 		Verify(timesConstraint, method, parameters);
@@ -46,10 +46,16 @@ internal class InvocationChecker
 	}
 	public void VerifyNoOtherCalls()
 	{
-		if (_invocationRecordList.HasUncheckedItems) throw new NotImplementedException("TODO implement like the TimesConstaint");
+		if (_invocationRecordList.HasUncheckedItems)
+			throw new ConstraintVerficationFaillure(
+				"No other calls were expected. However, the records still contain some unverified invocations."
+			);
 	}
 	public void VerifyNoCalls()
 	{
-		if (_invocationRecordList.HasItems) throw new NotImplementedException("TODO implement like the TimesConstaint");
+		if (_invocationRecordList.HasItems)
+			throw new ConstraintVerficationFaillure(
+				"No calls were expected. However, at least some invocations were recorded."
+			);
 	}
 }

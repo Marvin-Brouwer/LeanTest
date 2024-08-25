@@ -29,7 +29,7 @@ public sealed class Spy<TService> :
 		Instance = service;
 	}
 
-	public Spy<TService> Verify(ITimesConstraint times, Expression<Func<TService>> member)
+	public Spy<TService> Verify(ITimesConstraint times, Expression<Action<TService>> member)
 	{
 		_invocationChecker.Verify(times, member);
 		return this;
@@ -52,7 +52,7 @@ public sealed class Spy<TService> :
 		return this;
 	}
 
-	public Spy<TService> VerifyOnce(Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyOnce(Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Once, member);
 
 	public Spy<TService> VerifyOnce<TValue>(Expression<Func<TService, TValue>> member) =>
@@ -64,7 +64,7 @@ public sealed class Spy<TService> :
 	public Spy<TService> VerifyOnce<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Once, member);
 
-	public Spy<TService> VerifyExactly(uint amountOfTimes, Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyExactly(uint amountOfTimes, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
 	public Spy<TService> VerifyExactly<TValue>(uint amountOfTimes, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
@@ -72,7 +72,7 @@ public sealed class Spy<TService> :
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
 	public Spy<TService> VerifyExactly<TValue>(uint amountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
-	public Spy<TService> VerifyAtLeast(uint amountOfTimes, Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyAtLeast(uint amountOfTimes, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
 	public Spy<TService> VerifyAtLeast<TValue>(uint amountOfTimes, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
@@ -80,7 +80,7 @@ public sealed class Spy<TService> :
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
 	public Spy<TService> VerifyAtLeast<TValue>(uint amountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
-	public Spy<TService> VerifyAtMost(uint amountOfTimes, Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyAtMost(uint amountOfTimes, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
 	public Spy<TService> VerifyAtMost<TValue>(uint amountOfTimes, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
@@ -88,7 +88,7 @@ public sealed class Spy<TService> :
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
 	public Spy<TService> VerifyAtMost<TValue>(uint amountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
-	public Spy<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Action<TService>> member) =>
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
 	public Spy<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Func<TService, TValue>> member) =>
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
@@ -96,7 +96,7 @@ public sealed class Spy<TService> :
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
 	public Spy<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
-	public Spy<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive), member);
 	public Spy<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive), member);
@@ -105,7 +105,7 @@ public sealed class Spy<TService> :
 	public Spy<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive), member);
 
-	public Spy<TService> VerifyNever(Expression<Func<TService>> member) =>
+	public Spy<TService> VerifyNever(Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Never, member);
 
 	public Spy<TService> VerifyNever<TValue>(Expression<Func<TService, TValue>> member) =>

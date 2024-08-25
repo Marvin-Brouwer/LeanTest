@@ -24,12 +24,14 @@ internal sealed class InvocationRecordList
 	internal uint Count(MethodInfo method, ConfiguredParametersCollection parameters)
 	{
 		uint count = 0;
-		foreach (var invocation in _invocationRecords)
+		for (int i = 0; i < _invocationRecords.Count; i++)
 		{
+			var invocation = _invocationRecords[i];
 			if (invocation.HasBeenValidated) continue;
 			if (!invocation.Matches(method, parameters)) continue;
 			count++;
 			invocation.MarkAsValidated();
+			_invocationRecords[i] = invocation;
 		}
 		return count;
 	}

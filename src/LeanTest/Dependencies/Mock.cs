@@ -41,7 +41,7 @@ public sealed class Mock<TService> :
 	public IMemberSetup<Mock<TService>, TReturn> Setup<TReturn>(Expression<Func<TService, TReturn>> member) =>
 		new MemberSetup<Mock<TService>, TReturn>(this, member, _configuredMethods);
 
-	public Mock<TService> Verify(ITimesConstraint times, Expression<Func<TService>> member)
+	public Mock<TService> Verify(ITimesConstraint times, Expression<Action<TService>> member)
 	{
 		_invocationChecker.Verify(times, member);
 		return this;
@@ -64,7 +64,7 @@ public sealed class Mock<TService> :
 		return this;
 	}
 
-	public Mock<TService> VerifyOnce(Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyOnce(Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Once, member);
 
 	public Mock<TService> VerifyOnce<TValue>(Expression<Func<TService, TValue>> member) =>
@@ -76,7 +76,7 @@ public sealed class Mock<TService> :
 	public Mock<TService> VerifyOnce<TValue>(Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Once, member);
 
-	public Mock<TService> VerifyExactly(uint amountOfTimes, Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyExactly(uint amountOfTimes, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
 	public Mock<TService> VerifyExactly<TValue>(uint amountOfTimes, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
@@ -84,7 +84,7 @@ public sealed class Mock<TService> :
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
 	public Mock<TService> VerifyExactly<TValue>(uint amountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Exactly(amountOfTimes), member);
-	public Mock<TService> VerifyAtLeast(uint amountOfTimes, Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyAtLeast(uint amountOfTimes, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
 	public Mock<TService> VerifyAtLeast<TValue>(uint amountOfTimes, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
@@ -92,7 +92,7 @@ public sealed class Mock<TService> :
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
 	public Mock<TService> VerifyAtLeast<TValue>(uint amountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtLeast(amountOfTimes), member);
-	public Mock<TService> VerifyAtMost(uint amountOfTimes, Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyAtMost(uint amountOfTimes, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
 	public Mock<TService> VerifyAtMost<TValue>(uint amountOfTimes, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
@@ -100,7 +100,7 @@ public sealed class Mock<TService> :
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
 	public Mock<TService> VerifyAtMost<TValue>(uint amountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.AtMost(amountOfTimes), member);
-	public Mock<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Action<TService>> member) =>
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
 	public Mock<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Func<TService, TValue>> member) =>
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
@@ -108,7 +108,7 @@ public sealed class Mock<TService> :
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
 	public Mock<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, Expression<Func<TService, Task<TValue>>> member) =>
 		VerifyBetween(leastAmountOfTimes, mostAmountOfTimes, false, member);
-	public Mock<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyBetween(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive), member);
 	public Mock<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Func<TService, TValue>> member) =>
 		Verify(TimesContstraintProvider.Instance.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive), member);
@@ -117,7 +117,7 @@ public sealed class Mock<TService> :
 	public Mock<TService> VerifyBetween<TValue>(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive, Expression<Func<TService, Task<TValue>>> member) =>
 		Verify(TimesContstraintProvider.Instance.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive), member);
 
-	public Mock<TService> VerifyNever(Expression<Func<TService>> member) =>
+	public Mock<TService> VerifyNever(Expression<Action<TService>> member) =>
 		Verify(TimesContstraintProvider.Instance.Never, member);
 
 	public Mock<TService> VerifyNever<TValue>(Expression<Func<TService, TValue>> member) =>

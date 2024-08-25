@@ -70,6 +70,6 @@ internal sealed class TimesConstraint : ITimesConstraint
 	public Exception? VerifyInvocations(uint invocationCount, string name)
 	{
 		if (_invocationCheck(invocationCount)) return null;
-		return new TimesConstraintVerficationFaillure(_faillureWarning(invocationCount, name));
+		return new ConstraintVerficationFaillure(_faillureWarning(invocationCount, name));
 	}
 }

@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Adapter;
 
 using System.Diagnostics;
+using System.Reflection;
 
 namespace LeanTest.Hosting;
 
@@ -144,7 +145,11 @@ internal class TestRunner
 			}
 			catch(Exception ex)
 			{
-				var testResult = _resultBuilder.FailTest(testCase, ex, resultStreamingLoggerFactory.Logs);
+				var testException = ex is TargetInvocationException invocationException && invocationException.InnerException is not null
+					? invocationException.InnerException
+					: ex;
+
+				var testResult = _resultBuilder.FailTest(testCase, testException, resultStreamingLoggerFactory.Logs);
 				EndTest(testCase, testResult, startTime, stopwatch);
 			}
 
@@ -174,7 +179,11 @@ internal class TestRunner
 			}
 			catch (Exception ex)
 			{
-				var testResult = _resultBuilder.FailTest(testCase, ex, resultStreamingLoggerFactory.Logs);
+				var testException = ex is TargetInvocationException invocationException && invocationException.InnerException is not null
+					? invocationException.InnerException
+					: ex;
+
+				var testResult = _resultBuilder.FailTest(testCase, testException, resultStreamingLoggerFactory.Logs);
 				EndTest(testCase, testResult, startTime, stopwatch);
 			}
 			return;
