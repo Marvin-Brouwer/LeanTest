@@ -16,12 +16,13 @@ internal sealed class SpyFactory : ISpyFactory
 	Spy<TService> ISpyFactory.On<TService>(TService service)
 		where TService : class
 	{
+		var invocationMarshall = new InvocationForwarder<TService>(service);
 		var invocationRecordList = new InvocationRecordList();
-		var invocationRecorder = new InvocationRecorder<TService>(service, invocationRecordList);
+		var recordingInvocationMarshall = new RecordingInvocationMarshall(invocationMarshall, invocationRecordList);
 
 		var instance = _proxyGenerator
-			.GenerateProxy<TService>()
-			.InitializeType<TService>(invocationRecorder);
+			.GenerateProxy<TService>("Spy", service.GetType().GetHashCode())
+			.InitializeType<TService>(recordingInvocationMarshall);
 
 		return new Spy<TService>(invocationRecordList, instance);
 	}

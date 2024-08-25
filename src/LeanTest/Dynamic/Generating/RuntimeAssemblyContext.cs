@@ -8,7 +8,7 @@ namespace LeanTest.Dynamic.Generating;
 
 internal sealed class RuntimeAssemblyContext
 {
-	private readonly Dictionary<Type, Type> _generatedTypes;
+	private readonly Dictionary<string, Type> _generatedTypes;
 	private AssemblyLoadContext? _assemblyLoadContext = null;
 
 	public RuntimeAssemblyContext(Assembly originalAssembly)
@@ -40,13 +40,13 @@ internal sealed class RuntimeAssemblyContext
 	public ICollection<SyntaxTree> GeneratedSyntaxTrees { get; }
 	public ICollection<MetadataReference> ReferencedAssemblies { get; }
 
-	internal bool TryGetType(Type serviceType, [NotNullWhen(true)] out Type? generatedProxyType) =>
-		_generatedTypes.TryGetValue(serviceType, out generatedProxyType);
+	internal bool TryGetType(string cleanClassName, [NotNullWhen(true)] out Type? generatedProxyType) =>
+		_generatedTypes.TryGetValue(cleanClassName, out generatedProxyType);
 
-	internal void Add(Type serviceType, Type generatedProxyType,
+	internal void Add(string cleanClassName, Type generatedProxyType,
 		SyntaxTree syntaxTree, ICollection<MetadataReference> referencedAssemblies)
 	{
-		_generatedTypes.Add(serviceType, generatedProxyType);
+		_generatedTypes.Add(cleanClassName, generatedProxyType);
 		GeneratedSyntaxTrees.Add(syntaxTree);
 
 		foreach (var reference in referencedAssemblies)

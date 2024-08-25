@@ -80,7 +80,7 @@ internal class DiscoveringTestFactory : ITestFactory
 				{
 					foreach (var dataRecord in testScenario.TestData)
 					{
-						yield return new TestRun(() => testScenario.TestBody(dataRecord), testProperty.Name!, suiteType.FullName ?? suiteType.Name);
+						yield return new TestRun(() => testScenario.TestBody.DynamicInvoke(dataRecord), testProperty.Name!, suiteType.FullName ?? suiteType.Name);
 					}
 					continue;
 				}

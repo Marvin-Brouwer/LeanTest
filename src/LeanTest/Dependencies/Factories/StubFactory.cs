@@ -20,7 +20,7 @@ internal sealed class StubFactory : IStubFactory
 		var invocationMarshall = new InvocationMarshall(configuredMethods);
 
 		var instance = _proxyGenerator
-			.GenerateProxy<TService>()
+			.GenerateProxy<TService>("Stub")
 			.InitializeType<TService>(invocationMarshall);
 
 		return new Stub<TService>(configuredMethods, instance);

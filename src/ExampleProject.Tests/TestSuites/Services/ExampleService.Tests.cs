@@ -217,6 +217,15 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		TestOutputLogger.LogInformation("Test log {input}", input);
 		var result = await sut.DoThing(input);
 
+		try
+		{
+			_someSpy.Instance.DoThing("Hi");
+		}
+		catch
+		{
+			// This throws, we don't care this is just to test the
+			// Verify
+		}
 		// Assert
 		result.Should().Be(expected);
 

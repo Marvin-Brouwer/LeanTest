@@ -1,8 +1,7 @@
 #pragma warning disable RCS1047 // Allow Async postfix, because overloading doesn't work otherwise
 
 using LeanTest.Dependencies.Configuration;
-
-using System.Diagnostics.Contracts;
+using LeanTest.Dependencies.SupportingTypes;
 
 namespace LeanTest.Dependencies.Async;
 

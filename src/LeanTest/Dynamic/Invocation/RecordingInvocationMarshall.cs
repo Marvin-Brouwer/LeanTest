@@ -1,4 +1,3 @@
-using LeanTest.Dependencies.Configuration;
 using LeanTest.Dependencies.Verification;
 
 using System.Reflection;
@@ -8,11 +7,11 @@ namespace LeanTest.Dynamic.Invocation;
 internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 {
 	private readonly InvocationRecordList _invocationRecords;
-	private readonly InvocationMarshall _invocationMarshall;
+	private readonly IInvokeInterceptor _invocationMarshall;
 
-	public RecordingInvocationMarshall(ConfiguredMethodSet configuredMethods, InvocationRecordList invocationRecords)
+	public RecordingInvocationMarshall(IInvokeInterceptor invocationMarshall, InvocationRecordList invocationRecords)
 	{
-		_invocationMarshall = new InvocationMarshall(configuredMethods);
+		_invocationMarshall = invocationMarshall;
 		_invocationRecords = invocationRecords;
 	}
 
@@ -22,12 +21,12 @@ internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 		try
 		{
 			var returnValue = _invocationMarshall.RequestInvoke<TReturn>(methodInfo, parameters);
-			_invocationRecords.Add(methodInfo, parameters);
+			_invocationRecords.Add(methodInfo, parameters, true);
 			return returnValue;
 		}
-		catch (Exception ex)
+		catch
 		{
-			_invocationRecords.Add(methodInfo, parameters, ex);
+			_invocationRecords.Add(methodInfo, parameters, false);
 			throw;
 		}
 	}
@@ -38,11 +37,11 @@ internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 		try
 		{
 			_invocationMarshall.RequestInvoke(methodInfo, parameters);
-			_invocationRecords.Add(methodInfo, parameters);
+			_invocationRecords.Add(methodInfo, parameters, true);
 		}
-		catch (Exception ex)
+		catch
 		{
-			_invocationRecords.Add(methodInfo, parameters, ex);
+			_invocationRecords.Add(methodInfo, parameters, false);
 			throw;
 		}
 	}

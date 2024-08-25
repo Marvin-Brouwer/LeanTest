@@ -18,11 +18,12 @@ internal sealed class MockFactory : IMockFactory
 		where TService : class
 	{
 		var configuredMethods = new ConfiguredMethodSet();
+		var invocationMarshall = new InvocationMarshall(configuredMethods); 
 		var invocationRecordList = new InvocationRecordList();
-		var recordingInvocationMarshall = new RecordingInvocationMarshall(configuredMethods, invocationRecordList);
+		var recordingInvocationMarshall = new RecordingInvocationMarshall(invocationMarshall, invocationRecordList);
 
 		var instance = _proxyGenerator
-			.GenerateProxy<TService>()
+			.GenerateProxy<TService>("Mock")
 			.InitializeType<TService>(recordingInvocationMarshall);
 
 		return new Mock<TService>(configuredMethods, invocationRecordList, instance);

@@ -1,7 +1,7 @@
 namespace LeanTest.Tests;
 
 internal readonly record struct TestRun(
-	Func<ValueTask> TestBody,
+	Delegate TestBody,
 	string TestName,
 	string SuiteName
 )
@@ -57,7 +57,7 @@ internal readonly record struct TestRun(
 	{
 		try
 		{
-			await TestBody();
+			//await TestBody.DynamicInvoke();
 			_ = cancellationToken;
 		}
 		catch (Exception ex)

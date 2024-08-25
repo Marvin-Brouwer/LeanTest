@@ -134,7 +134,11 @@ internal class TestRunner
 
 			try
 			{
-				await dt.TestBody(testParameters);
+				if (dt.TestBody.Method.ReturnType == typeof(ValueTask))
+					await (ValueTask)dt.TestBody.DynamicInvoke(testParameters)!;
+				else
+					dt.TestBody.DynamicInvoke(testParameters);
+
 				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
 				EndTest(testCase, testResult, startTime, stopwatch);
 			}
@@ -160,7 +164,10 @@ internal class TestRunner
 
 			try
 			{
-				await tc.TestBody();
+				if (tc.TestBody.Method.ReturnType == typeof(ValueTask))
+					await (ValueTask)tc.TestBody.DynamicInvoke()!;
+				else
+					tc.TestBody.DynamicInvoke();
 
 				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
 				EndTest(testCase, testResult, startTime, stopwatch);

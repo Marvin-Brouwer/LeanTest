@@ -18,7 +18,7 @@ internal sealed class RuntimeProxyGenerator
 		_cancellationToken = cancellationToken;
 	}
 
-	public Type GenerateProxy<TServiceType>()
+	public Type GenerateProxy<TServiceType>(string postFix, int? hashCode = null)
 	{
 		var serviceType = typeof(TServiceType);
 		// TODO perhaps this is a good spot to figure out whether that library that outputs IL code provides a solution?
@@ -29,12 +29,12 @@ internal sealed class RuntimeProxyGenerator
 		// Or maybe (I forgot the name) the ProductivityTools library from Microsoft from way back when.
 		if (serviceType.IsSealed) throw RuntimeProxyGeneratorException.SealedType(serviceType);
 
-		if (_assemblyContext.TryGetType(serviceType, out var generatedProxyType))
+
+		var className = serviceType.CleanClassName(postFix, hashCode);
+		if (_assemblyContext.TryGetType(className, out var generatedProxyType))
 			return generatedProxyType;
 
 		using var ms = new MemoryStream();
-
-		var className = serviceType.CleanClassName();
 		var generatedProxyClass = ClassBuilder.GenerateProxyClass(_assemblyContext, serviceType, className);
 
 		// Language vesion as low as possible, this is to make sure attributes exist
@@ -80,7 +80,7 @@ internal sealed class RuntimeProxyGenerator
 		var assembly = _assemblyContext.CreateCleanAssemblyLoadContext().LoadFromStream(ms);
 		var generatedType = assembly.GetType($"{_assemblyContext.NamespaceName}.{className}")!;
 
-		_assemblyContext.Add(serviceType, generatedType, syntaxTree, assemblyReferences);
+		_assemblyContext.Add(className, generatedType, syntaxTree, assemblyReferences);
 
 		return generatedType;
 	}

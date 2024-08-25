@@ -16,17 +16,17 @@ internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 	}
 
 	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, Array.Empty<object>());
-	public TReturn RequestInvoke<TReturn>( MethodBase methodInfo, object?[] parameters)
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo, object?[] parameters)
 	{
 		try
 		{
 			var returnValue = (TReturn)methodInfo.Invoke(_service, parameters)!;
-			_invocationRecords.Add(methodInfo, parameters);
+			_invocationRecords.Add(methodInfo, parameters, true);
 			return returnValue;
 		}
-		catch (Exception ex)
+		catch
 		{
-			_invocationRecords.Add(methodInfo, parameters, ex);
+			_invocationRecords.Add(methodInfo, parameters, false);
 			throw;
 		}
 	}
@@ -37,11 +37,11 @@ internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 		try
 		{
 			_ = methodInfo.Invoke(_service, parameters)!;
-			_invocationRecords.Add(methodInfo, parameters);
+			_invocationRecords.Add(methodInfo, parameters, true);
 		}
-		catch (Exception ex)
+		catch
 		{
-			_invocationRecords.Add(methodInfo, parameters, ex);
+			_invocationRecords.Add(methodInfo, parameters, false);
 			throw;
 		}
 	}

@@ -55,7 +55,6 @@ internal abstract record ConfiguredMethod(MethodBase Method, Parameters Paramete
 		if (!ReturnType.Equals(returnType)) return false;
 		if (Method.IsGenericMethod != methodInfo.IsGenericMethod) return false;
 		if (!Parameters.Length.Equals(parameters.Length)) return false;
-		// TODO should we check by name for overloads or is the current filtering logic good enough?
 
 		return true;
 	}

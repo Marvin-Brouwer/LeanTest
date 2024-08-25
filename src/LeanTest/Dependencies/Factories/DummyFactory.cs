@@ -16,6 +16,6 @@ internal sealed class DummyFactory : IDummyFactory
 
 	TService IDummyFactory.Of<TService>()
 		where TService : class => _proxyGenerator
-			.GenerateProxy<TService>()
+			.GenerateProxy<TService>("Dummy")
 			.InitializeType<TService>(_invocationMarshall);
 }

@@ -46,15 +46,15 @@ public static partial class TestSuite
 		protected UnitTestCase Test(Action test) => new(test);
 		protected UnitTestCase Test(Func<ValueTask> test) => new(test);
 		protected UnitTestDataScenario Test<T1>(IEnumerable<T1> testData, Action<T1> test) =>
-			new(testData.Select(data => new object?[] { data }), (object?[] data) => test((T1)data[0]!));
+			new(testData.Select(data => new object?[] { data }), test);
 		protected UnitTestDataScenario Test<T1>(IEnumerable<T1> testData, Func<T1, ValueTask> test) =>
-			new(testData.Select(data => new object?[] { data }), (object?[] data) => test((T1)data[0]!));
+			new(testData.Select(data => new object?[] { data }), test);
 		protected UnitTestDataScenario Test<T1>(Func<IEnumerable<T1>> testData, Action<T1> test) => Test(testData(), test);
 		protected UnitTestDataScenario Test<T1>(Func<IEnumerable<T1>> testData, Func<T1, ValueTask> test) => Test(testData(), test);
 		protected UnitTestDataScenario Test<T1, T2>(IEnumerable<(T1, T2)> testData, Action<T1, T2> test) =>
-			new(testData.Select(data => new object?[] { data.Item1, data.Item2 }), (object?[] data) => test((T1)data[0]!, (T2)data[1]!));
+			new(testData.Select(data => new object?[] { data.Item1, data.Item2 }), test);
 		protected UnitTestDataScenario Test<T1, T2>(IEnumerable<(T1, T2)> testData, Func<T1, T2, ValueTask> test) =>
-			new(testData.Select(data => new object?[] { data.Item1, data.Item2 }), (object?[] data) => test((T1)data[0]!, (T2)data[1]!));
+			new(testData.Select(data => new object?[] { data.Item1, data.Item2 }), test);
 		protected UnitTestDataScenario Test<T1, T2>(Func<IEnumerable<(T1, T2)>> testData, Action<T1, T2> test) => Test(testData(), test);
 		protected UnitTestDataScenario Test<T1, T2>(Func<IEnumerable<(T1, T2)>> testData, Func<T1, T2, ValueTask> test) => Test(testData(), test);
 

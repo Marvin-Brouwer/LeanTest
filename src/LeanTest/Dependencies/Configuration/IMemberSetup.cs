@@ -1,7 +1,6 @@
-namespace LeanTest.Dependencies.Configuration;
+using LeanTest.Dependencies.SupportingTypes;
 
-public delegate void DynamicAction(params object?[] parameters);
-public delegate TReturn DynamicFunction<TReturn>(params object?[] parameters);
+namespace LeanTest.Dependencies.Configuration;
 
 public interface IMemberSetup<out TDependency> where TDependency : IDependency
 {
