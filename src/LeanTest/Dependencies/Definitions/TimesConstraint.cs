@@ -61,7 +61,7 @@ internal sealed class TimesConstraint : ITimesConstraint
 		invocationCount > leastAmountOfTimes &&
 		invocationCount < mostAmountOfTimes;
 	private static Warning WarnInvokedBetween(uint from, uint to, string inclusivity) => (uint invocationCount, string name) =>
-		$"{name} was expected to be called between \"{from}\" and \"{to}\" time(s) (${inclusivity}). However, \"{invocationCount}\" were counted.";
+		$"{name} was expected to be called between \"{from}\" and \"{to}\" time(s) ({inclusivity}). However, \"{invocationCount}\" were counted.";
 	private static Warning WarnInvokedBetweenInclusive(uint leastAmountOfTimes, uint mostAmountOfTimes) =>
 		WarnInvokedBetween(leastAmountOfTimes, mostAmountOfTimes, "inclusive");
 	private static Warning WarnInvokedBetweenExclusive(uint leastAmountOfTimes, uint mostAmountOfTimes) =>

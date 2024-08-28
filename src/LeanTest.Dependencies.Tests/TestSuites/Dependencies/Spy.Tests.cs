@@ -1,11 +1,15 @@
-
-
 using LeanTest.Dependencies.Definitions;
 using LeanTest.Dependencies.Tests.Fixtures;
 
 
 namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
+/// <summary>
+/// Test suite for <see cref="Spy{TService}"/>, testing verification methods.
+/// </summary>
+/// <tests>
+/// Tests NoCalls and NoOtherCalls
+/// </tests>
 public sealed partial class SpyTests : TestSuite.UnitTests
 {
 	public ITest VerifyNoOtherCalls_NoCalls_Passes => Test(() =>
@@ -51,6 +55,7 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 		result.Should()
 			.NotThrow();
 	});
+
 	public ITest VerifyNoCalls_SomeCalls_Throws => Test(() =>
 	{
 		// Arrange

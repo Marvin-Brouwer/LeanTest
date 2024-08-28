@@ -13,12 +13,19 @@ internal readonly record struct TimesContstraintProvider : ITimesContstraintProv
 
 
 	public ITimesConstraint Exactly(uint amountOfTimes) => TimesConstraint.Exactly(amountOfTimes);
+
 	public ITimesConstraint AtLeast(uint amountOfTimes) => TimesConstraint.AtLeast(amountOfTimes);
+
 	public ITimesConstraint AtMost(uint amountOfTimes) => TimesConstraint.AtMost(amountOfTimes);
-	public ITimesConstraint Between(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive) {
+
+	public ITimesConstraint Between(uint leastAmountOfTimes, uint mostAmountOfTimes, bool inclusive)
+	{
 		Guard.Against.InvalidInput(mostAmountOfTimes, nameof(mostAmountOfTimes),
 			(val) => val > leastAmountOfTimes,
 			"Required input mostAmountOfTimes cannot be less than leastAmountOfTimes."
+		);
+		Guard.Against.NegativeOrZero(mostAmountOfTimes, nameof(mostAmountOfTimes),
+			"Required input mostAmountOfTimes cannot be less than \"1\"."
 		);
 		return TimesConstraint.Between(leastAmountOfTimes, mostAmountOfTimes, inclusive);
 	}

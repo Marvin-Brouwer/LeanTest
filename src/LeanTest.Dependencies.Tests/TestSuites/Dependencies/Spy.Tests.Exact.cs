@@ -3,8 +3,15 @@ using LeanTest.Dependencies.Tests.Fixtures;
 
 namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
+
+/// <inheritdoc cref="SpyTests"/>
+/// <tests>
+/// Tests exact invocations, like Once and Never
+/// </tests>
 public sealed partial class SpyTests : TestSuite.UnitTests
 {
+	#region Once
+
 	public ITest VerifyOnce_InvokedOnce_Passes => Test(() =>
 	{
 		// Arrange
@@ -32,6 +39,48 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 			.Verify(Times.Once, spy => spy.VoidNoParameters())
 			.VerifyNoOtherCalls();
 	});
+
+	public ITest VerifyOnce_InvokedOnce_Faillure_Passes => Test(() =>
+	{
+		// Arrange
+		var sut = Spy.On<IExampleService>(new ExampleService(false));
+
+		// Act
+		try
+		{
+			sut.Instance.VoidNoParameters();
+		}
+		catch
+		{
+			//
+		}
+
+		// Assert
+		sut
+			.VerifyOnce(spy => spy.VoidNoParameters())
+			.VerifyNoOtherCalls();
+	});
+
+	public ITest VerifyOnce_InvokedTwice_Throws => Test(() =>
+	{
+		// Arrange
+		var sut = Spy.On<IExampleService>(new ExampleService(true));
+
+		// Act
+		sut.Instance.VoidNoParameters();
+		sut.Instance.VoidNoParameters();
+		var result = () => sut
+			.VerifyOnce(spy => spy.VoidNoParameters());
+
+		// Assert
+		result.Should()
+			.ThrowExactly<ConstraintVerficationFaillure>()
+			.WithMessage("IExampleService.VoidNoParameters was expected to be called once. However, \"2\" were counted.");
+	});
+
+	#endregion
+
+	#region Exactly
 
 	public ITest VerifyExactly_InvokedOnce_Passes => Test(() =>
 	{
@@ -61,27 +110,6 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 			.VerifyNoOtherCalls();
 	});
 
-	public ITest VerifyOnce_InvokedOnce_Faillure_Passes => Test(() =>
-	{
-		// Arrange
-		var sut = Spy.On<IExampleService>(new ExampleService(false));
-
-		// Act
-		try
-		{
-			sut.Instance.VoidNoParameters();
-		}
-		catch
-		{
-			//
-		}
-
-		// Assert
-		sut
-			.VerifyOnce(spy => spy.VoidNoParameters())
-			.VerifyNoOtherCalls();
-	});
-
 	public ITest VerifyExactly_Twice_InvokedOnce_Throws => Test(() =>
 	{
 		// Arrange
@@ -96,23 +124,6 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 		result.Should()
 			.ThrowExactly<ConstraintVerficationFaillure>()
 			.WithMessage("IExampleService.VoidNoParameters was expected to be called excactly \"2\" time(s). However, \"1\" were counted.");
-	});
-
-	public ITest VerifyOnce_InvokedTwice_Throws => Test(() =>
-	{
-		// Arrange
-		var sut = Spy.On<IExampleService>(new ExampleService(true));
-
-		// Act
-		sut.Instance.VoidNoParameters();
-		sut.Instance.VoidNoParameters();
-		var result = () => sut
-			.VerifyOnce(spy => spy.VoidNoParameters());
-
-		// Assert
-		result.Should()
-			.ThrowExactly<ConstraintVerficationFaillure>()
-			.WithMessage("IExampleService.VoidNoParameters was expected to be called once. However, \"2\" were counted.");
 	});
 
 	public ITest VerifyExactly_Zero_InvokedOnce_Throws => Test(() =>
@@ -130,6 +141,10 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 			.ThrowExactly<ConstraintVerficationFaillure>()
 			.WithMessage("IExampleService.VoidNoParameters was expected to be called excactly \"0\" time(s). However, \"1\" were counted.");
 	});
+
+	#endregion
+
+	#region Never
 
 	public ITest VerifyNever_InvokedOnce_Throws => Test(() =>
 	{
@@ -162,5 +177,7 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 			.ThrowExactly<ConstraintVerficationFaillure>()
 			.WithMessage("IExampleService.VoidNoParameters was expected to never be called. However, \"1\" were counted.");
 	});
+
+	#endregion
 }
 
