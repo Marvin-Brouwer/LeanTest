@@ -6,7 +6,6 @@ using System.Reflection;
 
 namespace LeanTest.Dependencies.Verification;
 
-// TODO Implement like TimesContstraint
 internal class InvocationChecker
 {
 	private readonly InvocationRecordList _invocationRecordList;
