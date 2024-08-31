@@ -77,7 +77,6 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		}
 		catch (Exception ex)
 		{
-			// TODO should throw notimplemented exception (or custom) with clear message
 			_ = ex;
 		}
 		try
@@ -87,7 +86,6 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		}
 		catch (Exception ex)
 		{
-			// TODO should throw notimplemented exception (or custom) with clear message
 			_ = ex;
 		}
 		try
@@ -96,7 +94,6 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		}
 		catch (Exception ex)
 		{
-			// TODO should throw notimplemented exception (or custom) with clear message
 			_ = ex;
 		}
 		_someSpy = Spy

@@ -3,7 +3,7 @@ namespace LeanTest.Dependencies.Tests.Fixtures;
 public interface IExampleService
 {
 	public void VoidNoParameters();
-	public void VoidWithParameters(string someString);
+	public void VoidWithParameters(string? someString);
 	public void VoidWithGenericParameters<T>(T something, bool someBoolean);
 	public int ReturnsNoParameters();
 	public int ReturnsWithParameters(bool someBoolean);

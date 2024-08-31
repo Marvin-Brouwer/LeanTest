@@ -3,6 +3,8 @@
 using LeanTest.Dependencies.Tests.Fixtures;
 using LeanTest.Dynamic.Invocation;
 
+using System.Numerics;
+
 
 namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
@@ -44,7 +46,11 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Assert
 		result.Should()
-			.ThrowExactly<InvocationNotFoundException>();
+			.ThrowExactly<InvocationNotFoundException>()
+			.WithMessage(
+				"Requested method \"VoidNoParameters\" was not configured with the requested parameters." + Environment.NewLine +
+				"Please make sure to configure your mocks, fakes, stubs, and spies."
+			);
 	});
 
 	public ITest VoidNoParameters_ConfiguredToThrow_Throws => Test(() =>
@@ -79,6 +85,23 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Act
 		var result = () => sut.VoidWithParameters("Test");
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITest VoidWithParameters_ConfiguredNull_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithParameters(null))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithParameters(null);
 
 		// Assert
 		result.Should()
@@ -130,6 +153,23 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Act
 		var result = () => sut.VoidWithGenericParameters(2, true);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITest VoidWithGenericParameters_ConfiguredDefault_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters<int>(default, Parameter.Is<bool>()))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters(0, true);
 
 		// Assert
 		result.Should()

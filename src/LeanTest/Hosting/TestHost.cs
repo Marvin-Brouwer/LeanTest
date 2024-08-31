@@ -16,7 +16,7 @@ public static class TestHost
 		
 	}
 
-	// TODO infer TProgram from stackFrome or something and then check if it's the same as the test context
+	// TODO infer TProgram from stackFrame or something and then check if it's the same as the test context
 	public static IHostBuilder CreateDefault<TProgram>(string[]? args) where TProgram : class, new() => Host
 		.CreateDefaultBuilder(args)
 			.ConfigureAppConfiguration((application, configuration) =>

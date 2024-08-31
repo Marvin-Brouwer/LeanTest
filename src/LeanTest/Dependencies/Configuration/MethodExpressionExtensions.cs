@@ -33,7 +33,7 @@ internal static class MethodExpressionExtensions
 		{
 			var originalParameter = parameters[i];
 			var argument = arguments[i];
-			// TODO handle nulls correctly
+
 			if (argument.NodeType == ExpressionType.Constant)
 			{
 				parameterSpecificity = 1;

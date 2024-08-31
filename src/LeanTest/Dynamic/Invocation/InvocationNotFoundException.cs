@@ -11,7 +11,7 @@ namespace LeanTest.Dynamic.Invocation;
 public sealed class InvocationNotFoundException : LeanTestException
 {
 	internal InvocationNotFoundException(MethodBase methodInfo, object?[] parameters, Type returnType)
-		: base($"Requested method \"{methodInfo.Name}\" was not configured with the requested parameters. {Environment.NewLine} " +
+		: base($"Requested method \"{methodInfo.Name}\" was not configured with the requested parameters." + Environment.NewLine +
 			$"Please make sure to configure your mocks, fakes, stubs, and spies.")
 	{
 		MethodInfo = methodInfo;
