@@ -35,6 +35,7 @@ public static partial class TestSuite
 		protected readonly IDummyFactory Dummy;
 
 		protected readonly IParameterFactory Parameter = ParameterFactory.Instance;
+
 		protected readonly ITimesContstraintProvider Times = TimesContstraintProvider.Instance;
 
 		protected readonly ICancellationTokenProvider CancellationToken;

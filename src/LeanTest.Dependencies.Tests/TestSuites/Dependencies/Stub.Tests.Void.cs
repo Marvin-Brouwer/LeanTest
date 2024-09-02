@@ -1,10 +1,10 @@
-
-
+using LeanTest.Dependencies.Configuration;
+using LeanTest.Dependencies.Factories;
 using LeanTest.Dependencies.Tests.Fixtures;
 using LeanTest.Dynamic.Invocation;
 
-using System.Numerics;
-
+using System.Diagnostics;
+using System.Reflection;
 
 namespace LeanTest.Dependencies.Tests.TestSuites.Dependencies;
 
@@ -159,6 +159,40 @@ public sealed class StubTests : TestSuite.UnitTests
 			.NotThrow();
 	});
 
+	public ITest VoidWithGenericParameters_ConfiguredForAnyType_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Matches<object>(v => v != null && v.Equals(2)), Parameter.Is<bool>()))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters(2, true);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITest VoidWithGenericParameters_ConfiguredForAnyValue_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.IsAny(), Parameter.Is<bool>()))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters(2, true);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
 	public ITest VoidWithGenericParameters_ConfiguredDefault_Returns => Test(() =>
 	{
 		// Arrange
@@ -170,6 +204,57 @@ public sealed class StubTests : TestSuite.UnitTests
 
 		// Act
 		var result = () => sut.VoidWithGenericParameters(0, true);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITest VoidWithGenericParameters_ConfiguredNull_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.IsNull<int?>(), Parameter.Is<bool>()))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters<int?>(null, true);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITest VoidWithGenericParameters_ConfiguredNotNull_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.NotNull<int?>(), Parameter.Is<bool>()))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters<int?>(0, true);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+	public ITest VoidWithGenericParameters_ConfiguredExtension_Returns => Test(() =>
+	{
+		// Arrange
+		_someStub
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.IsOneSecond(), Parameter.Is<bool>()))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithGenericParameters(TimeSpan.FromMilliseconds(1000), true);
 
 		// Assert
 		result.Should()
@@ -207,4 +292,32 @@ public sealed class StubTests : TestSuite.UnitTests
 	});
 
 	#endregion
+}
+
+/// <summary>
+/// This is here to illustrate, and test, how one would extend the <see cref="IParameterFactory"/>
+/// </summary>
+internal static class ParameterExtensions
+{
+	/// <summary>
+	/// When parameter matches a TimeSpan of one second
+	/// </summary>
+	[ParameterMatch<OneSecondMatcher>]
+	public static TimeSpan IsOneSecond(this IParameterFactory parameterFactory)
+	{
+		_ = parameterFactory;
+		return default;
+	}
+
+	/// <summary>
+	/// Matcher for: When parameter matches a TimeSpan of one second
+	/// </summary>
+	[DebuggerDisplay("When parameter matches a TimeSpan of one second")]
+	internal class OneSecondMatcher(ParameterInfo parameterInfo) : ConfiguredParameterExtension(parameterInfo)
+	{
+		public override bool MatchesRequirements<T>(T? parameterValue) where T : default
+		{
+			return TimeSpan.FromSeconds(1).Equals(parameterValue);
+		}
+	}
 }

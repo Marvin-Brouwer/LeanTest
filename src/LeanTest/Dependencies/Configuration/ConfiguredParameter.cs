@@ -1,9 +1,22 @@
 using FluentSerializer.Core.Extensions;
 
+using System.Diagnostics;
+using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace LeanTest.Dependencies.Configuration;
+
+/// <summary>
+/// Create an extended <see cref="ConfiguredParameter"/>, meant for use in extension methods.
+/// </summary>
+[DebuggerDisplay("Parameter matches user defined condition")]
+public abstract class ConfiguredParameterExtension : ConfiguredParameter {
+	protected ConfiguredParameterExtension(ParameterInfo parameterInfo) 
+	{
+		Parameter = parameterInfo;
+	}
+}
 
 public abstract class ConfiguredParameter
 {
@@ -12,6 +25,7 @@ public abstract class ConfiguredParameter
 		Parameter = parameter,
 		Value = valueExpression.Value,
 	};
+
 	public static ConfiguredParameter ForParameter(ParameterInfo parameter) => new TypeConstrainedParameter
 	{
 		Parameter = parameter,
@@ -26,13 +40,27 @@ public abstract class ConfiguredParameter
 		ParameterType = parameterType,
 	};
 
-	public static ConfiguredParameter ForMatch(ParameterInfo parameter, UnaryExpression expression)
+	public static ConfiguredParameter ForAnyType(ParameterInfo parameter) => new UnconstrainedParameter
 	{
-		var match = (LambdaExpression)expression.Operand;
-		var matchDelegate = (object? obj) => {
+		Parameter = parameter
+	};
+
+	public static ConfiguredParameter ForNullValues(ParameterInfo parameter) => new NullConstrainedParameter
+	{
+		Parameter = parameter
+	};
+
+	public static ConfiguredParameter ForNonNullValues(ParameterInfo parameter) => new NonNullConstrainedParameter
+	{
+		Parameter = parameter
+	};
+
+	public static ConfiguredParameter ForMatch(ParameterInfo parameter, LambdaExpression match)
+	{
+		var matchDelegate = (object? parameterValue) => {
 			try
 			{
-				return (bool)match.Compile().DynamicInvoke(obj)!;
+				return (bool)match.Compile().DynamicInvoke(parameterValue)!;
 			}
 			catch
 			{
@@ -48,36 +76,85 @@ public abstract class ConfiguredParameter
 		};
 	}
 
+	public static ConfiguredParameter ForExtension<T>(ParameterInfo parameter, Func<T, bool> match)
+	{
+		var matchDelegate = (object? parameterValue) => {
+			try
+			{
+				return (bool)match.DynamicInvoke(parameterValue)!;
+			}
+			catch
+			{
+				// https://github.com/Marvin-Brouwer/LeanTest/issues/7
+				return false;
+			}
+		};
+
+		return new MatchConstrainedParameter
+		{
+			Parameter = parameter,
+			MatchDelegate = matchDelegate
+		};
+	}
+
+	/// <summary>
+	/// Don't use this class for extension, <see cref="ConfiguredParameterExtension"/>.
+	/// </summary>
+	internal ConfiguredParameter() { }
+
 	public required ParameterInfo Parameter { get; init; }
-	public abstract bool MatchesRequirements<T>(T? obj) ;
+	public abstract bool MatchesRequirements<T>(T? parameterValue) ;
 }
 
+[DebuggerDisplay("When parameter equals constant Value")]
 internal sealed class ValueConstrainedParameter : ConfiguredParameter
 {
 	public required object? Value { get; init; }
 
-	public override bool MatchesRequirements<T>(T? obj) where T : default
+	public override bool MatchesRequirements<T>(T? parameterValue) where T : default
 	{
-		if (obj is null) return Value is null;
-		return obj.Equals(Value);
+		if (parameterValue is null) return Value is null;
+		return parameterValue.Equals(Value);
 	}
 }
 
+[DebuggerDisplay("When parameter matches anything")]
+internal sealed class UnconstrainedParameter : ConfiguredParameter
+{
+	public override bool MatchesRequirements<T>(T? parameterValue) where T : default => true;
+}
+
+[DebuggerDisplay("When parameter is null")]
+internal sealed class NullConstrainedParameter : ConfiguredParameter
+{
+	public override bool MatchesRequirements<T>(T? parameterValue) where T : default => parameterValue is null;
+}
+
+[DebuggerDisplay("When parameter is not null")]
+internal sealed class NonNullConstrainedParameter : ConfiguredParameter
+{
+	public override bool MatchesRequirements<T>(T? parameterValue) where T : default => parameterValue is not null;
+}
+
+[DebuggerDisplay("When parameter type matches {ParameterType.FullName}")]
 internal sealed class TypeConstrainedParameter : ConfiguredParameter
 {
 	public required Type ParameterType { get; init; }
 	public required bool IsNullable { get; init; }
 
-	public override bool MatchesRequirements<T>(T? obj) where T : default
+	public override bool MatchesRequirements<T>(T? parameterValue) where T : default
 	{
-		if (obj is null) return IsNullable;
-		return obj.GetType() == Parameter.ParameterType;
+		if (parameterValue is null) return IsNullable;
+		if (ParameterType == typeof(DynamicObject)) return true;
+		return parameterValue.GetType().IsAssignableTo(Parameter.ParameterType);
 	}
 }
+
+[DebuggerDisplay("When parameter satisfies delegate")]
 internal sealed class MatchConstrainedParameter : ConfiguredParameter
 {
 	public required Func<object?, bool> MatchDelegate { get; init; }
 
-	public override bool MatchesRequirements<T>(T? obj)
-		where T : default => MatchDelegate(obj);
+	public override bool MatchesRequirements<T>(T? parameterValue)
+		where T : default => MatchDelegate(parameterValue);
 }

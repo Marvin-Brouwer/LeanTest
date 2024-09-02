@@ -7,12 +7,18 @@ internal readonly partial record struct ParameterFactory : IParameterFactory
 {
 	internal static readonly IParameterFactory Instance = new ParameterFactory();
 
-	public TParam Is<TParam>() => default!;
+	public TParam Is<TParam>() where TParam : notnull => default!;
+	public object? IsAny() => default!;
+	public object? IsNull() => default!;
+	public TParam? IsNull<TParam>() => default!;
+	public object? NotNull() => default!;
+	public TParam? NotNull<TParam>() => default!;
+
 	public TParam Matches<TParam>(Expression<Func<TParam, bool>> match)
 	{
 		// We only use this to configure the parameter
 		_ = match;
-		return Is<TParam>();
+		return default!;
 	}
 
 	// TODO see if this still works

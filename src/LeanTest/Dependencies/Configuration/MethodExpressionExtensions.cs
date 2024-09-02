@@ -53,6 +53,15 @@ internal static class MethodExpressionExtensions
 			}
 			if (argumentConfiguration.Method.DeclaringType != typeof(IParameterFactory))
 			{
+				var customMatchAttribute = argumentConfiguration.Method
+					.GetCustomAttributes()
+					.FirstOrDefault(a => a.GetType().IsAssignableTo(typeof(IParameterMatchAttribute)));
+
+				if (customMatchAttribute is IParameterMatchAttribute customMatch)
+				{
+					configuredParameters[i] = customMatch.GetParameter(originalParameter);
+					continue;
+				}
 				configuredParameters[i] = ConfiguredParameter.ForParameter(originalParameter);
 				continue;
 			}
@@ -67,9 +76,18 @@ internal static class MethodExpressionExtensions
 					originalParameter,
 					argumentConfiguration.Method.GetGenericArguments().First()
 				),
+				nameof(IParameterFactory.IsAny) => ConfiguredParameter.ForAnyType(
+					originalParameter
+				),
+				nameof(IParameterFactory.IsNull) => ConfiguredParameter.ForNullValues(
+					originalParameter
+				),
+				nameof(IParameterFactory.NotNull) => ConfiguredParameter.ForNonNullValues(
+					originalParameter
+				),
 				nameof(IParameterFactory.Matches) => ConfiguredParameter.ForMatch(
 					originalParameter,
-					(UnaryExpression)argumentConfiguration.Arguments.First()
+					(LambdaExpression)((UnaryExpression)argumentConfiguration.Arguments.First()).Operand
 				),
 				nameof(IParameterFactory.IsReference) => ConfiguredParameter.ForType(
 					originalParameter,
