@@ -11,7 +11,6 @@ public sealed class Mock<TService> :
 	IConfigurableDependency<TService, Mock<TService>>,
 	IVerifyableDependency<TService, Mock<TService>>
 {
-	private readonly InvocationRecordList _invocationRecordList;
 	private readonly InvocationChecker _invocationChecker;
 	private readonly ConfiguredMethodSet _configuredMethods;
 
@@ -30,7 +29,6 @@ public sealed class Mock<TService> :
 		_configuredMethods = configuredMethods;
 		// TODO, this probably isn't threadsafe, perhaps it's cool to have a context associated with the current thread,
 		// or in other words the current Test(() => ....)
-		_invocationRecordList = invocationRecordList;
 		_invocationChecker = new InvocationChecker(invocationRecordList);
 		Instance = instance;
 	}

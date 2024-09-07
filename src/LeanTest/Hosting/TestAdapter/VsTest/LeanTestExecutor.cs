@@ -61,13 +61,10 @@ public abstract class LeanTestExecutor : ITestExecutor
 			return;
 		}
 
-		// We can't use await here because the contract from VSTest says we have to wait for everything to finish
-		// before returning from this function.
-		// XUnit does the same thing: https://github.com/xunit/visualstudio.xunit/blob/0ea6e6cb0991237daf727dfb69e64ced205f4553/src/xunit.runner.visualstudio/VsTestRunner.cs#L157C1-L159C43
-		InvokeTestConsole(tests.ToArray(), frameworkHandle, logger).GetAwaiter().GetResult();
+		InvokeTestConsole(tests.ToArray(), frameworkHandle, logger);
 	}
 
-	private Task InvokeTestConsole(IReadOnlyList<TestCase> tests, IFrameworkHandle frameworkHandle, ILogger logger)
+	private void InvokeTestConsole(IReadOnlyList<TestCase> tests, IFrameworkHandle frameworkHandle, ILogger logger)
 	{
 		var module = tests
 			.Select(test => test.GetPropertyValue<string>(TestProperties.SuiteTypeName, null))
@@ -88,8 +85,8 @@ public abstract class LeanTestExecutor : ITestExecutor
 		TestAdapterContext.HostMessageLogger = frameworkHandle;
 		TestAdapterContext.CurrentFilteredTestCases = tests;
 
+		// https://github.com/Marvin-Brouwer/LeanTest/issues/9
 		var entryPoint = module.EntryPoint;
-		// TODO source analyzer to make sure a program.cs is present
 		if (entryPoint is null) throw new EntryPointNotFoundException(
 			$"The test assembly {module.FullName ?? "?"} does not have an entrypoint.{Environment.NewLine}" +
 			$"Please make sure to define it as a console application, and a Program.cs with a TestHostBuilder is defined."
@@ -97,24 +94,10 @@ public abstract class LeanTestExecutor : ITestExecutor
 
 		logger.LogDebug("Invoking test program");
 
-		// TODO: We put an AsyncEntryPoint thing here, if we don't need async functionality here we might as well just call the regular entrypoint.
-		// Since we call .GetAwaiter().GetResult() here anyway.
-		var asyncEntryPoint = entryPoint.DeclaringType!.GetMethod(entryPoint.Name + "$", BindingFlags.Static | BindingFlags.NonPublic);
-		if (asyncEntryPoint is null) return SyncFallback(entryPoint);
-		else return (Task)asyncEntryPoint.Invoke(asyncEntryPoint, [Array.Empty<string>()])!;
-	}
-
-	private static Task SyncFallback(MethodInfo entryPoint)
-	{
-		try
-		{
-			entryPoint.Invoke(entryPoint, [Array.Empty<string>()]);
-			return Task.CompletedTask;
-		}
-		catch (Exception ex)
-		{
-			return Task.FromException(ex);
-		}
+		// Even though the app may have async top level statements, it's compiled into
+		// `.GetAwaiter().GetResult()` anyways.
+		// This is not an issue since we should only ever have one test program running.
+		_ = entryPoint.Invoke(entryPoint, [Array.Empty<string>()])!;
 	}
 
 	static void HandlePoorVsTestImplementationDetails(IRunContext runContext, IFrameworkHandle frameworkHandle)

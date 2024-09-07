@@ -46,7 +46,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 			.Setup(s => s.DoString("FOO"))
 			.Returns("Bar");
 		_someStub
-			.Setup(s => s.DoString(Parameters<string>().Matches(x => x.StartsWith("hi"))))
+			.Setup(s => s.DoString(Parameters<string>().Match(x => x.StartsWith("hi"))))
 			.Returns((string a) => a);
 		_someStub
 			.Setup(s => s.DoString(Parameters<string>().AnyValue))

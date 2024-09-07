@@ -21,7 +21,6 @@ internal class TestResultBuilder
 		return new TestResult(testCase)
 		{
 			Outcome = TestOutcome.None,
-			// TODO Check and/or format
 			ErrorMessage = cancelledByFrame is not null ? "Cancelled" : $"Cancelled by: {cancelledByFrame}"
 		};
 	}
