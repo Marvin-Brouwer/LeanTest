@@ -38,6 +38,6 @@ public sealed class ParameterExpressionProvider : IDynamicParameterExpressionPro
 	public DynamicObject? Null;
 	// TODO Analyzer to make sure nullable is returned
 	public DynamicObject? NotNull;
-	public DynamicObject Matches(Expression<Func<DynamicObject, bool>> match) =>
+	public DynamicObject Matches(Expression<Func<object, bool>> match) =>
 		throw ParameterExpressionInvokedException;
 }

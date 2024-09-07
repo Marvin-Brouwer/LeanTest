@@ -9,7 +9,7 @@ public interface ITypedParameterExpressionProvider<TParam> : IParameterExpressio
 
 public interface IDynamicParameterExpressionProvider: IParameterExpressionProvider
 {
-	DynamicObject Matches(Expression<Func<DynamicObject, bool>> match);
+	DynamicObject Matches(Expression<Func<object, bool>> match);
 }
 
 public interface IParameterExpressionProvider;

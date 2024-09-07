@@ -51,7 +51,7 @@ internal static class MethodExpressionExtensions
 				configuredParameters[i] = ConfiguredParameter.ForParameter(originalParameter);
 				continue;
 			}
-			if (!argumentConfiguration.Method.DeclaringType!.IsAssignableFrom(typeof(IParameterExpressionProvider)))
+			if (!argumentConfiguration.Method.DeclaringType!.IsAssignableTo(typeof(IParameterExpressionProvider)))
 			{
 				var customMatchAttribute = argumentConfiguration.Method
 					.GetCustomAttributes()
