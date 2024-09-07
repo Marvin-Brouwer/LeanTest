@@ -1,7 +1,6 @@
 #pragma warning disable RCS1047 // Allow Async postfix, because overloading doesn't work otherwise
 
 using LeanTest.Dependencies.Configuration;
-using LeanTest.Dependencies.SupportingTypes;
 
 namespace LeanTest.Dependencies.Async;
 
@@ -264,7 +263,7 @@ public static partial class AsyncMemberSetupExtensions
 
 	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
 	public static TDependency ReturnsAsync<TDependency, TReturn>(
-		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, DynamicFunction<TReturn> asyncCallback
+		this IMemberSetup<TDependency, Task<TReturn>> memberSetup, Delegate asyncCallback
 	)
 		where TDependency : IDependency
 	{
@@ -272,7 +271,7 @@ public static partial class AsyncMemberSetupExtensions
 		{
 			try
 			{
-				return Task.FromResult(asyncCallback(p));
+				return Task.FromResult((TReturn)asyncCallback.DynamicInvoke(p)!);
 			}
 			catch (Exception ex)
 			{
@@ -286,7 +285,7 @@ public static partial class AsyncMemberSetupExtensions
 
 	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
 	public static TDependency ReturnsAsync<TDependency, TReturn>(
-		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, DynamicFunction<TReturn> asyncCallback
+		this IMemberSetup<TDependency, ValueTask<TReturn>> memberSetup, Delegate asyncCallback
 	)
 		where TDependency : IDependency
 	{
@@ -294,7 +293,7 @@ public static partial class AsyncMemberSetupExtensions
 		{
 			try
 			{
-				var task = Task.FromResult(asyncCallback(p));
+				var task = Task.FromResult((TReturn)asyncCallback.DynamicInvoke(p)!);
 				return new ValueTask<TReturn>(task);
 			}
 			catch (Exception ex)

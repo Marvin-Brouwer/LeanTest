@@ -1,5 +1,5 @@
 using LeanTest.Dependencies.Configuration;
-using LeanTest.Dependencies.Factories;
+using LeanTest.Dependencies.Providers;
 using LeanTest.Dependencies.Tests.Fixtures;
 using LeanTest.Dynamic.Invocation;
 
@@ -78,7 +78,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
+			.Setup(sut => sut.VoidWithParameters(Parameters<string>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -91,7 +91,69 @@ public sealed class StubTests : TestSuite.UnitTests
 			.NotThrow();
 	});
 
-	public ITest VoidWithParameters_ConfiguredNull_Returns => Test(() =>
+	public ITest VoidWithParameters_ConfiguredReference_Returns => Test(() =>
+	{
+		// Arrange
+		var referenceString = "ref";
+		_someStub
+			.Setup(sut => sut.VoidWithReference(ref Parameters<string>().AnyValue))
+			.Executes((out string x) =>
+			{
+				x = "Test";
+			});
+
+		var sut = _someStub.Instance;
+
+		// Act
+		sut.VoidWithReference(ref referenceString);
+
+		// Assert
+		referenceString
+			.Should()
+			.BeEquivalentTo("Test");
+	});
+
+	public ITest VoidWithParameters_ConfiguredReadonlyReference_Returns => Test(() =>
+	{
+		// Arrange
+		var referenceString = "ref";
+		_someStub
+			.Setup(sut => sut.VoidWithReadonlyReference(in Parameters<string>().AnyValue))
+			.Executes();
+
+		var sut = _someStub.Instance;
+
+		// Act
+		var result = () => sut.VoidWithReadonlyReference(in referenceString);
+
+		// Assert
+		result.Should()
+			.NotThrow();
+	});
+
+    public ITest VoidWithParameters_ConfiguredOutReference_Returns => Test(() =>
+    {
+        // Arrange
+        _someStub
+            .Setup(sut => sut.VoidWithOutReference(out Parameters<string>().AnyValue))
+            .Executes((out string x) =>
+			{
+				x = "Test";
+			});
+
+		var sut = _someStub.Instance;
+		string referenceString;
+
+		// Act
+		sut.VoidWithOutReference(out referenceString);
+
+        // Assert
+		referenceString
+			.Should()
+			.BeEquivalentTo("Test");
+    });
+
+    public ITest VoidWithParameters_ConfiguredNull_Returns => Test(() =>
 	{
 		// Arrange
 		_someStub
@@ -125,7 +187,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithParameters(Parameter.Is<string>()))
+			.Setup(sut => sut.VoidWithParameters(Parameters<string>().AnyValue))
 			.Throws(new DataMisalignedException());
 
 		var sut = _someStub.Instance;
@@ -146,7 +208,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameters<int>().AnyValue, Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -163,7 +225,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Matches<object>(v => v != null && v.Equals(2)), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Matches(v => v != null && v.Equals(2)), Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -180,7 +242,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.IsAny(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Any, Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -197,7 +259,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters<int>(default, Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters<int>(default, Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -214,7 +276,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.IsNull<int?>(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameters<int?>().Null, Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -231,7 +293,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.NotNull<int?>(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameters<int?>().NotNull, Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -248,7 +310,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.IsOneSecond(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameter.OneSecond(), Parameters<bool>().AnyValue))
 			.Executes();
 
 		var sut = _someStub.Instance;
@@ -278,7 +340,7 @@ public sealed class StubTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(sut => sut.VoidWithGenericParameters(Parameter.Is<int>(), Parameter.Is<bool>()))
+			.Setup(sut => sut.VoidWithGenericParameters(Parameters<int>().AnyValue, Parameters<bool>().AnyValue))
 			.Throws(new DataMisalignedException());
 
 		var sut = _someStub.Instance;
@@ -295,7 +357,7 @@ public sealed class StubTests : TestSuite.UnitTests
 }
 
 /// <summary>
-/// This is here to illustrate, and test, how one would extend the <see cref="IParameterFactory"/>
+/// This is here to illustrate, and test, how one would extend the <see cref="IDynamicParameterExpressionProvider"/>
 /// </summary>
 internal static class ParameterExtensions
 {
@@ -303,9 +365,9 @@ internal static class ParameterExtensions
 	/// When parameter matches a TimeSpan of one second
 	/// </summary>
 	[ParameterMatch<OneSecondMatcher>]
-	public static TimeSpan IsOneSecond(this IParameterFactory parameterFactory)
+	public static TimeSpan OneSecond(this IDynamicParameterExpressionProvider parameter)
 	{
-		_ = parameterFactory;
+		_ = parameter;
 		return default;
 	}
 

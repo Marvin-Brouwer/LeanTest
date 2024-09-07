@@ -34,7 +34,10 @@ public static partial class TestSuite
 		protected readonly IFixtureFactory Fixture = FixtureFactory.Instance;
 		protected readonly IDummyFactory Dummy;
 
-		protected readonly IParameterFactory Parameter = ParameterFactory.Instance;
+		protected static ParameterExpressionProvider<TParam> Parameters<TParam>() =>
+			throw new NotSupportedException("The Parameter expression providers are only intended for expressions!");
+		protected static ParameterExpressionProvider Parameter =>
+			throw new NotSupportedException("The Parameter expression providers are only intended for expressions!");
 
 		protected readonly ITimesContstraintProvider Times = TimesContstraintProvider.Instance;
 

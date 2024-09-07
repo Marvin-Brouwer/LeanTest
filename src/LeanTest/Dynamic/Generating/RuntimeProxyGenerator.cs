@@ -37,9 +37,9 @@ internal sealed class RuntimeProxyGenerator
 		using var ms = new MemoryStream();
 		var generatedProxyClass = ClassBuilder.GenerateProxyClass(_assemblyContext, serviceType, className);
 
-		// Language vesion as low as possible, this is to make sure attributes exist
+		// Language vesion as low as possible, this is to make sure attributes, in, and, nullable reference types exist
 		var syntaxTree = CSharpSyntaxTree
-			.ParseText(generatedProxyClass, new CSharpParseOptions(LanguageVersion.CSharp7),
+			.ParseText(generatedProxyClass, new CSharpParseOptions(LanguageVersion.CSharp8),
 			cancellationToken: _cancellationToken
 		);
 		var proxyReferences = new[] {

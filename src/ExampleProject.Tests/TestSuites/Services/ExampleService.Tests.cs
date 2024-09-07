@@ -46,10 +46,10 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 			.Setup(s => s.DoString("FOO"))
 			.Returns("Bar");
 		_someStub
-			.Setup(s => s.DoString(Parameter.Matches<string>(x => x.StartsWith("hi"))))
+			.Setup(s => s.DoString(Parameters<string>().Matches(x => x.StartsWith("hi"))))
 			.Returns((string a) => a);
 		_someStub
-			.Setup(s => s.DoString(Parameter.Is<string>()))
+			.Setup(s => s.DoString(Parameters<string>().AnyValue))
 			.Returns((string a) => a);
 		_someStub
 			.Setup(s => s.DoOtherThing())
@@ -112,7 +112,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 			.Of<IExampleService>();
 
 		_asyncExampleMock
-			.Setup(sut => sut.DoThing(Parameter.Is<string>()))
+			.Setup(sut => sut.DoThing(Parameters<string>().AnyValue))
 			.ReturnsAsync((string _) => "Test");
 		_asyncExampleMock
 			.Setup(sut => sut.DoAsync())
@@ -123,7 +123,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 	{
 		// Arrange
 		_someStub
-			.Setup(x => x.DoThing(Parameter.Is<string>()))
+			.Setup(x => x.DoThing(Parameters<string>().AnyValue))
 			.Returns(true);
 		_someStub
 			.Setup(x => x.DoOtherThing())
@@ -142,7 +142,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		result.Should().Be(expected);
 
 		_someSpy
-			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			.VerifyOnce(x => x.DoThing(Parameters<string>().AnyValue))
 			.VerifyNoOtherCalls();
 	});
 
@@ -153,7 +153,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 
 		// Arrange
 		_someStub
-			.Setup(x => x.DoThing(Parameter.Is<string>()))
+			.Setup(x => x.DoThing(Parameters<string>().AnyValue))
 			.Returns(true);
 		_someStub
 			.Setup(x => x.DoOtherThing())
@@ -173,14 +173,14 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 
 		_someSpy
 			// TODO analyzer
-			.Verify(Times.Once, x => x.DoThing(Parameter.Is<string>()))
-			.Verify(Times.Exactly(1), x => x.DoThing(Parameter.Is<string>()))
-			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
-			.VerifyExactly(1, x => x.DoThing(Parameter.Is<string>()))
-			.VerifyAtLeast(1, x => x.DoThing(Parameter.Is<string>()))
-			.VerifyAtMost(1, x => x.DoThing(Parameter.Is<string>()))
-			.VerifyBetween(0, 1, x => x.DoThing(Parameter.Is<string>()))
-			.VerifyBetween(1, 2, true, x => x.DoThing(Parameter.Is<string>()))
+			.Verify(Times.Once, x => x.DoThing(Parameters<string>().AnyValue))
+			.Verify(Times.Exactly(1), x => x.DoThing(Parameters<string>().AnyValue))
+			.VerifyOnce(x => x.DoThing(Parameters<string>().AnyValue))
+			.VerifyExactly(1, x => x.DoThing(Parameters<string>().AnyValue))
+			.VerifyAtLeast(1, x => x.DoThing(Parameters<string>().AnyValue))
+			.VerifyAtMost(1, x => x.DoThing(Parameters<string>().AnyValue))
+			.VerifyBetween(0, 1, x => x.DoThing(Parameters<string>().AnyValue))
+			.VerifyBetween(1, 2, true, x => x.DoThing(Parameters<string>().AnyValue))
 			.VerifyNoOtherCalls();
 	});
 
@@ -198,7 +198,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		_ = isCool;
 		// Arrange
 		_someStub
-			.Setup(x => x.DoThing(Parameter.Is<string>()))
+			.Setup(x => x.DoThing(Parameters<string>().AnyValue))
 			.Returns(true);
 		_someStub
 			.Setup(x => x.DoOtherThing())
@@ -227,7 +227,7 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		result.Should().Be(expected);
 
 		_someSpy
-			.VerifyOnce(x => x.DoThing(Parameter.Is<string>()))
+			.VerifyOnce(x => x.DoThing(Parameters<string>().AnyValue))
 			.VerifyNoOtherCalls();
 		_someMock
 			.VerifyNoCalls();

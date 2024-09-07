@@ -14,7 +14,8 @@ internal static class ClassBuilder
 		using {{typeof(IInvokeInterceptor).Namespace}};
 		using {{serviceType.Namespace}};
 		using System.CodeDom.Compiler;
-				
+
+		#nullable enable
 		namespace {{context.NamespaceName}}
 		{
 			[GeneratedCode("{{typeof(ClassBuilder).Assembly.GetName().Name}}" ,"{{typeof(ClassBuilder).Assembly.GetName().Version}}")]
@@ -78,14 +79,52 @@ internal static class ClassBuilder
 			{
 				if (i != 0) methodBuilder.Append(", ");
 				var parameter = method.GetParameters()[i];
+				if (parameter.ParameterType.IsByRef)
+				{
+					if (parameter.IsIn) methodBuilder.Append("in ");
+					else if (parameter.IsOut) methodBuilder.Append("out ");
+					else methodBuilder.Append("ref ");
+				}
 				methodBuilder.Append(FormatType(parameter.ParameterType));
 				methodBuilder.Append(' ');
 				methodBuilder.Append(parameter.Name);
 			}
 		}
-		methodBuilder.Append(") => ");
+		methodBuilder.AppendLine(")");
+		methodBuilder.Append('\t', 2);
+		methodBuilder.Append("{ ");
+
+		if (hasParameters)
+		{
+
+			foreach (var parameter in parameters)
+			{
+				if (!parameter.ParameterType.IsByRef) continue;
+				if (!parameter.IsOut) continue;
+
+				methodBuilder.AppendLine();
+				methodBuilder.Append('\t', 3);
+				methodBuilder.Append(parameter.Name);
+				methodBuilder.Append(" = default!;");
+			}
+
+			methodBuilder.AppendLine();
+			methodBuilder.Append('\t', 3);
+
+			methodBuilder.Append("var formattedParameters = new object[] { ");
+			for (int i = 0; i < parameters.Length; i++)
+			{
+				if (i != 0) methodBuilder.Append(", ");
+				var parameter = parameters[i];
+				methodBuilder.Append(parameter.Name);
+			}
+			methodBuilder.Append(" };");
+		}
+
 		methodBuilder.AppendLine();
 		methodBuilder.Append('\t', 3);
+		if (!isVoidMethod)
+			methodBuilder.Append("var result = ");
 		methodBuilder.Append("_interceptor.RequestInvoke");
 		if (!isVoidMethod)
 		{
@@ -99,30 +138,44 @@ internal static class ClassBuilder
 		methodBuilder.Append($"{nameof(MethodBase)}.{nameof(MethodBase.GetCurrentMethod)}()");
 		if (hasParameters)
 		{
-			methodBuilder.Append(',');
-			methodBuilder.AppendLine();
-			methodBuilder.Append('\t', 4);
-			methodBuilder.Append("new object[] { ");
-			for (int i = 0; i < parameters.Length; i++)
-			{
-				if (i != 0) methodBuilder.Append(", ");
-				var parameter = parameters[i];
-				methodBuilder.Append(parameter.Name);
-			}
-			methodBuilder.Append(" }");
+			methodBuilder.Append(", ref formattedParameters");
 		}
 		methodBuilder.AppendLine();
 		methodBuilder.Append('\t', 3);
-		methodBuilder.Append(");");
+		methodBuilder.AppendLine(");");
+
+		for (int i = 0; i < parameters.Length; i++)
+		{
+			var parameter = parameters[i]!;
+			if (!parameter.ParameterType.IsByRef) continue;
+			if (parameter.IsIn) continue;
+
+			methodBuilder.Append('\t', 3);
+			methodBuilder.Append(parameter.Name);
+			methodBuilder.Append(" = (");
+			methodBuilder.Append(FormatType(parameter.ParameterType));
+			methodBuilder.Append(")formattedParameters[");
+			methodBuilder.Append(i);
+			methodBuilder.AppendLine("]!;");
+		}
+
+		if (!isVoidMethod)
+		{
+			methodBuilder.Append('\t', 3);
+			methodBuilder.AppendLine("return result;");
+		}
+
+		methodBuilder.Append('\t', 2);
+		methodBuilder.Append("}");
 	}
 
 	private static string FormatType(Type returnType)
 	{
 		if (!returnType.IsGenericType)
-			return (returnType.FullName ?? returnType.Name).Trim();
+			return (returnType.FullName ?? returnType.Name).Trim().TrimEnd('&');
 
 		var genericType = returnType.GetGenericTypeDefinition();
-		var bareTypeName = (genericType.FullName ?? genericType.Name).Split('`')[0];
+		var bareTypeName = (genericType.FullName ?? genericType.Name).Split('`')[0].TrimEnd('&');
 
 		var genericTypeBuilder = new StringBuilder(32);
 		genericTypeBuilder.Append(bareTypeName);

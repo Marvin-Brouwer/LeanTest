@@ -4,6 +4,9 @@ public interface IExampleService
 {
 	public void VoidNoParameters();
 	public void VoidWithParameters(string? someString);
+	public void VoidWithReference(ref string someString);
+	public void VoidWithReadonlyReference(in string someString);
+	public void VoidWithOutReference(out string someString);
 	public void VoidWithGenericParameters<T>(T something, bool someBoolean);
 	public int ReturnsNoParameters();
 	public int ReturnsWithParameters(bool someBoolean);

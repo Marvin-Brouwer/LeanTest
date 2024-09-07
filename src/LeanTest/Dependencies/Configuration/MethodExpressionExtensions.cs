@@ -1,4 +1,4 @@
-using LeanTest.Dependencies.Factories;
+using LeanTest.Dependencies.Providers;
 
 using System.Diagnostics;
 using System.Linq.Expressions;
@@ -51,7 +51,7 @@ internal static class MethodExpressionExtensions
 				configuredParameters[i] = ConfiguredParameter.ForParameter(originalParameter);
 				continue;
 			}
-			if (argumentConfiguration.Method.DeclaringType != typeof(IParameterFactory))
+			if (!argumentConfiguration.Method.DeclaringType!.IsAssignableFrom(typeof(IParameterExpressionProvider)))
 			{
 				var customMatchAttribute = argumentConfiguration.Method
 					.GetCustomAttributes()
@@ -66,32 +66,41 @@ internal static class MethodExpressionExtensions
 				continue;
 			}
 
-			parameterSpecificity = argumentConfiguration.Method.Name == nameof(IParameterFactory.Matches)
-				? 3
-				: 2;
+			if (argumentConfiguration.Method.Name == nameof(IDynamicParameterExpressionProvider.Matches))
+			{
+				parameterSpecificity = 3;
+			}
+			else if (argumentConfiguration.Method.Name == nameof(ITypedParameterExpressionProvider<object>.Match))
+			{
+				parameterSpecificity = 3;
+			}
+			else
+			{
+				parameterSpecificity = 2;
+			}
 
 			configuredParameters[i] = argumentConfiguration.Method.Name switch
 			{
-				nameof(IParameterFactory.Is) => ConfiguredParameter.ForType(
+				nameof(ParameterExpressionProvider<object>.AnyValue) => ConfiguredParameter.ForType(
 					originalParameter,
 					argumentConfiguration.Method.GetGenericArguments().First()
 				),
-				nameof(IParameterFactory.IsAny) => ConfiguredParameter.ForAnyType(
+				nameof(ParameterExpressionProvider.Any) => ConfiguredParameter.ForAnyType(
 					originalParameter
 				),
-				nameof(IParameterFactory.IsNull) => ConfiguredParameter.ForNullValues(
+				nameof(ParameterExpressionProvider.Null) => ConfiguredParameter.ForNullValues(
 					originalParameter
 				),
-				nameof(IParameterFactory.NotNull) => ConfiguredParameter.ForNonNullValues(
+				nameof(ParameterExpressionProvider.NotNull) => ConfiguredParameter.ForNonNullValues(
 					originalParameter
 				),
-				nameof(IParameterFactory.Matches) => ConfiguredParameter.ForMatch(
+				nameof(IDynamicParameterExpressionProvider.Matches) => ConfiguredParameter.ForMatch(
 					originalParameter,
 					(LambdaExpression)((UnaryExpression)argumentConfiguration.Arguments.First()).Operand
 				),
-				nameof(IParameterFactory.IsReference) => ConfiguredParameter.ForType(
+				nameof(ITypedParameterExpressionProvider<object>.Match) => ConfiguredParameter.ForMatch(
 					originalParameter,
-					argumentConfiguration.Method.GetGenericArguments().First()
+					(LambdaExpression)((UnaryExpression)argumentConfiguration.Arguments.First()).Operand
 				),
 				_ => throw new UnreachableException()
 			};

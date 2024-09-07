@@ -1,5 +1,3 @@
-using LeanTest.Dependencies.SupportingTypes;
-
 namespace LeanTest.Dependencies.Configuration;
 
 public interface IMemberSetup<out TDependency> where TDependency : IDependency
@@ -16,7 +14,7 @@ public interface IMemberSetup<out TDependency> where TDependency : IDependency
 	TDependency Executes<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callBack);
 
 	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
-	TDependency Executes(DynamicAction callBack);
+	TDependency Executes<TDelegate>(TDelegate callBack) where TDelegate : Delegate;
 }
 
 public interface IMemberSetup<TDependency, TReturn> where TDependency : IDependency
@@ -33,5 +31,5 @@ public interface IMemberSetup<TDependency, TReturn> where TDependency : IDepende
 	TDependency Returns<T1, T2, T3, T4, T5>(Func<T1, T2, T3, T4, T5, TReturn> callBack);
 
 	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
-	TDependency Returns(DynamicFunction<TReturn> callBack);
+	TDependency Returns<TDelegate>(TDelegate callBack) where TDelegate : Delegate;
 }

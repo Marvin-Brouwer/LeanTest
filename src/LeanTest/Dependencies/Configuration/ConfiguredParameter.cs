@@ -144,8 +144,11 @@ internal sealed class TypeConstrainedParameter : ConfiguredParameter
 
 	public override bool MatchesRequirements<T>(T? parameterValue) where T : default
 	{
-		if (parameterValue is null) return IsNullable;
+		if (parameterValue is null) return Parameter.IsOut || IsNullable;
 		if (ParameterType == typeof(DynamicObject)) return true;
+
+		if (ParameterType.IsByRef)
+			return parameterValue.GetType().IsAssignableTo(Parameter.ParameterType.GetElementType());
 		return parameterValue.GetType().IsAssignableTo(Parameter.ParameterType);
 	}
 }

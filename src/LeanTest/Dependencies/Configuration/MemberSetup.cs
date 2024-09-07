@@ -1,5 +1,3 @@
-using LeanTest.Dependencies.SupportingTypes;
-
 using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Configuration;
@@ -71,7 +69,7 @@ internal class MemberSetup<TDependency> : IMemberSetup<TDependency>
 		return Dependency;
 	}
 
-	public TDependency Executes(DynamicAction callBack)
+	public TDependency Executes<TDelegate>(TDelegate callBack) where TDelegate : Delegate
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForCallback(Method, callBack));
 		return Dependency;
@@ -123,7 +121,7 @@ internal class MemberSetup<TDependency, TReturn> : MemberSetup<TDependency>, IMe
 		return Dependency;
 	}
 
-	public TDependency Returns(DynamicFunction<TReturn> callBack)
+	public TDependency Returns<TDelegate>(TDelegate callBack) where TDelegate : Delegate
 	{
 		ConfiguredMethods.Add(ConfiguredMethod.ForCallback<TReturn>(Method, callBack));
 		return Dependency;

@@ -72,6 +72,35 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 			.WithMessage("No calls were expected. However, at least some invocations were recorded.");
 	});
 
+	public ITest SpyOnOutVariable_ShouldSetVariableValue => Test(() =>
+	{
+		// Arrange
+		var sut = Spy.On<IExampleService>(new ExampleService(true));
+
+		// Act
+		sut.Instance.VoidWithOutReference(out var someString);
+
+		// Assert
+		someString
+			.Should()
+			.BeEquivalentTo("referenced");
+	});
+
+	public ITest SpyOnRefVariable_ShouldSetVariableValue => Test(() =>
+	{
+		// Arrange
+		var sut = Spy.On<IExampleService>(new ExampleService(true));
+
+		// Act
+		string someString = "before reference";
+		sut.Instance.VoidWithReference(ref someString);
+
+		// Assert
+		someString
+			.Should()
+			.BeEquivalentTo("referenced");
+	});
+
 	private sealed class ExampleService : IExampleService
 	{
 		private readonly bool _success;
@@ -127,9 +156,27 @@ public sealed partial class SpyTests : TestSuite.UnitTests
 			if (!_success) throw new NotImplementedException();
 		}
 
-		public void VoidWithParameters(string someString)
+		public void VoidWithOutReference(out string someString)
 		{
 			if (!_success) throw new NotImplementedException();
+			someString = "referenced";
+		}
+
+		public void VoidWithParameters(string? someString)
+		{
+			if (!_success) throw new NotImplementedException();
+		}
+
+		public void VoidWithReadonlyReference(in string someString)
+		{
+			if (!_success) throw new NotImplementedException();
+			_ = someString;
+		}
+
+		public void VoidWithReference(ref string someString)
+		{
+			if (!_success) throw new NotImplementedException();
+			someString = "referenced";
 		}
 	}
 }

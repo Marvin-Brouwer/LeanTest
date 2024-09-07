@@ -6,6 +6,8 @@ namespace LeanTest.Dynamic.Invocation;
 
 internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 {
+	private static object?[] EmptyParams = Array.Empty<object>();
+
 	private readonly TService? _service;
 	private readonly InvocationRecordList _invocationRecords;
 
@@ -15,8 +17,8 @@ internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 		_invocationRecords = invocationRecords;
 	}
 
-	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, Array.Empty<object>());
-	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo, object?[] parameters)
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, ref EmptyParams);
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo, ref object?[] parameters)
 	{
 		try
 		{
@@ -31,8 +33,8 @@ internal sealed class InvocationRecorder<TService> : IInvokeInterceptor
 		}
 	}
 
-	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, Array.Empty<object>());
-	public void RequestInvoke(MethodBase methodInfo, object?[] parameters)
+	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, ref EmptyParams);
+	public void RequestInvoke(MethodBase methodInfo, ref object?[] parameters)
 	{
 		try
 		{

@@ -6,6 +6,8 @@ namespace LeanTest.Dynamic.Invocation;
 
 internal sealed class InvocationMarshall : IInvokeInterceptor
 {
+	private static object?[] EmptyParams = Array.Empty<object>();
+
 	private readonly ConfiguredMethodSet _configuredMethods;
 
 	internal InvocationMarshall(ConfiguredMethodSet configuredMethods)
@@ -13,10 +15,10 @@ internal sealed class InvocationMarshall : IInvokeInterceptor
 		_configuredMethods = configuredMethods;
 	}
 
-	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, Array.Empty<object>());
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, ref EmptyParams);
 	public TReturn RequestInvoke<TReturn>(
 		MethodBase methodInfo,
-		object?[] parameters)
+		ref object?[] parameters)
 	{
 		if (!_configuredMethods.TryFind<TReturn>(methodInfo, parameters, out var configuredMethod))
 			throw new InvocationNotFoundException(methodInfo, parameters, typeof(TReturn));
@@ -24,10 +26,10 @@ internal sealed class InvocationMarshall : IInvokeInterceptor
 		return (TReturn)configuredMethod.Invoke(parameters)!;
 	}
 
-	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, Array.Empty<object>());
+	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, ref EmptyParams);
 	public void RequestInvoke(
 		MethodBase methodInfo,
-		object?[] parameters)
+		ref object?[] parameters)
 	{
 		if (!_configuredMethods.TryFind(methodInfo, parameters, out var configuredMethod))
 			throw new InvocationNotFoundException(methodInfo, parameters);

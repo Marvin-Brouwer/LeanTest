@@ -1,7 +1,5 @@
 using System.Reflection;
 
-using IParameterFactory = LeanTest.Dependencies.Factories.IParameterFactory;
-
 namespace LeanTest.Dependencies.Configuration;
 
 /// <summary>
@@ -12,14 +10,14 @@ namespace LeanTest.Dependencies.Configuration;
 /// public static class ExampleParameterExtensions
 /// {
 /// 	[ParameterMatch<TrueValueMatcher>]
-/// 	public static bool IsTrue(this IParameterFactory parameterFactory)
+/// 	public static bool IsTrue(this IParameterExpressionProvider parameter)
 /// 	{
 /// 		_ = parameterFactory;
 /// 		return true;
 /// 	}
 /// 	
 /// 	[ParameterMatch<FalseValueMatcher>]
-/// 	public static bool IsFalse(this IParameterFactory parameterFactory)
+/// 	public static bool IsFalse(this IParameterExpressionProvider parameter)
 /// 	{
 /// 		_ = parameterFactory;
 /// 		return false;

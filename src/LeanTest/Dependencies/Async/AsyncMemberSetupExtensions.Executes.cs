@@ -1,7 +1,6 @@
 #pragma warning disable RCS1047 // Allow Async postfix, because overloading doesn't work otherwise
 
 using LeanTest.Dependencies.Configuration;
-using LeanTest.Dependencies.SupportingTypes;
 
 namespace LeanTest.Dependencies.Async;
 
@@ -271,7 +270,7 @@ public static partial class AsyncMemberSetupExtensions
 
 	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
 	public static TDependency ExecutesAsync<TDependency>(
-		this IMemberSetup<TDependency, Task> memberSetup, DynamicAction asyncCallback
+		this IMemberSetup<TDependency, Task> memberSetup, Delegate asyncCallback
 	)
 		where TDependency : IDependency
 	{
@@ -279,7 +278,7 @@ public static partial class AsyncMemberSetupExtensions
 		{
 			try
 			{
-				asyncCallback(p);
+				asyncCallback.DynamicInvoke(p);
 				return Task.CompletedTask;
 			}
 			catch (Exception ex)
@@ -294,7 +293,7 @@ public static partial class AsyncMemberSetupExtensions
 
 	// https://github.com/Marvin-Brouwer/LeanTest/issues/4
 	public static TDependency ExecutesAsync<TDependency>(
-		this IMemberSetup<TDependency, ValueTask> memberSetup, DynamicAction asyncCallback
+		this IMemberSetup<TDependency, ValueTask> memberSetup, Delegate asyncCallback
 	)
 		where TDependency : IDependency
 	{
@@ -302,7 +301,7 @@ public static partial class AsyncMemberSetupExtensions
 		{
 			try
 			{
-				asyncCallback(p);
+				asyncCallback.DynamicInvoke(p);
 				return new ValueTask(Task.CompletedTask);
 			}
 			catch(Exception ex)

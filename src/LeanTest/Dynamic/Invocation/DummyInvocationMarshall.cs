@@ -4,8 +4,10 @@ namespace LeanTest.Dynamic.Invocation;
 
 internal sealed class DummyInvocationMarshall : IInvokeInterceptor
 {
-	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, Array.Empty<object>());
-	public TReturn RequestInvoke<TReturn>( MethodBase methodInfo, object?[] parameters)
+	private static object?[] EmptyParams = Array.Empty<object>();
+
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, ref EmptyParams);
+	public TReturn RequestInvoke<TReturn>( MethodBase methodInfo, ref object?[] parameters)
 	{
 		if (typeof(TReturn).IsValueType) return default!;
 		if (typeof(TReturn).IsAbstract) return default!;
@@ -22,8 +24,8 @@ internal sealed class DummyInvocationMarshall : IInvokeInterceptor
 		}
 	}
 
-	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, Array.Empty<object>());
-	public void RequestInvoke(MethodBase methodInfo, object?[] parameters)
+	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, ref EmptyParams);
+	public void RequestInvoke(MethodBase methodInfo, ref object?[] parameters)
 	{
 		// Do nothing
 	}

@@ -6,6 +6,8 @@ namespace LeanTest.Dynamic.Invocation;
 
 internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 {
+	private object?[] EmptyParams = Array.Empty<object>();
+
 	private readonly InvocationRecordList _invocationRecords;
 	private readonly IInvokeInterceptor _invocationMarshall;
 
@@ -15,12 +17,12 @@ internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 		_invocationRecords = invocationRecords;
 	}
 
-	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, Array.Empty<object>());
-	public TReturn RequestInvoke<TReturn>( MethodBase methodInfo, object?[] parameters)
+	public TReturn RequestInvoke<TReturn>(MethodBase methodInfo) => RequestInvoke<TReturn>(methodInfo, ref EmptyParams);
+	public TReturn RequestInvoke<TReturn>( MethodBase methodInfo, ref object?[] parameters)
 	{
 		try
 		{
-			var returnValue = _invocationMarshall.RequestInvoke<TReturn>(methodInfo, parameters);
+			var returnValue = _invocationMarshall.RequestInvoke<TReturn>(methodInfo, ref parameters);
 			_invocationRecords.Add(methodInfo, parameters, true);
 			return returnValue;
 		}
@@ -31,12 +33,12 @@ internal sealed class RecordingInvocationMarshall : IInvokeInterceptor
 		}
 	}
 
-	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, Array.Empty<object>());
-	public void RequestInvoke(MethodBase methodInfo, object?[] parameters)
+	public void RequestInvoke(MethodBase methodInfo) => RequestInvoke(methodInfo, ref EmptyParams);
+	public void RequestInvoke(MethodBase methodInfo, ref object?[] parameters)
 	{
 		try
 		{
-			_invocationMarshall.RequestInvoke(methodInfo, parameters);
+			_invocationMarshall.RequestInvoke(methodInfo, ref parameters);
 			_invocationRecords.Add(methodInfo, parameters, true);
 		}
 		catch
