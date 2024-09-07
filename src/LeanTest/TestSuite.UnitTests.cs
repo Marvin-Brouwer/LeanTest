@@ -35,9 +35,9 @@ public static partial class TestSuite
 		protected readonly IDummyFactory Dummy;
 
 		protected static ParameterExpressionProvider<TParam> Parameters<TParam>() =>
-			throw new NotSupportedException("The Parameter expression providers are only intended for expressions!");
+			throw ParameterExpressionProvider.ParameterExpressionInvokedException;
 		protected static ParameterExpressionProvider Parameter =>
-			throw new NotSupportedException("The Parameter expression providers are only intended for expressions!");
+			throw ParameterExpressionProvider.ParameterExpressionInvokedException;
 
 		protected readonly ITimesContstraintProvider Times = TimesContstraintProvider.Instance;
 

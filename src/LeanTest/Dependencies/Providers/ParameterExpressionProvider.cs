@@ -5,40 +5,39 @@ using System.Linq.Expressions;
 
 namespace LeanTest.Dependencies.Providers;
 
-// TODO Analyzer for preferring T
 [Browsable(false), DebuggerNonUserCode]
 public sealed class ParameterExpressionProvider<TParam> : ITypedParameterExpressionProvider<TParam>
 {
 	[Browsable(false), DebuggerNonUserCode, DebuggerHidden]
-	internal ParameterExpressionProvider() => throw new NotSupportedException();
+	internal ParameterExpressionProvider() =>
+		throw ParameterExpressionProvider.ParameterExpressionInvokedException;
 
 	public TParam AnyValue = default!;
 	// TODO Analyzer to make sure nullable is returned
 	public TParam? Null;
 	// TODO Analyzer to make sure nullable is returned
 	public TParam? NotNull;
-	public TParam Match(Expression<Func<TParam, bool>> match)
-	{
-		_ = match;
-		return default!;
-	}
+	public TParam Match(Expression<Func<TParam, bool>> match) =>
+		throw ParameterExpressionProvider.ParameterExpressionInvokedException;
 }
 
 
 [Browsable(false), DebuggerNonUserCode]
 public sealed class ParameterExpressionProvider : IDynamicParameterExpressionProvider
 {
+	internal static readonly NotSupportedException ParameterExpressionInvokedException = new NotSupportedException(
+		"The Parameter expression providers are only intended for expressions!"
+	);
+
 	[Browsable(false), DebuggerNonUserCode, DebuggerHidden]
-	internal ParameterExpressionProvider() => throw new NotSupportedException();
+	internal ParameterExpressionProvider() =>
+		throw ParameterExpressionInvokedException;
 
 	public DynamicObject Any = default!;
 	// TODO Analyzer to make sure nullable is returned
 	public DynamicObject? Null;
 	// TODO Analyzer to make sure nullable is returned
 	public DynamicObject? NotNull;
-	public DynamicObject Matches(Expression<Func<DynamicObject, bool>> match)
-	{
-		_ = match;
-		return default!;
-	}
+	public DynamicObject Matches(Expression<Func<DynamicObject, bool>> match) =>
+		throw ParameterExpressionInvokedException;
 }
