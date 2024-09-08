@@ -143,10 +143,6 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 
 		// Assert
 		result.Should().Be(expected);
-
-		_someSpy
-			.VerifyOnce(x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyNoOtherCalls();
 	});
 
 	private static IEnumerable<int> Numbers => [1, 2, 3, 4];

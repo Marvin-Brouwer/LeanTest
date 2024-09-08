@@ -9,6 +9,11 @@
 		<OutputType>Exe</OutputType>
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
+	
+	<!-- Set this to "True" or invoke dotnet test with `:p:TEST_FAILLURE` if you want to test failing behavior -->
+	<PropertyGroup Condition="False">
+		<DefineConstants>$(DefineConstants);TEST_FAILLURE</DefineConstants>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="FluentAssertions" Version="6.11.0" />

@@ -16,11 +16,22 @@ public sealed partial class TestSuite : LeanTest.TestSuite.UnitTests
 	{
 		// AAA
 	});
+
+#if (TEST_FAILLURE)
 	public ITest UnitTest_AssertionFailed_Faillure => Test(() =>
 	{
 		// AAA
 		"Faillure".Should().BeEmpty();
 	});
+
+	public ITest UnitTest_ExceptionThrown_Faillure => Test(() =>
+	{
+		// AA
+		throw new Exception("This is on purpose");
+		// A
+	});
+#endif
+
 	public ITest UnitTest_CancelRequested_Canceled => Test(() =>
 	{
 		// AA
