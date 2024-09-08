@@ -7,12 +7,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+using System.Reflection;
+
 namespace LeanTest.Hosting;
 
 public static class HostExensions
 {
-	public static IServiceCollection AddLeanTestHost<TAssemblyMarker>(this IServiceCollection services) => services
-		.AddHostedService<TestHostService<TAssemblyMarker>>();
+	public static IServiceCollection AddLeanTestHost(this IServiceCollection services, Assembly testAssembly) => services
+		.AddHostedService(sp => new TestHostService(sp, testAssembly));
 	public static IServiceCollection AddLeanTestInvoker(this IServiceCollection services)
 	{
 		// Configure discovery and state services

@@ -37,12 +37,18 @@ internal class TestRunner
 		var shuffled = tests.Shuffle(cancellationToken);
 		var testTasks = InvokeTests(shuffled, cancellationToken);
 
-		// TODO Semaphore?
 		await Task.WhenAll(testTasks);
 	}
 
 	private IEnumerable<Task> InvokeTests(IReadOnlyList<TestCase> tests, CancellationToken cancellationToken)
 	{
+		// https://github.com/Marvin-Brouwer/LeanTest/issues/10
+		var minCount = ThreadPool.ThreadCount;
+		ThreadPool.GetMaxThreads(out var maxThreads, out _);
+		var maxCount = maxThreads * 2;
+
+		var semaphore = new SemaphoreSlim(minCount, maxCount);
+
 		foreach (var test in tests)
 		{
 			if (cancellationToken.IsCancellationRequested)
@@ -50,12 +56,13 @@ internal class TestRunner
 				EndTest(test, _resultBuilder.CancelTest(test));
 				continue;
 			}
-			yield return InvokeTest(test, cancellationToken);
+			yield return InvokeTest(test, semaphore, cancellationToken);
 		}
 	}
 
-	private async Task InvokeTest(TestCase testCase, CancellationToken cancellationToken)
+	private async Task InvokeTest(TestCase testCase, SemaphoreSlim semaphore, CancellationToken cancellationToken)
 	{
+		await semaphore.WaitAsync(cancellationToken);
 		_hostLogger.LogTrace("Running {testName}", testCase.DisplayName);
 
 		// Start the spinner but don't record the start time yet
@@ -63,36 +70,39 @@ internal class TestRunner
 
 		if (cancellationToken.IsCancellationRequested)
 		{
-			EndTest(testCase, _resultBuilder.CancelTest(testCase));
+			EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 			return;
 		}
 
 		var testPropertyName = testCase.GetPropertyValue<string>(TestProperties.PropertyName, null);
 		if (testPropertyName is null || string.IsNullOrEmpty(testCase.CodeFilePath))
 		{
+			semaphore.Release();
 			throw new Exception("TODO: NotFound result");
 		}
 
 		if (cancellationToken.IsCancellationRequested)
 		{
-			EndTest(testCase, _resultBuilder.CancelTest(testCase));
+			EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 			return;
 		}
 
 		var testAssemblyType = testCase.GetPropertyValue<string>(TestProperties.SuiteTypeName, null);
 		if (string.IsNullOrEmpty(testAssemblyType))
 		{
+			semaphore.Release();
 			throw new Exception("TODO: NotFound result");
 		}
 
 		var testSuiteType = Type.GetType(testAssemblyType);
 		if (testSuiteType is null)
 		{
+			semaphore.Release();
 			throw new Exception("TODO: NotFound result");
 		}
 		if (cancellationToken.IsCancellationRequested)
 		{
-			EndTest(testCase, _resultBuilder.CancelTest(testCase));
+			EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 			return;
 		}
 
@@ -105,10 +115,10 @@ internal class TestRunner
 
 		// We can assume the suite succeeds instantiation because we already need this during discovery phase.
 		// If this fails, the test should break horribly too.
-		var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuiteType)!;
+		var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuiteType, [0])!;
 		if (cancellationToken.IsCancellationRequested)
 		{
-			EndTest(testCase, _resultBuilder.CancelTest(testCase));
+			EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 			return;
 		}
 
@@ -119,13 +129,14 @@ internal class TestRunner
 			if (testParametersIndex == -1)
 			{
 				_hostLogger.LogCritical("TODO Fail");
+				semaphore.Release();
 				throw new Exception("TODO fail");
 			}
 
 			var testParameters = dt.TestData[testParametersIndex];
 			if (cancellationToken.IsCancellationRequested)
 			{
-				EndTest(testCase, _resultBuilder.CancelTest(testCase));
+				EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 				return;
 			}
 
@@ -141,7 +152,7 @@ internal class TestRunner
 					dt.TestBody.DynamicInvoke(testParameters);
 
 				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
 			}
 			catch(Exception ex)
 			{
@@ -150,7 +161,7 @@ internal class TestRunner
 					: ex;
 
 				var testResult = _resultBuilder.FailTest(testCase, testException, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
 			}
 
 			return;
@@ -159,7 +170,7 @@ internal class TestRunner
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
-				EndTest(testCase, _resultBuilder.CancelTest(testCase));
+				EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 				return;
 			}
 
@@ -175,7 +186,7 @@ internal class TestRunner
 					tc.TestBody.DynamicInvoke();
 
 				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
 			}
 			catch (Exception ex)
 			{
@@ -184,29 +195,31 @@ internal class TestRunner
 					: ex;
 
 				var testResult = _resultBuilder.FailTest(testCase, testException, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
 			}
 			return;
 		}
 
+		semaphore.Release();
 		throw new UnreachableException();
 
 		// TODO add Test.Skip situation?
 	}
 
-	private void EndTest(TestCase testCase, TestResult testResult)
+	private void EndTest(TestCase testCase, TestResult testResult, SemaphoreSlim semaphore)
 	{
 		_executionRecorder.RecordResult(testResult);
 		_executionRecorder.RecordEnd(testCase, testResult.Outcome);
+		semaphore.Release();
 	}
 
-	private void EndTest(TestCase testCase, TestResult testResult, DateTime startTime, Stopwatch stopwatch)
+	private void EndTest(TestCase testCase, TestResult testResult, DateTime startTime, Stopwatch stopwatch, SemaphoreSlim semaphore)
 	{
 		testResult.StartTime = startTime;
 		testResult.EndTime = DateTime.UtcNow;
 		stopwatch.Stop();
 		testResult.Duration = stopwatch.Elapsed;
 
-		EndTest(testCase, testResult);
+		EndTest(testCase, testResult, semaphore);
 	}
 }

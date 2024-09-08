@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
+using System.Diagnostics;
+
 namespace LeanTest.Hosting;
 
 // TODO cleanup unused
@@ -16,8 +18,12 @@ public static class TestHost
 		
 	}
 
-	// TODO infer TProgram from stackFrame or something and then check if it's the same as the test context
-	public static IHostBuilder CreateDefault<TProgram>(string[]? args) where TProgram : class, new() => Host
+	public static IHostBuilder CreateDefault(string[]? args)
+	{
+		var callingType = new StackTrace().GetFrames().First(x => x.GetMethod()?.ReflectedType?.Name == "Program");
+		var testAssembly = callingType.GetMethod()!.ReflectedType!.Assembly;
+
+		return Host
 		.CreateDefaultBuilder(args)
 			.ConfigureAppConfiguration((application, configuration) =>
 			{
@@ -47,7 +53,7 @@ public static class TestHost
 			.ConfigureServices((application, services) =>
 			{
 				services.AddLeanTestInvoker();
-				services.AddLeanTestHost<TProgram>();
+				services.AddLeanTestHost(testAssembly);
 			})
 			.ConfigureLogging((host, builder) =>
 			{
@@ -65,7 +71,7 @@ public static class TestHost
 				if (!host.HostingEnvironment.IsDevelopment())
 				{
 					builder
-#if(DEBUG)
+#if (DEBUG)
 						.SetMinimumLevel(LogLevel.Trace)
 #else
 						.SetMinimumLevel(LogLevel.Information)
@@ -85,4 +91,5 @@ public static class TestHost
 					builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, TestAdapterLoggerProvider>());
 				}
 			});
+	}
 }

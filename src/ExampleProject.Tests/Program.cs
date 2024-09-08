@@ -1,9 +1,17 @@
 using LeanTest.Hosting;
 
-await TestHost
-	.CreateDefault<Program>(args)
+var testHost = TestHost
+	.CreateDefault(args);
+
 // TODO:
-//	.AddSonarCloudCoverageCalculator()
-	.Build()
-//	.CollectCoverage();
+//	testHost
+//		.AddSonarCloudCoverageCalculator()
+
+var testRunner = testHost
+	.Build();
+
+//	testRunner
+//		.CollectCoverage();
+
+await testRunner
 	.StartAsync();

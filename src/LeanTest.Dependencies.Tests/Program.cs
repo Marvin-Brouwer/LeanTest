@@ -1,6 +1,6 @@
 using LeanTest.Hosting;
 
 await TestHost
-	.CreateDefault<Program>(args)
+	.CreateDefault(args)
 	.Build()
 	.StartAsync();
