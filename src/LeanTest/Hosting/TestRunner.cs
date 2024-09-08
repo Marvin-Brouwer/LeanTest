@@ -53,7 +53,7 @@ internal class TestRunner
 		{
 			if (cancellationToken.IsCancellationRequested)
 			{
-				EndTest(test, _resultBuilder.CancelTest(test));
+				EndTest(test, _resultBuilder.CancelTest(test), null);
 				continue;
 			}
 			yield return InvokeTest(test, semaphore, cancellationToken);
@@ -115,7 +115,7 @@ internal class TestRunner
 
 		// We can assume the suite succeeds instantiation because we already need this during discovery phase.
 		// If this fails, the test should break horribly too.
-		var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuiteType, [0])!;
+		var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuiteType)!;
 		if (cancellationToken.IsCancellationRequested)
 		{
 			EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
@@ -154,7 +154,17 @@ internal class TestRunner
 				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
 				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
 			}
-			catch(Exception ex)
+			catch (OperationCanceledException ex)
+			{
+				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
+			}
+			catch (TargetInvocationException invocationException) when(invocationException.InnerException is OperationCanceledException ex)
+			{
+				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
+			}
+			catch (Exception ex)
 			{
 				var testException = ex is TargetInvocationException invocationException && invocationException.InnerException is not null
 					? invocationException.InnerException
@@ -188,6 +198,16 @@ internal class TestRunner
 				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
 				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
 			}
+			catch (OperationCanceledException ex)
+			{
+				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
+			}
+			catch (TargetInvocationException invocationException) when (invocationException.InnerException is OperationCanceledException ex)
+			{
+				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
+				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
+			}
 			catch (Exception ex)
 			{
 				var testException = ex is TargetInvocationException invocationException && invocationException.InnerException is not null
@@ -206,11 +226,11 @@ internal class TestRunner
 		// TODO add Test.Skip situation?
 	}
 
-	private void EndTest(TestCase testCase, TestResult testResult, SemaphoreSlim semaphore)
+	private void EndTest(TestCase testCase, TestResult testResult, SemaphoreSlim? semaphore)
 	{
 		_executionRecorder.RecordResult(testResult);
 		_executionRecorder.RecordEnd(testCase, testResult.Outcome);
-		semaphore.Release();
+		semaphore?.Release();
 	}
 
 	private void EndTest(TestCase testCase, TestResult testResult, DateTime startTime, Stopwatch stopwatch, SemaphoreSlim semaphore)

@@ -6,10 +6,19 @@ internal readonly record struct CancellationTokenProvider : ICancellationTokenPr
 
 	internal CancellationTokenProvider(CancellationToken testCancellationToken)
 	{
-		ForTest = testCancellationToken;
+		_cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(testCancellationToken);
+		ForTest = _cancellationTokenSource.Token;
 	}
 
 	public CancellationToken None => CancellationToken.None;
 	public CancellationToken Cancelled => new CancellationToken(true);
+
+	private readonly CancellationTokenSource _cancellationTokenSource;
+
 	public CancellationToken ForTest { get;  }
+
+	public void CancelTestRun()
+	{
+		_cancellationTokenSource.Cancel();
+	}
 }

@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	
+
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>disable</ImplicitUsings>
@@ -17,8 +17,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\LeanTest.TestAdapter\LeanTest.TestAdapter.csproj" />
-	  <ProjectReference Include="..\LeanTest\LeanTest.csproj" />
+		<ProjectReference Include="..\LeanTest.TestAdapter\LeanTest.TestAdapter.csproj" />
+		<ProjectReference Include="..\LeanTest\LeanTest.csproj" />
 	</ItemGroup>
 
 </Project>

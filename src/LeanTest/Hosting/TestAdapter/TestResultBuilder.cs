@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
+using System;
 using System.Diagnostics;
 using System.Text;
 
@@ -23,6 +24,32 @@ internal class TestResultBuilder
 			Outcome = TestOutcome.None,
 			ErrorMessage = cancelledByFrame is not null ? "Cancelled" : $"Cancelled by: {cancelledByFrame}"
 		};
+	}
+
+	public TestResult CancelTest(TestCase testCase, IReadOnlyList<TestResultMessage> testLogs, Exception exception)
+	{
+		_logger.LogDebug("Cancelled {testName}", testCase.FullyQualifiedName);
+
+		var messageBuilder = new StringBuilder();
+		var result = new TestResult(testCase)
+		{
+			Outcome = TestOutcome.None,
+			ComputerName = Environment.MachineName,
+			// Because regular messages don't show up in the VS Test panel, we misuse the ErrorMessage for that
+			// Because we don't have that, we prepend the Message to the stacktrace.
+			ErrorStackTrace = exception.Message + Environment.NewLine + exception.StackTrace
+		};
+
+		foreach (var log in testLogs)
+		{
+			result.Messages.Add(log);
+			messageBuilder.AppendLine(log.Text);
+		}
+
+		// Because regular messages don't show up in the VS Test panel, we misuse the ErrorMessage for that
+		result.ErrorMessage = messageBuilder.ToString();
+
+		return result;
 	}
 
 	public TestResult SkipTest(TestCase testCase, string reason)

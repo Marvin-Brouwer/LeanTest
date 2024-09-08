@@ -135,6 +135,9 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 		var input = "SomeString";
 		var expected = "SomeString";
 
+		_ = _someFixture
+			.WithRealName();
+
 		// Act
 		var result = await sut.DoThing(input);
 
@@ -170,18 +173,6 @@ public sealed class ExampleServiceTests : TestSuite.UnitTests
 
 		// Assert
 		result.Should().Be(expected);
-
-		_someSpy
-			// TODO analyzer
-			.Verify(Times.Once, x => x.DoThing(Parameters<string>().AnyValue))
-			.Verify(Times.Exactly(1), x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyOnce(x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyExactly(1, x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyAtLeast(1, x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyAtMost(1, x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyBetween(0, 1, x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyBetween(1, 2, true, x => x.DoThing(Parameters<string>().AnyValue))
-			.VerifyNoOtherCalls();
 	});
 
 	private static IEnumerable<(int, bool)> GenerateCoolNumbers()

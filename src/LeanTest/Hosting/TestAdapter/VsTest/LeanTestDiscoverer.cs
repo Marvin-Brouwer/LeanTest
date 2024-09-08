@@ -72,6 +72,8 @@ public abstract class LeanTestDiscoverer : ITestDiscoverer
 		{
 			var assembly = assemblyLoadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(assemblyPath));
 			if (assembly is null) throw new NotSupportedException("TODO Custom exception");
+			// TODO apparently the entrypoint is not null without a Program.cs, figure out a way to detect.
+			if (assembly.EntryPoint is null) throw new NotSupportedException("TODO we should run the application here instead");
 
 			var testSuites = IndexTestSuites(assembly, CancellationToken.None).ToArray();
 			_logger.LogDebug("Found {suiteCount} test suites in {assemblyPath}", testSuites.Length, assemblyPath);
