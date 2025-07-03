@@ -1,7 +1,8 @@
 using LeanTest.Hosting;
 
 var testHost = TestHost
-	.CreateDefault(args);
+	.CreateDefault(args)
+	.AddUnitTests();
 
 // TODO:
 //	testHost

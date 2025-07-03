@@ -57,7 +57,7 @@ internal readonly record struct TestRun(
 	{
 		try
 		{
-			//await TestBody.DynamicInvoke();
+			await (Task)TestBody.DynamicInvoke()!;
 			_ = cancellationToken;
 		}
 		catch (Exception ex)

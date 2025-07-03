@@ -10,7 +10,7 @@ namespace LeanTest;
 
 public static partial class TestSuite
 {
-	public abstract class UnitTests
+	public abstract class UnitTests : ITestSuite
 	{
 		protected UnitTests()
 		{

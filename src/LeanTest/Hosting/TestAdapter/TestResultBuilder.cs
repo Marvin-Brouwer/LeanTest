@@ -16,6 +16,16 @@ internal class TestResultBuilder
 		_logger = logger;
 	}
 
+	private TestResult ApplyTimers(TestResult testResult, DateTime startTime, Stopwatch stopwatch)
+	{
+		testResult.StartTime = startTime;
+		testResult.EndTime = DateTime.UtcNow;
+		stopwatch.Stop();
+		testResult.Duration = stopwatch.Elapsed;
+
+		return testResult;
+	}
+
 	public TestResult CancelTest(TestCase testCase, StackFrame? cancelledByFrame = null)
 	{
 		_logger.LogDebug("Cancelled {testName}", testCase.FullyQualifiedName);
@@ -25,8 +35,13 @@ internal class TestResultBuilder
 			ErrorMessage = cancelledByFrame is not null ? "Cancelled" : $"Cancelled by: {cancelledByFrame}"
 		};
 	}
+	public TestResult CancelTest(TestCase testCase, Exception ex, IReadOnlyList<TestResultMessage> testLogs, DateTime startTime, Stopwatch stopwatch)
+	{
+		var testResult = CancelTest(testCase, ex, testLogs);
+		return ApplyTimers(testResult, startTime, stopwatch);
+	}
 
-	public TestResult CancelTest(TestCase testCase, IReadOnlyList<TestResultMessage> testLogs, Exception exception)
+	public TestResult CancelTest(TestCase testCase, Exception exception, IReadOnlyList<TestResultMessage> testLogs)
 	{
 		_logger.LogDebug("Cancelled {testName}", testCase.FullyQualifiedName);
 
@@ -62,6 +77,12 @@ internal class TestResultBuilder
 		};
 	}
 
+	public TestResult PassTest(TestCase testCase, IReadOnlyList<TestResultMessage> testLogs, DateTime startTime, Stopwatch stopwatch)
+	{
+		var testResult = PassTest(testCase, testLogs);
+		return ApplyTimers(testResult, startTime, stopwatch);
+	}
+
 	public TestResult PassTest(TestCase testCase, IReadOnlyList<TestResultMessage> testLogs)
 	{
 		_logger.LogDebug("Passed {testName}", testCase.FullyQualifiedName);
@@ -83,6 +104,12 @@ internal class TestResultBuilder
 		result.ErrorMessage = messageBuilder.ToString();
 
 		return result;
+	}
+
+	public TestResult FailTest(TestCase testCase, Exception ex, IReadOnlyList<TestResultMessage> testLogs, DateTime startTime, Stopwatch stopwatch)
+	{
+		var testResult = FailTest(testCase, ex, testLogs);
+		return ApplyTimers(testResult, startTime, stopwatch);
 	}
 
 	public TestResult FailTest(TestCase testCase, Exception exception, IReadOnlyList<TestResultMessage> testLogs)

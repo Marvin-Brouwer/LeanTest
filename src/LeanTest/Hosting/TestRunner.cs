@@ -2,6 +2,7 @@ using LeanTest.Dependencies.Providers;
 using LeanTest.Dynamic.Generating;
 using LeanTest.Hosting.TestAdapter;
 using LeanTest.Hosting.TestAdapter.Constants;
+using LeanTest.TestInvokers;
 using LeanTest.Tests;
 
 using Microsoft.Extensions.Logging;
@@ -21,14 +22,19 @@ internal class TestRunner
 
 	private readonly ITestExecutionRecorder _executionRecorder;
 	private readonly TestResultBuilder _resultBuilder;
+	private readonly IReadOnlyList<ITestInvoker> _testInvokers;
 
-	public TestRunner(ILogger<TestRunner> hostLogger, IOptions<LoggerFilterOptions> logOptions, ITestExecutionRecorder executionRecorder, TestResultBuilder resultBuilder)
+	public TestRunner(
+		ILogger<TestRunner> hostLogger, IOptions<LoggerFilterOptions> logOptions, ITestExecutionRecorder executionRecorder, TestResultBuilder resultBuilder,
+		IEnumerable<ITestInvoker> testInvokers)
 	{
 		_hostLogger = hostLogger;
 		_logOptions = logOptions;
 
 		_executionRecorder = executionRecorder;
 		_resultBuilder = resultBuilder;
+		_testInvokers = testInvokers.ToArray();
+
 	}
 	public async Task RunTests(IReadOnlyList<TestCase> tests, CancellationToken cancellationToken)
 	{
@@ -115,113 +121,40 @@ internal class TestRunner
 
 		// We can assume the suite succeeds instantiation because we already need this during discovery phase.
 		// If this fails, the test should break horribly too.
-		var suite = (TestSuite.UnitTests)Activator.CreateInstance(testSuiteType)!;
+		var suite = (ITestSuite)Activator.CreateInstance(testSuiteType)!;
 		if (cancellationToken.IsCancellationRequested)
 		{
 			EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
 			return;
 		}
+		EndTest(testCase, _resultBuilder.SkipTest(testCase, $"No {nameof(ITestInvoker)} was found for type ${suite.GetType().Name}"), semaphore);
 
-		var test = testSuiteType.GetProperty(testPropertyName)?.GetValue(suite);
-		if (test is UnitTestDataScenario dt)
+		var testInvoker = _testInvokers.FirstOrDefault(invoker => invoker.SupportsSuite(suite));
+		if (testInvoker is null)
 		{
-			var testParametersIndex = testCase.GetPropertyValue(TestProperties.DataParametersIndex, -1);
-			if (testParametersIndex == -1)
-			{
-				_hostLogger.LogCritical("TODO Fail");
-				semaphore.Release();
-				throw new Exception("TODO fail");
-			}
-
-			var testParameters = dt.TestData[testParametersIndex];
-			if (cancellationToken.IsCancellationRequested)
-			{
-				EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
-				return;
-			}
-
-			// Record start time
-			var startTime = DateTime.UtcNow;
-			var stopwatch = Stopwatch.StartNew();
-
-			try
-			{
-				if (dt.TestBody.Method.ReturnType == typeof(ValueTask))
-					await (ValueTask)dt.TestBody.DynamicInvoke(testParameters)!;
-				else
-					dt.TestBody.DynamicInvoke(testParameters);
-
-				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-			catch (OperationCanceledException ex)
-			{
-				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-			catch (TargetInvocationException invocationException) when(invocationException.InnerException is OperationCanceledException ex)
-			{
-				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-			catch (Exception ex)
-			{
-				var testException = ex is TargetInvocationException invocationException && invocationException.InnerException is not null
-					? invocationException.InnerException
-					: ex;
-
-				var testResult = _resultBuilder.FailTest(testCase, testException, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-
-			return;
-		}
-		if (test is UnitTestCase tc)
-		{
-			if (cancellationToken.IsCancellationRequested)
-			{
-				EndTest(testCase, _resultBuilder.CancelTest(testCase), semaphore);
-				return;
-			}
-
-			// Record start time
-			var startTime = DateTime.UtcNow;
-			var stopwatch = Stopwatch.StartNew();
-
-			try
-			{
-				if (tc.TestBody.Method.ReturnType == typeof(ValueTask))
-					await (ValueTask)tc.TestBody.DynamicInvoke()!;
-				else
-					tc.TestBody.DynamicInvoke();
-
-				var testResult = _resultBuilder.PassTest(testCase, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-			catch (OperationCanceledException ex)
-			{
-				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-			catch (TargetInvocationException invocationException) when (invocationException.InnerException is OperationCanceledException ex)
-			{
-				var testResult = _resultBuilder.CancelTest(testCase, resultStreamingLoggerFactory.Logs, ex);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
-			catch (Exception ex)
-			{
-				var testException = ex is TargetInvocationException invocationException && invocationException.InnerException is not null
-					? invocationException.InnerException
-					: ex;
-
-				var testResult = _resultBuilder.FailTest(testCase, testException, resultStreamingLoggerFactory.Logs);
-				EndTest(testCase, testResult, startTime, stopwatch, semaphore);
-			}
+			EndTest(testCase, _resultBuilder.SkipTest(testCase, $"No {nameof(ITestInvoker)} was found for type ${suite.GetType().Name}"), semaphore);
 			return;
 		}
 
-		semaphore.Release();
-		throw new UnreachableException();
+		var testProperty = testSuiteType
+			.GetProperty(testPropertyName)?
+			.GetValue(suite);
+
+		if (testProperty is not ITest test)
+		{
+			semaphore.Release();
+			throw new UnreachableException();
+		}
+
+		try
+		{
+			var testResult = await testInvoker.Invoke(testCase, test, resultStreamingLoggerFactory, cancellationToken);
+			EndTest(testCase, testResult, semaphore);
+		}
+		catch (Exception ex)
+		{
+			EndTest(testCase, _resultBuilder.FailTest(testCase, ex, resultStreamingLoggerFactory.Logs), semaphore);
+		}
 
 		// TODO add Test.Skip situation?
 	}
@@ -231,15 +164,5 @@ internal class TestRunner
 		_executionRecorder.RecordResult(testResult);
 		_executionRecorder.RecordEnd(testCase, testResult.Outcome);
 		semaphore?.Release();
-	}
-
-	private void EndTest(TestCase testCase, TestResult testResult, DateTime startTime, Stopwatch stopwatch, SemaphoreSlim semaphore)
-	{
-		testResult.StartTime = startTime;
-		testResult.EndTime = DateTime.UtcNow;
-		stopwatch.Stop();
-		testResult.Duration = stopwatch.Elapsed;
-
-		EndTest(testCase, testResult, semaphore);
 	}
 }

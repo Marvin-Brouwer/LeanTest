@@ -24,7 +24,7 @@ public static class TestHost
 		var testAssembly = callingType.GetMethod()!.ReflectedType!.Assembly;
 
 		return Host
-		.CreateDefaultBuilder(args)
+			.CreateDefaultBuilder(args)
 			.ConfigureAppConfiguration((application, configuration) =>
 			{
 				var logConfig = new Dictionary<string, string>
